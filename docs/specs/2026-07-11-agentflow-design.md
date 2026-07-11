@@ -65,17 +65,19 @@ LLM 成本管控网关。
 ## 3. 架构
 
 ```
-                        ┌──────────── Harness(编排/管控面)────────────┐
-用户 → [API 服务] → [协调器 Coordinator] → RocketMQ → [Worker 池 ×N] ──┐
-                         ↓                                   │         │ Runtime
-                   MySQL + Redis(任务状态机)                 │      (Agent 执行面)
-                         ↑                                   ▼         │
-                   [Run Trace 轨迹]              [上下文管理 AgentContext]
-                         ↑                                   ↓         │
-              ┌──────────┴──────────┐            [LLM 网关] → LLM API  │
-              │  统一副作用 Policy 层  │ ←── 所有写库/通知/工具副作用     │
-              └──────────┬──────────┘            [RAG 检索服务] → pgvector
-                         ▼                        (Agent 工具, 意图驱动调用)
+        [Zookeeper] ── 协调器选主 + Worker 注册发现 + 集群自愈
+             │
+        ┌────┴─────── Harness(编排/管控面)────────────────┐
+用户 → [API 服务] → [协调器 Coordinator] → Kafka → [Worker 池 ×N] ──┐
+                         ↓                              │        │ Runtime
+             MySQL(任务状态机)+ Redis(锁/限流)       │     (Agent 执行面)
+                         ↑                              ▼        │
+              [Run Trace 轨迹 → MongoDB 分片]  [上下文管理 AgentContext]
+                         ↑                              ↓        │
+              ┌──────────┴──────────┐       [LLM 网关] → LLM API │
+              │  统一副作用 Policy 层  │ ←── 所有写库/通知/工具副作用 │
+              └──────────┬──────────┘       [RAG 检索服务] → pgvector
+                         ▼                   (Agent 工具, 意图驱动调用)
                   写库 / 发通知 / 建 case
 ```
 
@@ -83,16 +85,37 @@ LLM 成本管控网关。
 > Policy、限流);Runtime = 执行面(worker 内单个 Agent 的 LLM+工具循环)。
 > 边界原则:Runtime 只负责"想和做",一切副作用与持久化必须回到 Harness 经 Policy 层统一处理。
 
+> **技术校准记录(2026-07-11)**:原用 RocketMQ,现校准为 **Kafka + Zookeeper**——Kafka
+> 在美国市场认可度高于 RocketMQ,RocketMQ(原属虚构项目技术栈)剔除。选型以工程最优
+> 为准则,而非"是否已学过"——项目真做即真掌握;"已学过"只影响学习成本,不作否决项。
+
+### 数据存储选型(polyglot persistence —— 为不同访问模式选对存储)
+
+> 这套"多存储混用"本身是面试加分点:体现"按访问模式选存储"的数据建模成熟度,可单独讲。
+
+| 数据 | 访问模式 | 选型 | 理由 |
+|---|---|---|---|
+| **任务状态机** | 高频更新、**事务性**状态迁移、按 status/time 扫超时 | **MySQL** | 状态机=关系型场景;ACID 保证副作用"恰好一次";索引扫超时快 |
+| **Run Trace** ⭐ | 深层嵌套、结构不固定、写多、按 traceId 整取回放、量大 | **MongoDB(分片)** | 嵌套 JSON 免建表免 Join;按 traceId/时间分片天然水平扩展 |
+| **热状态/锁/限流/去重键** | 毫秒读写、TTL、原子操作 | **Redis/Redisson** | 分布式锁、令牌桶、幂等键 |
+| **任务分发队列** | 持久化日志、分区、消费者组、可重放 | **Kafka** | 削峰、水平扩展消费、消息重投容错 |
+| **协调/选主/服务发现** | 强一致成员管理、watch 通知 | **Zookeeper** | 协调器选主、Worker 注册/自愈 |
+| **RAG 向量** | 近邻检索(ANN) | **pgvector** | 语义检索,最简够用(备选 Milvus/Qdrant) |
+
+> 注:Kafka / Zookeeper / MongoDB 恰好也是 Udemy 课程亲手实现过的,学习成本低——
+> 是"最优选型"与"低学习成本"的巧合双赢,但选型依据是工程契合,不是已学过。
+
 ### 组件与自研/用库边界
 
 | 组件 | 职责 | 自研 or 用库 | 语言 |
 |---|---|---|---|
 | API 服务 | 提交任务、查进度、取结果 | SpringBoot 常规 | Java |
+| **Zookeeper 协调** ⭐ | 协调器 Leader 选举、Worker 注册/服务发现、集群自愈(课程真技术) | ZK 组件 + 集成自研 | Java |
 | **协调器** ⭐ | 任务拆解为 DAG、依赖管理、分发、结果聚合 | **纯自研**(卖点1) | Java |
 | **任务状态机** ⭐ | pending/running/retry/failed/done + **部分成功语义** + 超时兜底 + 死信队列 | **纯自研**(卖点2) | Java |
-| **Worker 池** ⭐ | 消费任务、幂等去重(Redisson+MD5)、优雅上下线、水平扩展;跑**多角色 Agent**(抓取/分析/汇总分工) | 骨架自研;Agent 内循环用 **LangChain4j** | Java |
+| **Worker 池** ⭐ | 消费 Kafka 任务、幂等去重(Redisson+MD5)、经 ZK 注册/优雅上下线、水平扩展;跑**多角色 Agent**(抓取/分析/汇总分工) | 骨架自研;Agent 内循环用 **LangChain4j** | Java |
 | **LLM 网关** ⭐ | **Redis+Lua 自实现令牌桶**、多模型路由、token 记账 | **纯自研**(卖点3) | Java |
-| **Run Trace** 🆕⭐ | 每个 step / 工具调用 / 状态变更留痕,明确保存时机,支持回放与"闭环是否执行成功"审计 | **纯自研**(卖点4) | Java |
+| **Run Trace** 🆕⭐ | 每个 step / 工具调用 / 状态变更留痕(存 **MongoDB 分片**),明确保存时机,支持回放与"闭环是否执行成功"审计 | **纯自研**(卖点4) | Java |
 | **统一副作用 Policy 层** 🆕⭐ | 所有写库/发通知/建 case 走同一闸,副作用级幂等,防重复;安全处理**代码层 enforce**(非提示词) | **纯自研** | Java |
 | **上下文管理 AgentContext** 🆕 | 注入/裁剪/摘要历史,控制进模型的 token 量,防上下文膨胀 | 骨架自研 | Java |
 | **Skill/工具注册** 🆕 | 工具动态加载注册,**schema 约束输出**(不让模型自由发挥),多命中排序 | 自研 | Java |
@@ -102,12 +125,16 @@ LLM 成本管控网关。
 
 - **Java 17 + SpringBoot 3**(主体 ~85%):API、协调器、状态机、Worker、LLM 网关
 - **Python + FastAPI**(~15%):RAG 检索微服务(embedding 生态优势 + 跨语言架构加分)
-- RocketMQ(任务分发)· Redis/Redisson(锁、限流、热状态)· MySQL(任务持久化)
+- **Kafka**(任务分发)· **Zookeeper**(协调/选主/服务发现)· Redis/Redisson(锁、限流、热状态)
+- **MySQL**(任务状态机,事务)· **MongoDB 分片**(Run Trace,嵌套 JSON + 水平扩展)
 - pgvector(向量检索)· LangChain4j(Agent 内循环)· Docker Compose(多容器编排)
 - LLM:开发用便宜模型(qwen-turbo / gpt-4o-mini 级);压测用 **mock LLM**(测调度不烧钱)
 
 **语言决策记录**:核心卖点是分布式调度 → 必须 Java(国内后端市场 + 本人最强栈);
 RAG 独立成 Python 微服务 → 一石三鸟(AI 生态、跨语言微服务经验、美国 AIE 岗位友好)。
+
+**技术选型均为真实掌握**:Kafka / Zookeeper / MongoDB 来自 Udemy 课程亲手实现;
+Redis / MySQL / Java 来自两段实习;RAG 为本项目新学。全栈无"纸上技术"。
 
 ---
 
