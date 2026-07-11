@@ -14,7 +14,7 @@ tasks into DAGs, dispatches them via message queue to horizontally-scalable agen
 workers, with self-built idempotency, rate limiting, and a cost-aware LLM gateway.
 
 **🇨🇳 中:** 高并发分布式 Agent 任务调度平台——协调器将复杂任务拆解为 DAG,经
-RocketMQ 削峰分发至可水平扩展的 Agent Worker 池,自研幂等去重、令牌桶限流与
+Kafka 削峰分发至可水平扩展的 Agent Worker 池,自研幂等去重、令牌桶限流与
 LLM 成本管控网关。
 
 同一项目、两套叙事:美国面试讲**系统设计与可扩展性**(AI Platform / Agent Infra),
