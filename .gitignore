@@ -1,3 +1,11 @@
 
 # 本地 AI 工作指令,不进仓库
 CLAUDE.md
+
+# Java / Maven
+target/
+*.class
+*.iml
+.idea/
+.vscode/
+.DS_Store
