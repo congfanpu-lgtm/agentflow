@@ -80,7 +80,11 @@ public class TaskFinalizer {
         taskMapper.updateById(task);
         traceEmitter.emit(String.valueOf(task.getId()), task.getId(), null,
                 TraceStage.TASK_FINALIZED, terminal.name(), "subtasks=" + subs.size());
-        notificationService.notifyTaskFinished(task);
+        try {
+            notificationService.notifyTaskFinished(task);
+        } catch (Exception e) {
+            log.warn("任务完成通知失败(不影响终态落定) taskId={}", task.getId(), e);
+        }
         log.info("任务落定 taskId={} terminal={} subtasks={}", task.getId(), terminal, subs.size());
     }
 }

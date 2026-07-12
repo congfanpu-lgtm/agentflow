@@ -21,11 +21,11 @@ class NotificationDedupeTest {
         TaskEntity t = new TaskEntity();
         t.setTaskUuid(UUID.randomUUID().toString());
         t.setStatus("COMPLETED");
-        // 直接验 policy 层去重(businessKey 相同第二次返回 false)
+        // 真实调用两次 notifyTaskFinished,证明底层业务 key 只会被占用一次
+        notificationService.notifyTaskFinished(t);
+        notificationService.notifyTaskFinished(t);
+        // 此时业务 key 应已被第一次调用占用;第三次尝试对同一 key 执行必须被去重跳过
         String key = "notify:" + t.getTaskUuid();
-        assertTrue(policy.execute(key, () -> {}));
-        assertFalse(policy.execute(key, () -> {}));
-        // notifyTaskFinished 第二次不会真正执行 action(已被去重)
-        notificationService.notifyTaskFinished(t); // 幂等,无副作用重复
+        assertFalse(policy.execute(key, () -> fail("should be deduped")));
     }
 }

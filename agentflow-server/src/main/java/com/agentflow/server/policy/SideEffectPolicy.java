@@ -29,7 +29,13 @@ public class SideEffectPolicy {
             log.info("副作用去重跳过 businessKey={}", businessKey);
             return false;
         }
-        action.run();
-        return true;
+        try {
+            action.run();
+            return true;
+        } catch (RuntimeException e) {
+            // 执行失败:释放占位键,让后续重试可再执行(避免"标记已完成但实际没做")
+            bucket.delete();
+            throw e;
+        }
     }
 }
