@@ -3,12 +3,14 @@ package com.agentflow.worker.listener;
 import com.agentflow.common.mq.ResultMessage;
 import com.agentflow.common.mq.SubtaskMessage;
 import com.agentflow.common.mq.Topics;
+import com.agentflow.worker.idempotency.IdempotencyGuard;
 import com.agentflow.worker.processor.EchoProcessor;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.kafka.core.KafkaTemplate;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
@@ -16,7 +18,13 @@ class SubtaskListenerTest {
 
     @SuppressWarnings("unchecked")
     private final KafkaTemplate<String, Object> template = mock(KafkaTemplate.class);
-    private final SubtaskListener listener = new SubtaskListener(new EchoProcessor(), template);
+    private final IdempotencyGuard guard = mock(IdempotencyGuard.class);
+    private final SubtaskListener listener = new SubtaskListener(new EchoProcessor(), template, guard);
+
+    {
+        when(guard.key(any(), any())).thenReturn("k");
+        when(guard.alreadyProcessed("k")).thenReturn(false);
+    }
 
     @Test
     void successProducesCompletedResult() {
