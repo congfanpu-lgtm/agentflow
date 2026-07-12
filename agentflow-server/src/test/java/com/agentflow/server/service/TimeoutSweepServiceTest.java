@@ -16,7 +16,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest
+@SpringBootTest(properties = "agentflow.timeout.stuck-seconds=2")
 class TimeoutSweepServiceTest {
 
     @Autowired private TimeoutSweepService sweep;
@@ -37,8 +37,8 @@ class TimeoutSweepServiceTest {
         s.setTaskId(taskId); s.setSeq(0); s.setStatus("DISPATCHED");
         s.setInput("{\"text\":\"x\"}"); s.setRedispatchCount(redispatchCount);
         subtaskMapper.insert(s); subId = s.getId();
-        // 强制 updated_at 过期(绕过 ON UPDATE 自动刷新)
-        subtaskMapper.setUpdatedAt(subId, LocalDateTime.now().minusMinutes(10));
+        // 强制 updated_at 过期(绕过 ON UPDATE 自动刷新);测试用 stuck-seconds=2,30s 足够安全越过阈值
+        subtaskMapper.setUpdatedAt(subId, LocalDateTime.now().minusSeconds(30));
     }
 
     @AfterEach

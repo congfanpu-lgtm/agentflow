@@ -6,6 +6,7 @@ import com.agentflow.worker.idempotency.IdempotencyGuard;
 import com.agentflow.worker.processor.EchoProcessor;
 import com.agentflow.worker.retry.RetryRouter;
 import org.junit.jupiter.api.Test;
+import org.mockito.InOrder;
 import org.springframework.kafka.core.KafkaTemplate;
 
 import static org.mockito.ArgumentMatchers.*;
@@ -38,5 +39,9 @@ class SubtaskListenerIdempotencyTest {
         verify(processor).process("{\"text\":\"hi\"}");
         verify(template).send(eq(Topics.RESULT), eq("10"), any());
         verify(guard).markProcessed("k");
+        // 崩溃安全:必须先发 RESULT 再置幂等键(见 SubtaskListener 注释)
+        InOrder inOrder = inOrder(template, guard);
+        inOrder.verify(template).send(eq(Topics.RESULT), eq("10"), any());
+        inOrder.verify(guard).markProcessed("k");
     }
 }

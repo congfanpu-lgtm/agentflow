@@ -19,7 +19,13 @@ import java.util.List;
 /**
  * 超时兜底:扫描卡在 DISPATCHED 的子任务(worker 死/消息丢,无任何回传)。
  * 未超上限 → 重投主 topic;超上限 → 落定 FAILED 并推进任务终态。
- * 与「处理异常重试」(worker 侧 RetryRouter)触发源不同,不重叠。
+ * <p>
+ * 与「处理异常重试」(worker 侧 RetryRouter 的重试阶梯,约 5s+30s+5m ≈ 335s)按【触发源】区分,
+ * 二者不是同一回事:重试阶梯处理的是"处理异常"(worker 收到消息但处理失败,topic 路由到延迟重试
+ * topic,全程不落库、不更新 updated_at);本服务处理的是"静默失败"(worker 从未处理——进程死亡
+ * 或消息丢失,既无结果回传也无重试活动)。{@code stuck-seconds} 默认值刻意设置在整条重试阶梯
+ * 总时长之上(留有余量),使兜底只对"确实静默"的子任务生效,不会在阶梯进行中把它误判为卡死、
+ * 抢先重投/落定,从而打断正在进行的重试。
  * 终态落定复用 {@link TaskFinalizer},与 {@link ResultHandleService} 共用同一套判终态/聚合逻辑(DRY)。
  */
 @Slf4j
@@ -35,7 +41,8 @@ public class TimeoutSweepService {
     private final TaskFinalizer taskFinalizer;
     private final KafkaTemplate<String, Object> kafkaTemplate;
 
-    @Value("${agentflow.timeout.stuck-seconds:60}")
+    // 默认 600s:高于重试阶梯全程耗时(约 5s+30s+5m ≈ 335s)且留有余量,避免抢占仍在阶梯中的子任务。
+    @Value("${agentflow.timeout.stuck-seconds:600}")
     private long stuckSeconds;
 
     @Transactional

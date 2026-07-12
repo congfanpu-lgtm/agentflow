@@ -37,9 +37,13 @@ public class SubtaskListener {
         }
         try {
             String output = processor.process(msg.getInputJson());
-            guard.markProcessed(idemKey);
+            // 先发 RESULT,再标记幂等键:发送更安全——服务端子任务 CAS 已对重复结果去重,
+            // 若崩溃发生在“发送成功之后、markProcessed 之前”,重投顶多导致一次无害的重复处理
+            // (纯回显 + 服务端幂等丢弃);反之若先 markProcessed 再崩溃在发送前,则结果永久丢失,
+            // 且重投会被幂等直接跳过,最终被超时兜底误判为失败——不可接受。
             kafkaTemplate.send(Topics.RESULT, String.valueOf(msg.getSubtaskId()),
                     new ResultMessage(msg.getTaskId(), msg.getSubtaskId(), true, output, null));
+            guard.markProcessed(idemKey);
         } catch (Exception e) {
             log.warn("子任务处理失败 subtaskId={} attempt={},交重试路由", msg.getSubtaskId(), attempt, e);
             retryRouter.route(msg, attempt, e.getMessage());

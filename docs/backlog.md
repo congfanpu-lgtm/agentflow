@@ -62,3 +62,16 @@
 
 8. **DLQ 恢复为何要"重置子任务+回退计数+复活任务",而不是简单重投消息?**
    如果只是简单地把原始消息重新发一遍到主 topic 而不碰 DB 状态,会出现两类问题:(a) 子任务在 DB 里仍然是 `FAILED`、任务仍然是终态(`FAILED`/`PARTIAL_FAILED`)——`ResultHandleService.handle()` 的 CAS 要求源状态是 `DISPATCHED` 才能推进,一个已经是 `FAILED` 的子任务不会再被任何后续结果消息驱动状态变化,重投的消息处理完之后产生的结果消息只会被当作"过期重复结果"忽略掉,恢复完全不起作用;(b) 任务层面的计数(`subtask_failed`)和 `result` 快照里还留着旧的失败记录,即使子任务真的又跑了一遍,`done+failed==total` 的判定基准也是错的,没法重新走到"聚合出新终态"这一步。所以 DLQ 恢复必须先把子任务 FAILED→DISPATCHED(清空 `error_msg`、`redispatch_count` 归零,让它回到"可以被正常状态机推进"的位置——之所以是 `DISPATCHED` 而不是 `PENDING`,是因为 `replay()` 在同一次调用里紧接着就把消息重投出去了,消息已经"在途",必须精确对齐到 `ResultHandleService.handle()` 的 CAS 能识别的源状态)、任务失败计数原子回退 + 状态复活为 RUNNING(清空旧 `result`,让它重新具备"可以再次被判定终态"的资格),这一步做完之后重投消息才有意义——重投的消息能被正常处理、处理完的结果消息能被 `ResultHandleService` 正常 CAS 接受并推进计数,最终重新聚合出正确的任务终态。(本轮实盘演练也印证了这一点的重要性:见上方 backlog 关于 `DlqRecoveryService.replay()` 状态迁移缺口的记录——曾经把重投前的状态误设成了 `PENDING` 而非 `DISPATCHED`,导致后续结果被判定源状态不匹配而丢弃,这个 P1 已于 W3 修复,间接证明了"状态必须精确对齐到状态机能识别的位置"这件事本身的必要性。)
+
+## W3 最终评审遗留(defer)
+
+- **C3**:`DlqRecoveryService.replay` 无 CAS,并发双触发会让 `subtask_failed` 变负 → 建议加
+  `casStatus(FAILED→DISPATCHED)==1` 守卫(当前为运营手动触发、低并发场景,暂可接受,列入待办)。
+- **C4**:超时扫描是单个大事务遍历所有卡死子任务 + 事务内 Kafka 发送,规模大时会形成长事务
+  (里程碑当前规模可接受,后续量级上升需拆分批次/事务外发送)。
+- **T4b**:超时重投的 `SubtaskMessage` 硬编码 `type="ECHO_BATCH"`(DLQ `replay` 已正确使用
+  `t.getType()`);当前只有一种任务类型尚不触发问题,但加入第二种任务类型时是潜在 bug,
+  留到 W5+ 修。
+- **T3**:`RetryRouter` 的 `switch default` 分支吸收了 `attempt≥2` 的情况,当前依赖前置守卫保证
+  安全,尚未出问题但语义不够显式。
+- **T5a**:目前没有 `DlqControllerTest`,DLQ 恢复的 HTTP 层缺少直接测试覆盖。
