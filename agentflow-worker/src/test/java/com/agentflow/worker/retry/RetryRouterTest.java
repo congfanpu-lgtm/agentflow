@@ -13,6 +13,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
+import java.nio.charset.StandardCharsets;
+
 class RetryRouterTest {
 
     @SuppressWarnings("unchecked")
@@ -30,6 +32,21 @@ class RetryRouterTest {
         verify(template).send(cap.capture());
         assertEquals(Topics.RETRY_5S, cap.getValue().topic());
         assertNotNull(cap.getValue().headers().lastHeader(Topics.NOT_BEFORE_HEADER));
+        var attemptHeader = cap.getValue().headers().lastHeader(Topics.RETRY_ATTEMPT_HEADER);
+        assertNotNull(attemptHeader);
+        assertEquals("0", new String(attemptHeader.value(), StandardCharsets.UTF_8));
+    }
+
+    @Test
+    void attempt1GoesToRetry30s() {
+        router.route(msg, 1, "boom");
+        ArgumentCaptor<ProducerRecord<String, Object>> cap = ArgumentCaptor.forClass(ProducerRecord.class);
+        verify(template).send(cap.capture());
+        assertEquals(Topics.RETRY_30S, cap.getValue().topic());
+        assertNotNull(cap.getValue().headers().lastHeader(Topics.NOT_BEFORE_HEADER));
+        var attemptHeader = cap.getValue().headers().lastHeader(Topics.RETRY_ATTEMPT_HEADER);
+        assertNotNull(attemptHeader);
+        assertEquals("1", new String(attemptHeader.value(), StandardCharsets.UTF_8));
     }
 
     @Test
@@ -38,6 +55,9 @@ class RetryRouterTest {
         ArgumentCaptor<ProducerRecord<String, Object>> cap = ArgumentCaptor.forClass(ProducerRecord.class);
         verify(template).send(cap.capture());
         assertEquals(Topics.RETRY_5M, cap.getValue().topic());
+        var attemptHeader = cap.getValue().headers().lastHeader(Topics.RETRY_ATTEMPT_HEADER);
+        assertNotNull(attemptHeader);
+        assertEquals("2", new String(attemptHeader.value(), StandardCharsets.UTF_8));
     }
 
     @Test
