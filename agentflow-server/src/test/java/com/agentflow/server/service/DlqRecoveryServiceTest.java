@@ -34,7 +34,7 @@ class DlqRecoveryServiceTest {
     }
 
     @Test
-    void replayResetsSubtaskAndTaskThenRedispatches() {
+    void replayResetsSubtaskToDispatchedAndTaskThenRedispatches() {
         TaskEntity t = new TaskEntity();
         t.setTaskUuid(UUID.randomUUID().toString());
         t.setType("ECHO_BATCH"); t.setStatus("FAILED");   // 已终态
@@ -50,7 +50,7 @@ class DlqRecoveryServiceTest {
         recovery.replay(subId);
 
         SubtaskEntity s2 = subtaskMapper.selectById(subId);
-        assertEquals("PENDING", s2.getStatus());          // 重置
+        assertEquals("DISPATCHED", s2.getStatus());       // 重置为 DISPATCHED(而非 PENDING),使重投结果的 CAS 匹配
         assertNull(s2.getErrorMsg());                      // 旧错误信息被清空
         TaskEntity t2 = taskMapper.selectById(taskId);
         assertEquals("RUNNING", t2.getStatus());          // 任务复活

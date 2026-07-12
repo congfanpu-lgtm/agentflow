@@ -4,7 +4,7 @@
 - Kafka UI 容器(如 provectuslabs/kafka-ui,可视化 topic/consumer group,arm64 兼容)
 - Worker RUNNING 状态上报(心跳);W9 可选 Zookeeper 注册/选主
 - 为 maven-compiler-plugin 开启 <parameters>true</parameters>(否则新增 @PathVariable/@RequestParam 不写显式名会在 Spring 6.1 运行时失败)
-- **【P1,Task 7 实盘复现发现的真实缺陷】`DlqRecoveryService.replay()` 状态迁移缺口**:
+- **【P1,Task 7 实盘复现发现的真实缺陷 —— 已于 W3 修复】`DlqRecoveryService.replay()` 状态迁移缺口**:
   重投时把子任务直接置为 `PENDING`(而非 `DISPATCHED`)后就发消息到 `AGENTFLOW_SUBTASK`,
   但 `ResultHandleService.handle()` 要求 CAS 源状态必须是 `DISPATCHED` 才会推进(`transitionSubtask(DISPATCHED→终态)`)。
   于是重投后无论 worker 处理成功还是再次失败,回传结果都会因为 CAS 源状态不匹配(实际是 PENDING)而被
@@ -12,10 +12,12 @@
   且 `TimeoutSweepService.findStuckDispatched` 只扫 `DISPATCHED` 行,也捞不到这个 PENDING 的"孤儿"。
   2026-07-12 用真实空字符串输入触发 DLQ→replay 全链路时复现:`subtask.id=495` 重投后确实再次经历
   RETRY_5S→30S→5M→DLQ 完整阶梯并二次进 DLQ(worker 日志可见),但 `task.id=444` 的 `status` 停留在
-  `RUNNING`、`subtask_failed=0` 再未变化(直接查库确认)。修复方向:`replay()` 重投前应把子任务置为
-  `DISPATCHED`(仿 `SubtaskDispatcher.dispatch` 的"发送成功才迁移"语义),或放宽 `ResultHandleService`
-  的 CAS 源状态为 `{PENDING, DISPATCHED}` 之一。`DlqRecoveryServiceTest` 未覆盖到这个缺口,因为它只
-  断言 `replay()` 单次调用后的即时状态,不模拟消息被 worker 消费后的回传闭环。
+  `RUNNING`、`subtask_failed=0` 再未变化(直接查库确认)。
+  **修复(同日,W3):** `replay()` 重投前把子任务置为 `DISPATCHED`(仿 `SubtaskDispatcher.dispatch` 的
+  "发送即视为在途"语义),而不是放宽 `ResultHandleService` 的 CAS 源状态——保持 CAS 语义单一、状态机
+  不为这一个调用方特例放宽。`DlqRecoveryServiceTest` 同步补上 `assertEquals("DISPATCHED", ...)` 断言
+  (原先只断言即时重置状态、未覆盖到"重投结果回传能否被正常 CAS 接受"这一环,是这个缺口能潜伏到实盘演练
+  才暴露的原因)。
 
 ## 自检(W1–2 里程碑,对照 `docs/interview-signals.md` 验收清单)
 
@@ -40,7 +42,7 @@
 - [x] 死信队列(Task 3):重试耗尽(attempt≥3)进 `AGENTFLOW_DLQ` 并回传失败结果
 - [x] 超时兜底扫描(Task 4):`TimeoutSweepService` 定时扫描卡在 `DISPATCHED` 超过 `stuck-seconds` 的子任务,未超 `MAX_REDISPATCH(3)` 重投,超过则落定 `FAILED`
 - [x] `TaskFinalizer` DRY 抽取(Task 4):`ResultHandleService` 与 `TimeoutSweepService` 共用同一套终态判定 + 聚合逻辑
-- [x] DLQ 恢复(Task 5):`POST /api/v1/dlq/replay/{subtaskId}` 重置子任务 FAILED→PENDING、任务失败计数回退、任务复活为 RUNNING 后重投(注:恢复后的结果回传闭环有缺口,见上方 backlog 条目)
+- [x] DLQ 恢复(Task 5):`POST /api/v1/dlq/replay/{subtaskId}` 重置子任务 FAILED→DISPATCHED、任务失败计数回退、任务复活为 RUNNING 后重投(注:曾误置为 PENDING 导致结果回传闭环断裂,该 P1 已于 W3 修复,见上方 backlog 条目)
 - [x] 优雅停机 + 多 Worker 水平扩展(Task 6):`server.shutdown=graceful` + `spring.kafka.listener.immediate-stop=false`,同消费组多实例自动 rebalance
 - [x] 端到端容错演练 + 里程碑验收(Task 7,本轮):`scripts/fault-drill.sh` + 三场景手工演练(见 `.superpowers/sdd/task-7-report.md`)
 
@@ -59,4 +61,4 @@
    两者缺一不可:`@Transactional` 保证"有事件发生时,处理这个事件的多步 DB 写入是原子的",解决的是并发/异常下的部分写入撕裂;超时扫描保证"即使永远没有事件发生,系统也不会永远卡住",解决的是"事件本身丢失"这一更根本的问题——前者是关于"一次处理内部的一致性",后者是关于"处理是否会发生"的兜底,层次不同,不能互相替代。
 
 8. **DLQ 恢复为何要"重置子任务+回退计数+复活任务",而不是简单重投消息?**
-   如果只是简单地把原始消息重新发一遍到主 topic 而不碰 DB 状态,会出现两类问题:(a) 子任务在 DB 里仍然是 `FAILED`、任务仍然是终态(`FAILED`/`PARTIAL_FAILED`)——`ResultHandleService.handle()` 的 CAS 要求源状态是 `DISPATCHED` 才能推进,一个已经是 `FAILED` 的子任务不会再被任何后续结果消息驱动状态变化,重投的消息处理完之后产生的结果消息只会被当作"过期重复结果"忽略掉,恢复完全不起作用;(b) 任务层面的计数(`subtask_failed`)和 `result` 快照里还留着旧的失败记录,即使子任务真的又跑了一遍,`done+failed==total` 的判定基准也是错的,没法重新走到"聚合出新终态"这一步。所以 DLQ 恢复必须先把子任务 FAILED→PENDING(清空 `error_msg`、`redispatch_count` 归零,让它回到"可以被正常状态机推进"的位置)、任务失败计数原子回退 + 状态复活为 RUNNING(清空旧 `result`,让它重新具备"可以再次被判定终态"的资格),这一步做完之后重投消息才有意义——重投的消息能被正常处理、处理完的结果消息能被 `ResultHandleService` 正常 CAS 接受并推进计数,最终重新聚合出正确的任务终态。(本轮实盘演练也印证了这一点的重要性:见上方 backlog 关于 `DlqRecoveryService.replay()` 状态迁移缺口的记录——正是因为重投前把状态设成了 `PENDING` 而非 `DISPATCHED`,导致后续结果仍被判定源状态不匹配而丢弃,间接证明了"状态必须精确对齐到状态机能识别的位置"这件事本身的必要性,只是这次对齐错了目标状态。)
+   如果只是简单地把原始消息重新发一遍到主 topic 而不碰 DB 状态,会出现两类问题:(a) 子任务在 DB 里仍然是 `FAILED`、任务仍然是终态(`FAILED`/`PARTIAL_FAILED`)——`ResultHandleService.handle()` 的 CAS 要求源状态是 `DISPATCHED` 才能推进,一个已经是 `FAILED` 的子任务不会再被任何后续结果消息驱动状态变化,重投的消息处理完之后产生的结果消息只会被当作"过期重复结果"忽略掉,恢复完全不起作用;(b) 任务层面的计数(`subtask_failed`)和 `result` 快照里还留着旧的失败记录,即使子任务真的又跑了一遍,`done+failed==total` 的判定基准也是错的,没法重新走到"聚合出新终态"这一步。所以 DLQ 恢复必须先把子任务 FAILED→DISPATCHED(清空 `error_msg`、`redispatch_count` 归零,让它回到"可以被正常状态机推进"的位置——之所以是 `DISPATCHED` 而不是 `PENDING`,是因为 `replay()` 在同一次调用里紧接着就把消息重投出去了,消息已经"在途",必须精确对齐到 `ResultHandleService.handle()` 的 CAS 能识别的源状态)、任务失败计数原子回退 + 状态复活为 RUNNING(清空旧 `result`,让它重新具备"可以再次被判定终态"的资格),这一步做完之后重投消息才有意义——重投的消息能被正常处理、处理完的结果消息能被 `ResultHandleService` 正常 CAS 接受并推进计数,最终重新聚合出正确的任务终态。(本轮实盘演练也印证了这一点的重要性:见上方 backlog 关于 `DlqRecoveryService.replay()` 状态迁移缺口的记录——曾经把重投前的状态误设成了 `PENDING` 而非 `DISPATCHED`,导致后续结果被判定源状态不匹配而丢弃,这个 P1 已于 W3 修复,间接证明了"状态必须精确对齐到状态机能识别的位置"这件事本身的必要性。)
