@@ -4,10 +4,12 @@ import com.agentflow.common.mq.SubtaskMessage;
 import com.agentflow.common.mq.Topics;
 import com.agentflow.common.state.SubtaskStatus;
 import com.agentflow.common.state.TaskStatus;
+import com.agentflow.common.trace.TraceStage;
 import com.agentflow.server.entity.SubtaskEntity;
 import com.agentflow.server.entity.TaskEntity;
 import com.agentflow.server.mapper.SubtaskMapper;
 import com.agentflow.server.service.TaskStateMachine;
+import com.agentflow.server.trace.TraceEmitter;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,6 +31,7 @@ public class SubtaskDispatcher {
     private final KafkaTemplate<String, Object> kafkaTemplate;
     private final SubtaskMapper subtaskMapper;
     private final TaskStateMachine stateMachine;
+    private final TraceEmitter traceEmitter;
 
     public void dispatch(TaskEntity task) {
         if (!stateMachine.transitionTask(task.getId(), TaskStatus.PENDING, TaskStatus.RUNNING)) {
@@ -48,6 +51,8 @@ public class SubtaskDispatcher {
                 kafkaTemplate.send(Topics.SUBTASK, String.valueOf(sub.getId()), msg).get();
                 stateMachine.transitionSubtask(sub.getId(),
                         SubtaskStatus.PENDING, SubtaskStatus.DISPATCHED);
+                traceEmitter.emit(String.valueOf(task.getId()), task.getId(), sub.getId(),
+                        TraceStage.DISPATCHED, "DISPATCHED", "seq=" + sub.getSeq());
             } catch (Exception e) {
                 if (e instanceof InterruptedException) {
                     Thread.currentThread().interrupt();  // 仅在真被中断时恢复中断标志

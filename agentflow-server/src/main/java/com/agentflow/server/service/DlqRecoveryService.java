@@ -2,10 +2,12 @@ package com.agentflow.server.service;
 
 import com.agentflow.common.mq.SubtaskMessage;
 import com.agentflow.common.mq.Topics;
+import com.agentflow.common.trace.TraceStage;
 import com.agentflow.server.entity.SubtaskEntity;
 import com.agentflow.server.entity.TaskEntity;
 import com.agentflow.server.mapper.SubtaskMapper;
 import com.agentflow.server.mapper.TaskMapper;
+import com.agentflow.server.trace.TraceEmitter;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +27,7 @@ public class DlqRecoveryService {
     private final SubtaskMapper subtaskMapper;
     private final TaskMapper taskMapper;
     private final KafkaTemplate<String, Object> kafkaTemplate;
+    private final TraceEmitter traceEmitter;
 
     @Transactional
     public void replay(Long subtaskId) {
@@ -60,6 +63,8 @@ public class DlqRecoveryService {
         kafkaTemplate.send(Topics.SUBTASK, String.valueOf(s.getId()),
                 new SubtaskMessage(t.getId(), s.getId(), s.getSubtaskUuid(),
                         t.getType(), s.getSeq(), s.getInput()));
+        traceEmitter.emit(String.valueOf(t.getId()), t.getId(), s.getId(),
+                TraceStage.RECOVERED, "DISPATCHED", "manual replay");
         log.info("DLQ 恢复:子任务重置并重投 subtaskId={} taskId={}", subtaskId, t.getId());
     }
 }

@@ -2,9 +2,11 @@ package com.agentflow.server.service;
 
 import com.agentflow.common.mq.ResultMessage;
 import com.agentflow.common.state.SubtaskStatus;
+import com.agentflow.common.trace.TraceStage;
 import com.agentflow.server.entity.SubtaskEntity;
 import com.agentflow.server.mapper.SubtaskMapper;
 import com.agentflow.server.mapper.TaskMapper;
+import com.agentflow.server.trace.TraceEmitter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -25,6 +27,7 @@ public class ResultHandleService {
     private final SubtaskMapper subtaskMapper;
     private final TaskStateMachine stateMachine;
     private final TaskFinalizer taskFinalizer;
+    private final TraceEmitter traceEmitter;
 
     @Transactional
     public void handle(ResultMessage msg) {
@@ -45,6 +48,8 @@ public class ResultHandleService {
             sub.setErrorMsg(msg.getErrorMsg());
         }
         subtaskMapper.updateById(sub);
+        traceEmitter.emit(String.valueOf(msg.getTaskId()), msg.getTaskId(), msg.getSubtaskId(),
+                TraceStage.SUBTASK_SETTLED, target.name(), null);
 
         if (msg.isSuccess()) {
             taskMapper.incrementDone(msg.getTaskId());

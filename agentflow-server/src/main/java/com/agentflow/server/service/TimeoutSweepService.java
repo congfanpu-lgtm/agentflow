@@ -3,9 +3,11 @@ package com.agentflow.server.service;
 import com.agentflow.common.mq.SubtaskMessage;
 import com.agentflow.common.mq.Topics;
 import com.agentflow.common.state.SubtaskStatus;
+import com.agentflow.common.trace.TraceStage;
 import com.agentflow.server.entity.SubtaskEntity;
 import com.agentflow.server.mapper.SubtaskMapper;
 import com.agentflow.server.mapper.TaskMapper;
+import com.agentflow.server.trace.TraceEmitter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -40,6 +42,7 @@ public class TimeoutSweepService {
     private final TaskStateMachine stateMachine;
     private final TaskFinalizer taskFinalizer;
     private final KafkaTemplate<String, Object> kafkaTemplate;
+    private final TraceEmitter traceEmitter;
 
     // 默认 600s:高于重试阶梯全程耗时(约 5s+30s+5m ≈ 335s)且留有余量,避免抢占仍在阶梯中的子任务。
     @Value("${agentflow.timeout.stuck-seconds:600}")
@@ -56,6 +59,9 @@ public class TimeoutSweepService {
                 kafkaTemplate.send(Topics.SUBTASK, String.valueOf(s.getId()),
                         new SubtaskMessage(s.getTaskId(), s.getId(), s.getSubtaskUuid(),
                                 "ECHO_BATCH", s.getSeq(), s.getInput()));
+                traceEmitter.emit(String.valueOf(s.getTaskId()), s.getTaskId(), s.getId(),
+                        TraceStage.TIMEOUT_REDISPATCH, "DISPATCHED",
+                        "redispatch=" + (s.getRedispatchCount() + 1));
                 log.warn("超时重投 subtaskId={} redispatch={}", s.getId(), s.getRedispatchCount() + 1);
             } else {
                 if (stateMachine.transitionSubtask(s.getId(),

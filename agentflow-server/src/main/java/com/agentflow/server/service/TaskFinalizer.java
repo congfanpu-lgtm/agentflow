@@ -1,10 +1,12 @@
 package com.agentflow.server.service;
 
 import com.agentflow.common.state.TaskStatus;
+import com.agentflow.common.trace.TraceStage;
 import com.agentflow.server.entity.SubtaskEntity;
 import com.agentflow.server.entity.TaskEntity;
 import com.agentflow.server.mapper.SubtaskMapper;
 import com.agentflow.server.mapper.TaskMapper;
+import com.agentflow.server.trace.TraceEmitter;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -30,6 +32,7 @@ public class TaskFinalizer {
     private final SubtaskMapper subtaskMapper;
     private final TaskStateMachine stateMachine;
     private final ObjectMapper objectMapper;
+    private final TraceEmitter traceEmitter;
 
     public void finalizeIfAllSettled(Long taskId) {
         TaskEntity task = taskMapper.selectById(taskId);
@@ -74,6 +77,8 @@ public class TaskFinalizer {
         // 必须同步为终态,否则 updateById 会把旧状态写回去,冲掉 CAS 结果
         task.setStatus(terminal.name());
         taskMapper.updateById(task);
+        traceEmitter.emit(String.valueOf(task.getId()), task.getId(), null,
+                TraceStage.TASK_FINALIZED, terminal.name(), "subtasks=" + subs.size());
         log.info("任务落定 taskId={} terminal={} subtasks={}", task.getId(), terminal, subs.size());
     }
 }

@@ -2,6 +2,7 @@ package com.agentflow.server.service;
 
 import com.agentflow.common.state.SubtaskStatus;
 import com.agentflow.common.state.TaskStatus;
+import com.agentflow.common.trace.TraceStage;
 import com.agentflow.server.coordinator.SubtaskDef;
 import com.agentflow.server.coordinator.SubtaskDispatcher;
 import com.agentflow.server.coordinator.TaskDecomposer;
@@ -9,6 +10,7 @@ import com.agentflow.server.entity.SubtaskEntity;
 import com.agentflow.server.entity.TaskEntity;
 import com.agentflow.server.mapper.SubtaskMapper;
 import com.agentflow.server.mapper.TaskMapper;
+import com.agentflow.server.trace.TraceEmitter;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -28,22 +30,29 @@ public class TaskSubmitService {
     private final SubtaskMapper subtaskMapper;
     private final SubtaskDispatcher dispatcher;
     private final TransactionTemplate transactionTemplate;
+    private final TraceEmitter traceEmitter;
 
     public TaskSubmitService(List<TaskDecomposer> decomposerList,
                              TaskMapper taskMapper, SubtaskMapper subtaskMapper,
                              SubtaskDispatcher dispatcher,
-                             TransactionTemplate transactionTemplate) {
+                             TransactionTemplate transactionTemplate,
+                             TraceEmitter traceEmitter) {
         this.decomposers = decomposerList.stream()
                 .collect(Collectors.toMap(TaskDecomposer::type, Function.identity()));
         this.taskMapper = taskMapper;
         this.subtaskMapper = subtaskMapper;
         this.dispatcher = dispatcher;
         this.transactionTemplate = transactionTemplate;
+        this.traceEmitter = traceEmitter;
     }
 
     /** 落库与分发分离:事务提交后才发 MQ(发送失败不回滚任务,W3-4 兜底重发)。 */
     public TaskEntity submit(String type, JsonNode payload) {
         TaskEntity task = transactionTemplate.execute(status -> persist(type, payload));
+        traceEmitter.emit(String.valueOf(task.getId()), task.getId(), null,
+                TraceStage.SUBMITTED, "PENDING", "type=" + type);
+        traceEmitter.emit(String.valueOf(task.getId()), task.getId(), null,
+                TraceStage.DECOMPOSED, "PENDING", "subtasks=" + task.getSubtaskTotal());
         dispatcher.dispatch(task);
         return task;
     }
