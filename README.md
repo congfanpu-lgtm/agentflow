@@ -24,6 +24,18 @@
 
 查询:`GET /api/v1/tasks/{taskUuid}`
 
+## 多 Worker 水平扩展
+
+主 topic 3 分区,最多 3 个 Worker 并行(同消费组自动 rebalance):
+
+    # 终端各起一个,同 group 自动分走分区
+    mvn -q -pl agentflow-worker -am spring-boot:run
+    mvn -q -pl agentflow-worker -am spring-boot:run
+    mvn -q -pl agentflow-worker -am spring-boot:run
+
+优雅停机:`Ctrl-C` 后 Worker 处理完在途子任务、提交 offset 再退出,配合幂等去重保证不丢不重。
+(1→3 Worker 吞吐提升比在 W8 压测量化。)
+
 ## 测试
 
     mvn test        # 需 docker compose up -d(集成测试直连本地 MySQL/Kafka)
