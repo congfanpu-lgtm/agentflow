@@ -14,6 +14,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -32,6 +33,7 @@ public class ResultHandleService {
     private final TaskStateMachine stateMachine;
     private final ObjectMapper objectMapper;
 
+    @Transactional
     public void handle(ResultMessage msg) {
         SubtaskEntity sub = subtaskMapper.selectById(msg.getSubtaskId());
         if (sub == null) {
