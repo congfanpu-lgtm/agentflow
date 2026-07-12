@@ -19,6 +19,12 @@ spring:
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       properties:
         spring.json.trusted.packages: com.agentflow.common.mq
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/agentflow_trace
+    redis:
+      host: localhost
+      port: 6379
 mybatis-plus:
   configuration:
     map-underscore-to-camel-case: true

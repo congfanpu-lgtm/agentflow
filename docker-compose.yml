@@ -21,6 +21,12 @@ services:
     ports:
       - "6379:6379"
 
+  mongo:
+    image: mongo:7
+    container_name: agentflow-mongo
+    ports:
+      - "27017:27017"
+
   kafka:
     image: apache/kafka:4.0.0        # 官方镜像,原生 KRaft,无需 Zookeeper;arm64 支持
     container_name: agentflow-kafka
