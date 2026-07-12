@@ -9,6 +9,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -27,6 +29,8 @@ class TaskSubmitServiceTest {
     private SubtaskMapper subtaskMapper;
     @Autowired
     private ObjectMapper om;
+    @MockBean
+    private KafkaTemplate<String, Object> kafkaTemplate;
 
     @Test
     void submitPersistsTaskAndSubtasks() throws Exception {
