@@ -33,6 +33,7 @@ public class TaskFinalizer {
     private final TaskStateMachine stateMachine;
     private final ObjectMapper objectMapper;
     private final TraceEmitter traceEmitter;
+    private final NotificationService notificationService;
 
     public void finalizeIfAllSettled(Long taskId) {
         TaskEntity task = taskMapper.selectById(taskId);
@@ -79,6 +80,7 @@ public class TaskFinalizer {
         taskMapper.updateById(task);
         traceEmitter.emit(String.valueOf(task.getId()), task.getId(), null,
                 TraceStage.TASK_FINALIZED, terminal.name(), "subtasks=" + subs.size());
+        notificationService.notifyTaskFinished(task);
         log.info("任务落定 taskId={} terminal={} subtasks={}", task.getId(), terminal, subs.size());
     }
 }
