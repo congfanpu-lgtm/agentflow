@@ -5,6 +5,7 @@ import com.agentflow.common.mq.SubtaskMessage;
 import com.agentflow.common.mq.Topics;
 import com.agentflow.worker.idempotency.IdempotencyGuard;
 import com.agentflow.worker.processor.EchoProcessor;
+import com.agentflow.worker.retry.RetryRouter;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -19,7 +20,9 @@ class SubtaskListenerTest {
     @SuppressWarnings("unchecked")
     private final KafkaTemplate<String, Object> template = mock(KafkaTemplate.class);
     private final IdempotencyGuard guard = mock(IdempotencyGuard.class);
-    private final SubtaskListener listener = new SubtaskListener(new EchoProcessor(), template, guard);
+    private final RetryRouter retryRouter = mock(RetryRouter.class);
+    private final SubtaskListener listener =
+            new SubtaskListener(new EchoProcessor(), template, guard, retryRouter);
 
     {
         when(guard.key(any(), any())).thenReturn("k");
@@ -30,7 +33,7 @@ class SubtaskListenerTest {
     void successProducesCompletedResult() {
         SubtaskMessage msg = new SubtaskMessage(1L, 10L, "uuid-1", "ECHO_BATCH", 0,
                 "{\"text\":\"hi\"}");
-        listener.onMessage(msg);
+        listener.onMessage(msg, null);
 
         ArgumentCaptor<ResultMessage> captor = ArgumentCaptor.forClass(ResultMessage.class);
         verify(template).send(eq(Topics.RESULT), eq("10"), captor.capture());
@@ -42,14 +45,11 @@ class SubtaskListenerTest {
     }
 
     @Test
-    void processingFailureProducesFailedResult() {
+    void processingFailureRoutesToRetryRouter() {
         SubtaskMessage msg = new SubtaskMessage(1L, 11L, "uuid-2", "ECHO_BATCH", 1, "{}");
-        listener.onMessage(msg);
+        listener.onMessage(msg, null);
 
-        ArgumentCaptor<ResultMessage> captor = ArgumentCaptor.forClass(ResultMessage.class);
-        verify(template).send(eq(Topics.RESULT), eq("11"), captor.capture());
-        ResultMessage result = captor.getValue();
-        assertFalse(result.isSuccess());
-        assertNotNull(result.getErrorMsg());
+        verify(retryRouter).route(eq(msg), eq(0), any());
+        verify(template, never()).send(eq(Topics.RESULT), anyString(), any());
     }
 }

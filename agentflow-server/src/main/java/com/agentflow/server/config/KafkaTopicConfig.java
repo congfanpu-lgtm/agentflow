@@ -19,4 +19,24 @@ public class KafkaTopicConfig {
     public NewTopic resultTopic() {
         return TopicBuilder.name(Topics.RESULT).partitions(3).replicas(1).build();
     }
+
+    @Bean
+    public NewTopic retry5sTopic() {
+        return TopicBuilder.name(Topics.RETRY_5S).partitions(3).replicas(1).build();
+    }
+
+    @Bean
+    public NewTopic retry30sTopic() {
+        return TopicBuilder.name(Topics.RETRY_30S).partitions(3).replicas(1).build();
+    }
+
+    @Bean
+    public NewTopic retry5mTopic() {
+        return TopicBuilder.name(Topics.RETRY_5M).partitions(3).replicas(1).build();
+    }
+
+    @Bean
+    public NewTopic dlqTopic() {
+        return TopicBuilder.name(Topics.DLQ).partitions(3).replicas(1).build();
+    }
 }
