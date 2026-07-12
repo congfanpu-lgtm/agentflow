@@ -22,6 +22,7 @@ CREATE TABLE IF NOT EXISTS subtask (
   input         JSON         NULL,
   output        JSON         NULL,
   error_msg     VARCHAR(512) NULL,
+  redispatch_count INT NOT NULL DEFAULT 0,
   created_at    DATETIME(3)  NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
   updated_at    DATETIME(3)  NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
   UNIQUE KEY uk_subtask_uuid (subtask_uuid),

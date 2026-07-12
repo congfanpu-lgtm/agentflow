@@ -19,6 +19,7 @@ public class SubtaskEntity {
     private String input;        // JSON 字符串
     private String output;       // JSON 字符串
     private String errorMsg;
+    private Integer redispatchCount;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }
