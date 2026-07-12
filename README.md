@@ -43,7 +43,7 @@
 ## 路线图
 
 - [x] W1–2 骨架:API + 状态机 + Kafka 分发 + echo Worker
-- [ ] W3–4 可靠性:幂等、**自研 Kafka 阶梯重试/死信**、超时兜底、多 Worker
+- [x] W3–4 可靠性核心: 幂等、Kafka 自研重试/死信+恢复、超时兜底、优雅停机
 - [ ] W5–6 LLM 网关(令牌桶/路由/token 记账)+ LangChain4j Agent
 - [ ] W7 RAG 检索服务(FastAPI + pgvector)
 - [ ] W8 压测与容错演练
