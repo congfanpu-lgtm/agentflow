@@ -155,3 +155,9 @@
 - **T3**:`RetryRouter` 的 `switch default` 分支吸收了 `attempt≥2` 的情况,当前依赖前置守卫保证
   安全,尚未出问题但语义不够显式。
 - **T5a**:目前没有 `DlqControllerTest`,DLQ 恢复的 HTTP 层缺少直接测试覆盖。
+
+## W4 最终评审遗留(defer,W5-6 前处理其一)
+- 【重要,W5-6】NotificationService/副作用当前在 finalize 事务内 pre-commit 执行;接真外部副作用(邮件/建 case)前改为 afterCommit(TransactionSynchronization),避免"对未提交状态提前通知"。
+- TraceEmitter 不观测 async 送达失败;TraceConsumer.save 无 try/catch(trace-only,可加 DLQ)。
+- Trace 事件按 wall-clock 排序,跨进程时钟漂移可乱序;可改逻辑序列号(每 traceId 单调递增)。
+- ServerTracePointsTest 遗留 MySQL 行;TraceEvent.traceId 注释 stale(写 taskUuid 实为 taskId)。
