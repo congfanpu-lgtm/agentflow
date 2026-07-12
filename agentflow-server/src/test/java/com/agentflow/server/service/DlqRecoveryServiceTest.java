@@ -39,6 +39,7 @@ class DlqRecoveryServiceTest {
         t.setTaskUuid(UUID.randomUUID().toString());
         t.setType("ECHO_BATCH"); t.setStatus("FAILED");   // 已终态
         t.setSubtaskTotal(1); t.setSubtaskDone(0); t.setSubtaskFailed(1);
+        t.setResult("[{\"seq\":0,\"status\":\"FAILED\"}]");
         taskMapper.insert(t); taskId = t.getId();
         SubtaskEntity s = new SubtaskEntity();
         s.setSubtaskUuid(UUID.randomUUID().toString());
@@ -50,9 +51,11 @@ class DlqRecoveryServiceTest {
 
         SubtaskEntity s2 = subtaskMapper.selectById(subId);
         assertEquals("PENDING", s2.getStatus());          // 重置
+        assertNull(s2.getErrorMsg());                      // 旧错误信息被清空
         TaskEntity t2 = taskMapper.selectById(taskId);
         assertEquals("RUNNING", t2.getStatus());          // 任务复活
         assertEquals(0, t2.getSubtaskFailed());           // 失败计数回退
+        assertNull(t2.getResult());                        // 旧的 FAILED 结果被清空
         verify(kafkaTemplate).send(eq(com.agentflow.common.mq.Topics.SUBTASK),
                 eq(String.valueOf(subId)), any());        // 重投主 topic
     }
