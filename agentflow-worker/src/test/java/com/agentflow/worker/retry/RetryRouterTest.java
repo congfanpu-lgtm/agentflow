@@ -3,6 +3,7 @@ package com.agentflow.worker.retry;
 import com.agentflow.common.mq.ResultMessage;
 import com.agentflow.common.mq.SubtaskMessage;
 import com.agentflow.common.mq.Topics;
+import com.agentflow.worker.trace.TraceEmitter;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -20,7 +21,7 @@ class RetryRouterTest {
     @SuppressWarnings("unchecked")
     private final KafkaTemplate<String, Object> template = mock(KafkaTemplate.class);
     private final RetryProperties props = new RetryProperties();
-    private final RetryRouter router = new RetryRouter(template, props);
+    private final RetryRouter router = new RetryRouter(template, props, mock(TraceEmitter.class));
 
     private final SubtaskMessage msg =
             new SubtaskMessage(1L, 10L, "u", "ECHO_BATCH", 0, "{\"text\":\"a\"}");

@@ -5,6 +5,7 @@ import com.agentflow.common.mq.Topics;
 import com.agentflow.worker.idempotency.IdempotencyGuard;
 import com.agentflow.worker.processor.EchoProcessor;
 import com.agentflow.worker.retry.RetryRouter;
+import com.agentflow.worker.trace.TraceEmitter;
 import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -19,7 +20,7 @@ class SubtaskListenerIdempotencyTest {
     private final EchoProcessor processor = spy(new EchoProcessor());
     private final IdempotencyGuard guard = mock(IdempotencyGuard.class);
     private final SubtaskListener listener =
-            new SubtaskListener(processor, template, guard, mock(RetryRouter.class));
+            new SubtaskListener(processor, template, guard, mock(RetryRouter.class), mock(TraceEmitter.class));
 
     @Test
     void skipsProcessingWhenAlreadyProcessed() throws Exception {

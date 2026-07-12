@@ -3,6 +3,8 @@ package com.agentflow.worker.retry;
 import com.agentflow.common.mq.ResultMessage;
 import com.agentflow.common.mq.SubtaskMessage;
 import com.agentflow.common.mq.Topics;
+import com.agentflow.common.trace.TraceStage;
+import com.agentflow.worker.trace.TraceEmitter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -20,6 +22,7 @@ public class RetryRouter {
 
     private final KafkaTemplate<String, Object> kafkaTemplate;
     private final RetryProperties props;
+    private final TraceEmitter traceEmitter;
 
     public void route(SubtaskMessage msg, int attempt, String errorMsg) {
         String key = String.valueOf(msg.getSubtaskId());
@@ -28,6 +31,8 @@ public class RetryRouter {
             kafkaTemplate.send(Topics.RESULT, key,
                     new ResultMessage(msg.getTaskId(), msg.getSubtaskId(), false, null, errorMsg));
             log.error("子任务重试耗尽,进 DLQ subtaskId={}", msg.getSubtaskId());
+            traceEmitter.emit(String.valueOf(msg.getTaskId()), msg.getTaskId(), msg.getSubtaskId(),
+                    TraceStage.DLQ, "exhausted", errorMsg);
             return;
         }
         String topic;
@@ -47,5 +52,7 @@ public class RetryRouter {
         kafkaTemplate.send(rec);
         log.info("子任务转重试 subtaskId={} attempt={} topic={} delayMs={}",
                 msg.getSubtaskId(), attempt, topic, delayMs);
+        traceEmitter.emit(String.valueOf(msg.getTaskId()), msg.getTaskId(), msg.getSubtaskId(),
+                TraceStage.RETRY, "attempt=" + attempt, topic);
     }
 }

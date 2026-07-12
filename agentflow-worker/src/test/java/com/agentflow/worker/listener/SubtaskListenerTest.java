@@ -6,6 +6,7 @@ import com.agentflow.common.mq.Topics;
 import com.agentflow.worker.idempotency.IdempotencyGuard;
 import com.agentflow.worker.processor.EchoProcessor;
 import com.agentflow.worker.retry.RetryRouter;
+import com.agentflow.worker.trace.TraceEmitter;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -22,7 +23,7 @@ class SubtaskListenerTest {
     private final IdempotencyGuard guard = mock(IdempotencyGuard.class);
     private final RetryRouter retryRouter = mock(RetryRouter.class);
     private final SubtaskListener listener =
-            new SubtaskListener(new EchoProcessor(), template, guard, retryRouter);
+            new SubtaskListener(new EchoProcessor(), template, guard, retryRouter, mock(TraceEmitter.class));
 
     {
         when(guard.key(any(), any())).thenReturn("k");
