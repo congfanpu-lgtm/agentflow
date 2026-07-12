@@ -49,7 +49,9 @@ public class SubtaskDispatcher {
                 stateMachine.transitionSubtask(sub.getId(),
                         SubtaskStatus.PENDING, SubtaskStatus.DISPATCHED);
             } catch (Exception e) {
-                Thread.currentThread().interrupt();  // 保守处理 InterruptedException
+                if (e instanceof InterruptedException) {
+                    Thread.currentThread().interrupt();  // 仅在真被中断时恢复中断标志
+                }
                 log.error("子任务消息发送失败 subtaskId={},保持 PENDING 等待兜底",
                         sub.getId(), e);
             }
