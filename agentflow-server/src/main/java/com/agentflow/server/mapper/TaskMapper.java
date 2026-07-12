@@ -18,4 +18,8 @@ public interface TaskMapper extends BaseMapper<TaskEntity> {
     /** 失败计数原子累加(部分失败语义:done+failed==total 时判终态)。 */
     @Update("UPDATE task SET subtask_failed = subtask_failed + 1 WHERE id = #{id}")
     int incrementFailed(@Param("id") Long id);
+
+    /** DLQ 恢复:失败计数原子回退(子任务由 FAILED 重置为 PENDING 时对应扣减)。 */
+    @Update("UPDATE task SET subtask_failed = subtask_failed - 1 WHERE id = #{id}")
+    int decrementFailed(@Param("id") Long id);
 }
