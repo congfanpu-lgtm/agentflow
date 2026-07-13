@@ -57,6 +57,39 @@ Kafka `AGENTFLOW_TRACE` topic;server 侧唯一的 `TraceConsumer` 消费落 Mong
 
 演示脚本:`./scripts/trace-demo.sh`(提交任务 → 轮询到 COMPLETED → 打印完整 trace)。
 
+## LLM 网关与可控 Agent(W5–6)
+
+**LLM 网关(唯一出口)**:所有 LLM 调用只能经 `LlmGateway.chat(ChatRequest)`——业务代码拿不到底层
+`LlmClient`,没有旁路(代码层 enforce)。网关职责:① 多模型路由(按 `model` 选桶 + 计价)
+② 限流 ③ 调用 ④ token 记账。默认后端 `MockLlmClient`(确定性、不烧钱、无需 API key,压测/单测都用它);
+`llm.provider=openai` 切真实模型(OpenAI 兼容协议,JDK HttpClient,base-url/key 走环境变量)。
+
+**Redis + Lua 令牌桶限流**:桶状态存 Redis(跨 worker 实例共享,水平扩展下限流才是全局的),
+"读令牌→按时间补充→判够→扣减→回写"整段用一个 Lua 脚本原子执行(Redis 单线程 = 天然原子,
+免分布式锁,与状态机用 MySQL CAS 同源)。扣不到令牌 → `RateLimitedException`,worker 侧当普通失败
+交 W3 阶梯重试(复用可靠性层,不另造机制)。
+
+**token 记账**:每次调用把 prompt/completion token 数 + 估算成本(微美元)原子累加到 Redis;
+`GET /api/v1/llm/usage` 按模型返回累计 token 与成本(简历指标3/6 数据源)。
+
+**AgentContext(防上下文膨胀)**:`AgentContext.build(system, input, history)` 按 token 预算裁剪——
+超预算优先丢最老历史,历史丢光仍超则截断超长输入(保留头尾),裁剪量记日志。绝不无上限塞给模型。
+
+**Skill 动态注册 + schema 约束输出**:实现 `Skill` 接口 + `@Component` 即被 `SkillRegistry` 自动收录
+(动态加载);多个 skill 命中同一 intent 按 `priority` 排序;每个 skill 声明 `outputSchema`,LLM 输出
+必须过 `SchemaValidator` 校验,不合规视为失败交重试——**输出稳定是代码层校验,不是求模型听话**。
+
+**真 Agent**:新任务类型 `LLM_BATCH`,worker `LlmProcessor`(Runtime)= AgentContext 组 prompt →
+网关调模型 → 按 skill schema 校验输出;`SubtaskListener` 按 `msg.type` 路由到处理器(策略模式,
+Echo/LLM 并存)。副作用一律回 Harness 经 Policy——处理器不产生外部副作用。
+
+提交 LLM 任务(默认 mock):
+
+    curl -X POST localhost:8080/api/v1/tasks -H 'Content-Type: application/json' \
+      -d '{"type":"LLM_BATCH","payload":{"items":["文本A","文本B"],"model":"mock-small"}}'
+
+演示脚本:`./scripts/w5-6-demo.sh`(提交 LLM_BATCH → 打印结果 + trace + `GET /llm/usage` 记账)。
+
 ## 测试
 
     mvn test        # 需 docker compose up -d(集成测试直连本地 MySQL/Kafka/Mongo)
@@ -66,6 +99,6 @@ Kafka `AGENTFLOW_TRACE` topic;server 侧唯一的 `TraceConsumer` 消费落 Mong
 - [x] W1–2 骨架:API + 状态机 + Kafka 分发 + echo Worker
 - [x] W3–4 可靠性核心: 幂等、Kafka 自研重试/死信+恢复、超时兜底、优雅停机
 - [x] W3–4 可观测:Run Trace(事件溯源→Mongo 回放)+ 统一副作用 Policy 层
-- [ ] W5–6 LLM 网关(令牌桶/路由/token 记账)+ LangChain4j Agent
+- [x] W5–6 LLM 网关(Redis+Lua 令牌桶/多模型路由/token 记账)+ 真 Agent(经网关,mock 默认)+ AgentContext + Skill 注册/schema 约束
 - [ ] W7 RAG 检索服务(FastAPI + pgvector)
 - [ ] W8 压测与容错演练

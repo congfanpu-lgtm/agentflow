@@ -151,13 +151,54 @@
   (里程碑当前规模可接受,后续量级上升需拆分批次/事务外发送)。
 - **T4b**:超时重投的 `SubtaskMessage` 硬编码 `type="ECHO_BATCH"`(DLQ `replay` 已正确使用
   `t.getType()`);当前只有一种任务类型尚不触发问题,但加入第二种任务类型时是潜在 bug,
-  留到 W5+ 修。
+  留到 W5+ 修。**【已于 W5-6 关闭】**加入 `LLM_BATCH` 第二种类型时同步修复:`TimeoutSweepService`
+  重投改用 `taskMapper.selectById(taskId).getType()`。
 - **T3**:`RetryRouter` 的 `switch default` 分支吸收了 `attempt≥2` 的情况,当前依赖前置守卫保证
   安全,尚未出问题但语义不够显式。
 - **T5a**:目前没有 `DlqControllerTest`,DLQ 恢复的 HTTP 层缺少直接测试覆盖。
 
 ## W4 最终评审遗留(defer,W5-6 前处理其一)
-- 【重要,W5-6】NotificationService/副作用当前在 finalize 事务内 pre-commit 执行;接真外部副作用(邮件/建 case)前改为 afterCommit(TransactionSynchronization),避免"对未提交状态提前通知"。
+- 【重要,W5-6】~~NotificationService/副作用当前在 finalize 事务内 pre-commit 执行;接真外部副作用(邮件/建 case)前改为 afterCommit~~ **【已于 W5-6 关闭】**:`NotificationService.notifyTaskFinished` 改为有活动事务时经 `TransactionSynchronization.afterCommit` 执行、无事务时直接执行,`NotificationDedupeTest` 补 "回滚不通知" 断言。
 - TraceEmitter 不观测 async 送达失败;TraceConsumer.save 无 try/catch(trace-only,可加 DLQ)。
 - Trace 事件按 wall-clock 排序,跨进程时钟漂移可乱序;可改逻辑序列号(每 traceId 单调递增)。
 - ServerTracePointsTest 遗留 MySQL 行;TraceEvent.traceId 注释 stale(写 taskUuid 实为 taskId)。
+
+## W5–6 里程碑交付清单(Task 1–7,LLM 网关/可控 Agent,已 `scripts/w5-6-demo.sh` 实盘验收)
+
+- [x] LLM 网关基础(Task 1):`LlmClient` 抽象 + `MockLlmClient`(默认,确定性/不烧钱/无 key)+ `ChatRequest/Response`、`TokenUsage` DTO(common)+ `LlmModelProperties` 多模型配置
+- [x] Redis+Lua 令牌桶限流 + 多模型路由 + token 记账(Task 2):`RateLimiter`(Lua 原子)、`LlmGateway`(唯一出口,拿不到底层 client)、`TokenAccountant`(Redis 原子累加)、`GET /api/v1/llm/usage`;限流失败复用 W3 阶梯重试
+- [x] 真 Agent + 处理器按 type 路由(Task 3):`SubtaskProcessor` 接口 + `LlmProcessor`(经网关)+ `LlmBatchDecomposer`(`LLM_BATCH`);`SubtaskListener` 按 `msg.type` 选处理器(策略模式);**修 T4b**
+- [x] AgentContext 上下文管理(Task 4):`AgentContext.build` 按 token 预算裁剪(丢老历史/截断超长输入),`TokenEstimator` 启发式估算
+- [x] Skill 动态注册 + schema 约束 + 多命中排序(Task 5):`Skill`/`SkillRegistry`(Spring 收集)、`SchemaValidator`(手写最小校验)、`SummarizeSkill`/`ExtractSkill`;`LlmProcessor` 校验模型输出不合规则重试
+- [x] W4 遗留:通知改 afterCommit(Task 6)
+- [x] 端到端验收 + 里程碑收尾(Task 7,本轮):`scripts/w5-6-demo.sh` 实盘跑通——`LLM_BATCH` 2 子任务经网关产出 `{summary,skill,model,tokens}`、trace 覆盖 `SUBMITTED→…→TASK_FINALIZED`、`/llm/usage` 见 `mock-small` 累计 token 与成本
+
+**W5-6 实盘/评审发现(记录供后续)**:
+- **工具链**:本机 Homebrew 把 `mvn` 的运行时 JDK 升到 26,lombok 1.18.34 不支持(`TypeTag :: UNKNOWN`);且 maven-compiler-plugin 3.15+ 不再隐式启用注解处理。已在 parent pom 显式声明 lombok `annotationProcessorPaths`;构建须用 `JAVA_HOME=$(/usr/libexec/java_home -v 21)`(项目 target release 17)。**建议**:加 `.mvn/jvm.config` 或 maven-toolchains 固化 JDK 21,避免依赖手动 `JAVA_HOME`。
+- **`/llm/usage` 被测试键污染**:集成测试用真 Redis 且模型名用随机 UUID(`gw-*`/`rl-*`),累计计数残留在 Redis,`/llm/usage` 会连带列出。演示读数需认准真实模型名(`mock-small`)。建议:测试键加独立前缀或 `@AfterEach` 清理,或 usage 只列配置内的模型名。
+- **令牌桶用调用方墙钟**:单 Redis 实例足够;跨节点多写时钟漂移场景可改用 Redis 服务端 `TIME`。
+- **token 估算为启发式**(`chars/系数`);精确 tokenizer(jtokkit)列 backlog。
+- **schema 校验为手写最小实现**(必填+基础类型);嵌套/枚举/正则等完整 JSON Schema 列 backlog。
+- **真实 `OpenAiLlmClient` 未进 CI**:仅 `llm.provider=openai` + 环境变量手动验证,避免烧钱。
+
+## 自检(W5–6 里程碑,对应设计文档考点)
+
+13. **令牌桶为何用 Redis+Lua 而非 JVM 本地/分布式锁?**
+    JVM 本地桶在多 worker 水平扩展下各限各的,合起来限流失控;分布式锁能对但引入锁服务 +
+    持有/续期/死锁运维复杂度。令牌桶的"读→补充→判→扣→写"是 check-then-act,并发下必须原子——
+    Redis 单线程执行整段 Lua = 天然原子,桶状态在 Redis 天然跨实例共享,一条脚本搞定,无额外基础设施。
+    与状态机用 MySQL CAS 把 read-modify-write 压成一条原子操作是同一思路。
+
+14. **LLM 调用如何代码层 enforce 经网关(而非提示词/约定)?**
+    结构性收口:业务代码只注入 `LlmGateway` bean,拿不到底层 `LlmClient`(限流/记账/路由全封在
+    `chat()` 内),没有旁路。"只能经网关"由方法签名唯一入口保证,不靠 review/命名。与 W4
+    `SideEffectPolicy` 收口副作用同构。
+
+15. **上下文注入怎么做?如何避免过多历史进模型?**
+    `AgentContext.build` 统一组装 system+历史+输入;按 `maxContextTokens` 预算裁剪——超预算优先丢
+    最老历史,历史丢光仍超则截断超长输入(保留头尾),裁剪量记日志(可观测)。绝不无上限塞给模型。
+
+16. **Skill 输出稳定怎么保证(schema vs 提示词)?多命中如何排序?**
+    每个 Skill 声明 `outputSchema`,LLM 产出必须过 `SchemaValidator` 代码层校验,不合规=失败交 W3
+    重试——输出稳定是"解析+校验模型输出并拒绝不合规",不是"求模型听话"。多命中按 `priority()` 降序、
+    name 稳定排序(`SkillRegistry.select`)。动态加载靠 Spring 收集 `List<Skill>`,新增技能仅 @Component。
