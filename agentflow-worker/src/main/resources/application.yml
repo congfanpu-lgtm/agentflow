@@ -26,3 +26,17 @@ spring:
 
 server:
   shutdown: graceful
+
+# LLM 网关:默认 mock(不烧钱、无需 key);切真模型设 llm.provider=openai + OPENAI_* 环境变量。
+llm:
+  provider: mock
+  default-model: mock-small
+  models:
+    - name: mock-small        # 便宜/高频模型:桶大、便宜
+      capacity: 20
+      refill-per-sec: 10
+      price-per1k-tokens: 0.0005
+    - name: mock-large        # 贵/低频模型:桶小、限流更严、更贵
+      capacity: 5
+      refill-per-sec: 2
+      price-per1k-tokens: 0.01
