@@ -55,10 +55,13 @@ public class TimeoutSweepService {
         for (SubtaskEntity s : stuck) {
             if (s.getRedispatchCount() < MAX_REDISPATCH) {
                 subtaskMapper.incrementRedispatch(s.getId());
-                // 重投后 incrementRedispatch 的 ON UPDATE 会刷新 updated_at,重新计时
+                // 重投后 incrementRedispatch 的 ON UPDATE 会刷新 updated_at,重新计时。
+                // 修 backlog T4b:type 取自任务而非硬编码 ECHO_BATCH,否则多任务类型下会把
+                // LLM_BATCH 子任务错标成 ECHO_BATCH,worker 路由到错处理器。
+                String type = taskMapper.selectById(s.getTaskId()).getType();
                 kafkaTemplate.send(Topics.SUBTASK, String.valueOf(s.getId()),
                         new SubtaskMessage(s.getTaskId(), s.getId(), s.getSubtaskUuid(),
-                                "ECHO_BATCH", s.getSeq(), s.getInput()));
+                                type, s.getSeq(), s.getInput()));
                 traceEmitter.emit(String.valueOf(s.getTaskId()), s.getTaskId(), s.getId(),
                         TraceStage.TIMEOUT_REDISPATCH, "DISPATCHED",
                         "redispatch=" + (s.getRedispatchCount() + 1));

@@ -5,10 +5,9 @@ import com.agentflow.common.mq.SubtaskMessage;
 import com.agentflow.common.mq.Topics;
 import com.agentflow.common.trace.TraceStage;
 import com.agentflow.worker.idempotency.IdempotencyGuard;
-import com.agentflow.worker.processor.EchoProcessor;
+import com.agentflow.worker.processor.SubtaskProcessor;
 import com.agentflow.worker.retry.RetryRouter;
 import com.agentflow.worker.trace.TraceEmitter;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -16,17 +15,33 @@ import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class SubtaskListener {
 
-    private final EchoProcessor processor;
+    /** type → 处理器(Spring 注入所有 SubtaskProcessor,按 type 建索引:策略模式)。 */
+    private final Map<String, SubtaskProcessor> processors;
     private final KafkaTemplate<String, Object> kafkaTemplate;
     private final IdempotencyGuard guard;
     private final RetryRouter retryRouter;
     private final TraceEmitter traceEmitter;
+
+    public SubtaskListener(List<SubtaskProcessor> processors,
+                           KafkaTemplate<String, Object> kafkaTemplate,
+                           IdempotencyGuard guard, RetryRouter retryRouter,
+                           TraceEmitter traceEmitter) {
+        this.processors = processors.stream()
+                .collect(Collectors.toMap(SubtaskProcessor::type, Function.identity()));
+        this.kafkaTemplate = kafkaTemplate;
+        this.guard = guard;
+        this.retryRouter = retryRouter;
+        this.traceEmitter = traceEmitter;
+    }
 
     @KafkaListener(topics = Topics.SUBTASK)
     public void onMessage(SubtaskMessage msg,
@@ -43,6 +58,10 @@ public class SubtaskListener {
             return;
         }
         try {
+            SubtaskProcessor processor = processors.get(msg.getType());
+            if (processor == null) {
+                throw new IllegalArgumentException("未知任务类型:" + msg.getType());
+            }
             String output = processor.process(msg.getInputJson());
             traceEmitter.emit(String.valueOf(msg.getTaskId()), msg.getTaskId(), msg.getSubtaskId(),
                     TraceStage.PROCESSED, "OK", null);

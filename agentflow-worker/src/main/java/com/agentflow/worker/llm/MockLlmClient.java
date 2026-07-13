@@ -4,6 +4,7 @@ import com.agentflow.common.llm.ChatMessage;
 import com.agentflow.common.llm.ChatRequest;
 import com.agentflow.common.llm.ChatResponse;
 import com.agentflow.common.llm.TokenUsage;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
@@ -14,6 +15,8 @@ import org.springframework.stereotype.Component;
 @Component
 @ConditionalOnProperty(name = "llm.provider", havingValue = "mock", matchIfMissing = true)
 public class MockLlmClient implements LlmClient {
+
+    private static final ObjectMapper OM = new ObjectMapper();
 
     @Override
     public String provider() {
@@ -34,9 +37,16 @@ public class MockLlmClient implements LlmClient {
                 }
             }
         }
-        // 确定性"摘要":截断到 maxTokens*4 字符量级并大写首句,足够跑通链路 + 测试可断言。
+        // 模拟"守规矩的模型":确定性输出符合 summarize schema 的 JSON——processor 会真的解析+校验它,
+        // 校验通过才算成功(schema 约束是代码层 enforce,不是求模型听话)。
         String trimmed = lastUser.length() > 120 ? lastUser.substring(0, 120) : lastUser;
-        String content = "SUMMARY: " + trimmed.trim();
+        String content;
+        try {
+            content = OM.writeValueAsString(
+                    OM.createObjectNode().put("summary", "SUMMARY: " + trimmed.trim()));
+        } catch (Exception e) {
+            throw new IllegalStateException(e);
+        }
         // token 估算:chars/4(见 TokenEstimator 同款启发式);mock 无真实 usage 故本地估。
         TokenUsage usage = new TokenUsage(Math.max(1, promptChars / 4),
                 Math.max(1, content.length() / 4));

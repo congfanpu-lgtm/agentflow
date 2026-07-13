@@ -20,7 +20,8 @@ class SubtaskListenerIdempotencyTest {
     private final EchoProcessor processor = spy(new EchoProcessor());
     private final IdempotencyGuard guard = mock(IdempotencyGuard.class);
     private final SubtaskListener listener =
-            new SubtaskListener(processor, template, guard, mock(RetryRouter.class), mock(TraceEmitter.class));
+            new SubtaskListener(java.util.List.of(processor), template, guard,
+                    mock(RetryRouter.class), mock(TraceEmitter.class));
 
     @Test
     void skipsProcessingWhenAlreadyProcessed() throws Exception {

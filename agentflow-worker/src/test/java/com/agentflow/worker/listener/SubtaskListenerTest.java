@@ -23,7 +23,8 @@ class SubtaskListenerTest {
     private final IdempotencyGuard guard = mock(IdempotencyGuard.class);
     private final RetryRouter retryRouter = mock(RetryRouter.class);
     private final SubtaskListener listener =
-            new SubtaskListener(new EchoProcessor(), template, guard, retryRouter, mock(TraceEmitter.class));
+            new SubtaskListener(java.util.List.of(new EchoProcessor()), template, guard, retryRouter,
+                    mock(TraceEmitter.class));
 
     {
         when(guard.key(any(), any())).thenReturn("k");

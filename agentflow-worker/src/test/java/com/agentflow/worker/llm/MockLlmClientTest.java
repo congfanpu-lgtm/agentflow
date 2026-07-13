@@ -21,11 +21,12 @@ class MockLlmClientTest {
     }
 
     @Test
-    void deterministicOutputForSameInput() {
+    void deterministicSchemaConformingJson() {
         ChatResponse a = client.chat(req("请总结这段文字"));
         ChatResponse b = client.chat(req("请总结这段文字"));
         assertEquals(a.getContent(), b.getContent());
-        assertTrue(a.getContent().startsWith("SUMMARY:"));
+        assertTrue(a.getContent().contains("\"summary\""), "应输出含 summary 的 JSON");
+        assertTrue(a.getContent().trim().startsWith("{"), "应是 JSON 对象");
         assertEquals("mock-small", a.getModel());
     }
 
