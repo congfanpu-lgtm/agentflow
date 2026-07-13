@@ -26,12 +26,13 @@ import java.util.List;
 public class LlmProcessor implements SubtaskProcessor {
 
     private static final String DEFAULT_INTENT = "summarize";
+    // worker 非 web 上下文无自动装配的 ObjectMapper bean;同 EchoProcessor 就地实例化。
+    private static final ObjectMapper objectMapper = new ObjectMapper();
 
     private final LlmGateway gateway;
     private final AgentContext agentContext;
     private final SkillRegistry skillRegistry;
     private final SchemaValidator schemaValidator;
-    private final ObjectMapper objectMapper;
 
     @Override
     public String type() {

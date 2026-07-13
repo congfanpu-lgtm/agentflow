@@ -30,7 +30,7 @@ class LlmProcessorTest {
         LlmModelProperties props = new LlmModelProperties();
         AgentContext ctx = new AgentContext(new TokenEstimator(), props);
         SkillRegistry registry = new SkillRegistry(List.of(new SummarizeSkill()));
-        return new LlmProcessor(gateway, ctx, registry, new SchemaValidator(), om);
+        return new LlmProcessor(gateway, ctx, registry, new SchemaValidator());
     }
 
     @Test
