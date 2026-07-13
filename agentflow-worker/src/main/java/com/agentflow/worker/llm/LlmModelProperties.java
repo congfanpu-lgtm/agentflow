@@ -19,6 +19,8 @@ public class LlmModelProperties {
     private String provider = "mock";
     /** 请求未指定 model 时用的默认模型名。 */
     private String defaultModel = "mock-small";
+    /** AgentContext 组装 prompt 的 token 预算上限,超出即裁剪(防上下文膨胀)。 */
+    private int maxContextTokens = 2000;
     private List<Model> models = new ArrayList<>();
 
     public Model model(String name) {
