@@ -40,3 +40,9 @@ llm:
       capacity: 5
       refill-per-sec: 2
       price-per1k-tokens: 0.01
+
+# RAG 检索服务(Python/FastAPI + pgvector)
+rag:
+  base-url: http://localhost:8000
+  top-k: 3
+  timeout-ms: 3000
