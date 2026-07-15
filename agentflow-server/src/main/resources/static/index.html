@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AgentFlow 控制台</title>
+<style>
+  :root{
+    --bg:#0d1117; --panel:#161b22; --panel2:#1c2330; --border:#2a3140;
+    --fg:#e6edf3; --muted:#8b949e; --accent:#4493f8; --accent2:#7c5cff;
+    --ok:#3fb950; --warn:#d29922; --fail:#f85149; --run:#4493f8;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--fg);
+    font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif}
+  header{padding:18px 24px;border-bottom:1px solid var(--border);display:flex;align-items:baseline;gap:12px}
+  header h1{margin:0;font-size:18px;letter-spacing:.3px}
+  header .tag{color:var(--muted);font-size:12px}
+  header .dot{width:8px;height:8px;border-radius:50%;background:var(--fail);display:inline-block;margin-right:6px}
+  header .dot.up{background:var(--ok)}
+  main{max-width:1180px;margin:0 auto;padding:20px;display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:16px}
+  .card h2{margin:0 0 12px;font-size:13px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted)}
+  .full{grid-column:1/3}
+  label{display:block;font-size:12px;color:var(--muted);margin:10px 0 4px}
+  select,textarea,input{width:100%;background:var(--panel2);border:1px solid var(--border);
+    color:var(--fg);border-radius:6px;padding:8px 10px;font:inherit}
+  textarea{resize:vertical;min-height:84px;font-family:var(--mono);font-size:13px}
+  .row{display:flex;gap:10px}.row>*{flex:1}
+  button{background:var(--accent);color:#fff;border:0;border-radius:6px;padding:9px 16px;
+    font:inherit;font-weight:600;cursor:pointer;margin-top:12px}
+  button:hover{filter:brightness(1.1)} button:disabled{opacity:.5;cursor:default}
+  button.ghost{background:transparent;border:1px solid var(--border);color:var(--muted);font-weight:500;padding:5px 10px;margin:0}
+  .badge{display:inline-block;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:600}
+  .b-COMPLETED{background:rgba(63,185,80,.15);color:var(--ok)}
+  .b-RUNNING,.b-PENDING,.b-DISPATCHED{background:rgba(68,147,248,.15);color:var(--run)}
+  .b-FAILED{background:rgba(248,81,73,.15);color:var(--fail)}
+  .b-PARTIAL_FAILED{background:rgba(210,153,34,.15);color:var(--warn)}
+  .progress{height:10px;background:var(--panel2);border-radius:999px;overflow:hidden;margin:12px 0 6px;display:flex}
+  .progress .done{background:var(--ok)}.progress .fail{background:var(--fail)}
+  .muted{color:var(--muted)} .mono{font-family:var(--mono)}
+  pre{background:var(--panel2);border:1px solid var(--border);border-radius:6px;padding:10px;
+    overflow:auto;font-size:12.5px;max-height:300px;margin:8px 0 0}
+  .hint{font-size:12px;color:var(--muted);margin-top:4px}
+  /* timeline */
+  .tl{list-style:none;margin:0;padding:0;position:relative}
+  .tl:before{content:"";position:absolute;left:7px;top:4px;bottom:4px;width:2px;background:var(--border)}
+  .tl li{position:relative;padding:0 0 12px 26px}
+  .tl .mk{position:absolute;left:2px;top:3px;width:12px;height:12px;border-radius:50%;
+    background:var(--accent);border:2px solid var(--bg)}
+  .tl .st{font-weight:600} .tl .meta{color:var(--muted);font-size:12px}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--border)}
+  th{color:var(--muted);font-weight:500;font-size:12px}
+  td.num{font-family:var(--mono);text-align:right}
+  @media(max-width:820px){main{grid-template-columns:1fr}.full{grid-column:1}}
+</style>
+</head>
+<body>
+<header>
+  <h1>AgentFlow 控制台</h1>
+  <span class="tag"><span id="dot" class="dot"></span><span id="health">连接中…</span></span>
+  <span class="tag">分布式多 Agent 任务编排 · 提交 / 追踪 / 记账</span>
+</header>
+
+<main>
+  <!-- 提交 -->
+  <section class="card">
+    <h2>提交任务</h2>
+    <label>任务类型</label>
+    <select id="type">
+      <option value="ECHO_BATCH">ECHO_BATCH — 回显(压测/对照)</option>
+      <option value="LLM_BATCH">LLM_BATCH — 经网关调 LLM 摘要</option>
+      <option value="RESEARCH_BATCH">RESEARCH_BATCH — 意图驱动 RAG 检索 + 汇总</option>
+    </select>
+    <label id="lblItems">条目(每行一条)</label>
+    <textarea id="items">分布式系统里幂等为什么重要
+令牌桶如何削峰</textarea>
+    <div class="row" id="modelRow" style="display:none">
+      <div>
+        <label>模型</label>
+        <select id="model"><option>mock-small</option><option>mock-large</option></select>
+      </div>
+    </div>
+    <button id="submit">提交</button>
+    <div class="hint" id="submitHint">RESEARCH_BATCH:含疑问/研究关键词的条目才会触发检索(意图门控)。</div>
+  </section>
+
+  <!-- 任务状态 -->
+  <section class="card">
+    <h2>任务状态</h2>
+    <div id="taskEmpty" class="muted">尚未提交任务。</div>
+    <div id="taskBox" style="display:none">
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <span id="status" class="badge">—</span>
+        <span class="mono muted" id="uuid"></span>
+      </div>
+      <div class="progress" id="progress"></div>
+      <div class="muted" id="progressText"></div>
+      <pre id="result"></pre>
+    </div>
+  </section>
+
+  <!-- Run Trace -->
+  <section class="card">
+    <h2>Run Trace 执行轨迹</h2>
+    <div id="traceEmpty" class="muted">提交任务后显示完整生命周期(SUBMITTED → … → TASK_FINALIZED)。</div>
+    <ul class="tl" id="trace"></ul>
+  </section>
+
+  <!-- LLM usage -->
+  <section class="card">
+    <h2>LLM Token 记账 <button class="ghost" id="refreshUsage" style="float:right">刷新</button></h2>
+    <table>
+      <thead><tr><th>模型</th><th>prompt</th><th>completion</th><th>合计</th><th>成本(USD)</th></tr></thead>
+      <tbody id="usage"><tr><td colspan="5" class="muted">—</td></tr></tbody>
+    </table>
+    <div class="hint">令牌桶限流 + 多模型路由 + 记账,均在 LlmGateway 唯一出口收口。</div>
+  </section>
+</main>
+
+<script>
+const API="/api/v1";
+const $=id=>document.getElementById(id);
+let pollTimer=null;
+
+async function jget(u){const r=await fetch(u);if(!r.ok)throw new Error(r.status);return r.json();}
+
+// 健康探活(借 usage 接口)
+(async()=>{try{await jget(`${API}/llm/usage`);$("dot").classList.add("up");$("health").textContent="服务在线";}
+  catch{$("health").textContent="服务离线(先启动 server)";}})();
+
+// 类型切换:RESEARCH 用"问题",LLM/RESEARCH 显示模型
+$("type").addEventListener("change",()=>{
+  const t=$("type").value;
+  $("modelRow").style.display=(t==="ECHO_BATCH")?"none":"flex";
+  $("lblItems").textContent=(t==="RESEARCH_BATCH")?"问题(每行一个)":"条目(每行一条)";
+  if(t==="RESEARCH_BATCH")$("items").value="kafka 如何在 worker 离开时重分配分区?\nhello there";
+});
+
+function payloadFor(type,lines){
+  if(type==="RESEARCH_BATCH")return{questions:lines,model:$("model").value};
+  if(type==="LLM_BATCH")return{items:lines,model:$("model").value};
+  return{items:lines};
+}
+
+$("submit").addEventListener("click",async()=>{
+  const type=$("type").value;
+  const lines=$("items").value.split("\n").map(s=>s.trim()).filter(Boolean);
+  if(!lines.length){alert("请至少输入一条");return;}
+  $("submit").disabled=true;
+  try{
+    const r=await fetch(`${API}/tasks`,{method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({type,payload:payloadFor(type,lines)})});
+    const data=await r.json();
+    if(!r.ok)throw new Error(data.error||r.status);
+    startPolling(data.taskUuid);
+  }catch(e){alert("提交失败:"+e.message);}
+  finally{$("submit").disabled=false;}
+});
+
+function startPolling(uuid){
+  clearInterval(pollTimer);
+  $("taskEmpty").style.display="none";$("taskBox").style.display="block";
+  $("traceEmpty").style.display="none";
+  $("uuid").textContent=uuid;
+  const tick=async()=>{
+    try{
+      const t=await jget(`${API}/tasks/${uuid}`);
+      renderTask(t);
+      renderTrace(await jget(`${API}/tasks/${uuid}/trace`));
+      loadUsage();
+      if(["COMPLETED","FAILED","PARTIAL_FAILED"].includes(t.status))clearInterval(pollTimer);
+    }catch(e){/* 轮询中容忍瞬时错误 */}
+  };
+  tick();pollTimer=setInterval(tick,1000);
+}
+
+function renderTask(t){
+  $("status").className="badge b-"+t.status;$("status").textContent=t.status;
+  const p=t.progress||{total:0,done:0,failed:0};
+  const w=x=>p.total?(x/p.total*100).toFixed(1)+"%":"0";
+  $("progress").innerHTML=`<div class="done" style="width:${w(p.done)}"></div><div class="fail" style="width:${w(p.failed)}"></div>`;
+  $("progressText").textContent=`子任务 ${p.done}/${p.total} 完成${p.failed?` · ${p.failed} 失败`:""}`;
+  $("result").textContent=t.result?JSON.stringify(t.result,null,2):"(等待聚合结果…)";
+}
+
+const STAGE_COLOR={SUBMITTED:"#7c5cff",DECOMPOSED:"#7c5cff",DISPATCHED:"#4493f8",
+  WORKER_RECEIVED:"#4493f8",PROCESSED:"#3fb950",RESULT_SENT:"#3fb950",
+  SUBTASK_SETTLED:"#3fb950",RETRY:"#d29922",DLQ:"#f85149",RECOVERED:"#d29922",
+  TIMEOUT_REDISPATCH:"#d29922",TASK_FINALIZED:"#7c5cff"};
+function fmtTime(ms){const d=new Date(ms);
+  return d.toLocaleTimeString("zh",{hour12:false})+"."+String(ms%1000).padStart(3,"0");}
+function renderTrace(evs){
+  $("trace").innerHTML=evs.map(e=>{
+    const c=STAGE_COLOR[e.stage]||"#8b949e";
+    const meta=[e.status,e.subtaskId!=null?`sub#${e.subtaskId}`:null,e.detail].filter(Boolean).join(" · ");
+    return `<li><span class="mk" style="background:${c}"></span>`+
+      `<div class="st">${e.stage}</div>`+
+      `<div class="meta">${fmtTime(e.timestamp)}${meta?" — "+meta:""}</div></li>`;
+  }).join("");
+}
+
+async function loadUsage(){
+  try{
+    const rows=await jget(`${API}/llm/usage`);
+    const real=rows.filter(r=>!/^(gw|rl)-/.test(r.model)); // 过滤集成测试残留键
+    const show=real.length?real:rows;
+    $("usage").innerHTML=show.length?show.map(r=>
+      `<tr><td class="mono">${r.model}</td><td class="num">${r.promptTokens}</td>`+
+      `<td class="num">${r.completionTokens}</td><td class="num">${r.totalTokens}</td>`+
+      `<td class="num">$${r.costUsd.toFixed(6)}</td></tr>`).join("")
+      :`<tr><td colspan="5" class="muted">暂无(提交 LLM/RESEARCH 任务后出现)</td></tr>`;
+  }catch{$("usage").innerHTML=`<tr><td colspan="5" class="muted">—</td></tr>`;}
+}
+$("refreshUsage").addEventListener("click",loadUsage);
+loadUsage();
+</script>
+</body>
+</html>

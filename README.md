@@ -24,6 +24,10 @@
 
 查询:`GET /api/v1/tasks/{taskUuid}`
 
+**Web 控制台**:server 起来后浏览器打开 `http://localhost:8080/`——单文件看板(原生 JS,零依赖,
+server `static/` 直供):提交任务(ECHO/LLM/RESEARCH)、实时进度条、Run Trace 执行轨迹时间线、
+LLM token 记账,轮询刷新。用于 demo 演示。
+
 ## 多 Worker 水平扩展
 
 主 topic 3 分区,最多 3 个 Worker 并行(同消费组自动 rebalance):
