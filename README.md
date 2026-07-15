@@ -90,9 +90,53 @@ Echo/LLM 并存)。副作用一律回 Harness 经 Policy——处理器不产生
 
 演示脚本:`./scripts/w5-6-demo.sh`(提交 LLM_BATCH → 打印结果 + trace + `GET /llm/usage` 记账)。
 
+## RAG 检索与多角色 Agent(W7)
+
+**独立 Python/FastAPI RAG 微服务(`agentflow-rag/`)**:跨语言架构——Java 主链路 + Python
+embedding 生态。`/rag/ingest` 灌库、`/rag/search` 近邻检索、`/health` 探活;向量存 **pgvector**
+(`documents(id,content,embedding vector(256))`,余弦 `<=>` ANN)。embedding 默认**确定性词哈希投影**
+(离线、可复现、无需 API key,延续 mock-first 哲学),真实 embedding 是 backlog 配置开关。
+自建小标注集测 **Recall@K**(`tests/test_recall.py`,确定性 embedding 下 mean Recall@3=1.0)。
+
+**意图驱动检索 + 多角色**:worker 经 `RagClient`(唯一检索入口,与 LLM 经网关同构)调 RAG 服务。
+新任务类型 `RESEARCH_BATCH` 由 `ResearchProcessor` 处理,是一条子任务内的角色流水:
+router(意图判断是否需要检索)→ retriever(**命中才检索**,不是每步都查)→ AgentContext 注入资料
+→ summarizer(经网关调 LLM)→ RagSearchSkill schema 校验。跨子任务的聚合(汇总)由 `TaskFinalizer`
+完成。检索只读、不产生副作用故不经 Policy。
+
+启动 RAG 服务(前置:pgvector 容器):
+
+    # pgvector 容器(compose 文件本机被占用,用 docker run;等价 compose 见下)
+    docker run -d --name agentflow-pgvector -p 5433:5432 \
+      -e POSTGRES_PASSWORD=agentflow -e POSTGRES_DB=agentflow_rag pgvector/pgvector:pg16
+    cd agentflow-rag && python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
+    ./run.sh                                       # RAG 服务(:8000)
+
+> 等价 docker-compose 片段(供后续合入 `docker-compose.yml`):
+> ```yaml
+>   pgvector:
+>     image: pgvector/pgvector:pg16
+>     container_name: agentflow-pgvector
+>     ports: ["5433:5432"]
+>     environment:
+>       POSTGRES_PASSWORD: agentflow
+>       POSTGRES_DB: agentflow_rag
+> ```
+
+提交研究任务(mock LLM + 确定性 embedding,离线可跑):
+
+    curl -X POST localhost:8080/api/v1/tasks -H 'Content-Type: application/json' \
+      -d '{"type":"RESEARCH_BATCH","payload":{"questions":["kafka 如何重分配分区?","hello there"],"model":"mock-small"}}'
+
+演示脚本:`./scripts/w7-rag-demo.sh`(灌库 → RESEARCH_BATCH:需检索项 `usedRag=true` 带
+`retrieved` ids;不需项 `usedRag=false` 不检索)。
+
 ## 测试
 
-    mvn test        # 需 docker compose up -d(集成测试直连本地 MySQL/Kafka/Mongo)
+    mvn test        # Java:需 MySQL/Kafka/Mongo/Redis + pgvector 容器(集成测试直连本地中间件)
+    cd agentflow-rag && .venv/bin/python -m pytest -q   # Python RAG:需 pgvector 容器
+
+> 注:本机 Maven 运行时若为 JDK 21+ 之外版本(lombok 兼容),构建用 `JAVA_HOME=$(/usr/libexec/java_home -v 21)`。
 
 ## 路线图
 
@@ -100,5 +144,5 @@ Echo/LLM 并存)。副作用一律回 Harness 经 Policy——处理器不产生
 - [x] W3–4 可靠性核心: 幂等、Kafka 自研重试/死信+恢复、超时兜底、优雅停机
 - [x] W3–4 可观测:Run Trace(事件溯源→Mongo 回放)+ 统一副作用 Policy 层
 - [x] W5–6 LLM 网关(Redis+Lua 令牌桶/多模型路由/token 记账)+ 真 Agent(经网关,mock 默认)+ AgentContext + Skill 注册/schema 约束
-- [ ] W7 RAG 检索服务(FastAPI + pgvector)
+- [x] W7 RAG 检索服务(Python/FastAPI + pgvector,确定性 embedding + Recall@K)+ 意图驱动检索 + 多角色处理器
 - [ ] W8 压测与容错演练

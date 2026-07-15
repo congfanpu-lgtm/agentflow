@@ -202,3 +202,46 @@
     每个 Skill 声明 `outputSchema`,LLM 产出必须过 `SchemaValidator` 代码层校验,不合规=失败交 W3
     重试——输出稳定是"解析+校验模型输出并拒绝不合规",不是"求模型听话"。多命中按 `priority()` 降序、
     name 稳定排序(`SkillRegistry.select`)。动态加载靠 Spring 收集 `List<Skill>`,新增技能仅 @Component。
+
+## W7 里程碑交付清单(Task 1–5,RAG 检索/意图驱动/多角色,已 `scripts/w7-rag-demo.sh` 实盘验收)
+
+- [x] Python RAG 服务(Task 1):独立 `agentflow-rag/`(FastAPI),`/health` `/rag/ingest` `/rag/search`;确定性词哈希 embedding(dim 256,离线可复现,无 key);pgvector 存储 + 余弦 `<=>` ANN
+- [x] Recall@K(Task 2):自建小标注集(16 docs / 6 queries),`test_recall.py` 实测 mean Recall@3=1.0(确定性 embedding 词面相似下)
+- [x] RagClient(Task 3):worker HTTP 检索工具唯一入口(JDK HttpClient,固定 HTTP/1.1),`rag.*` 配置
+- [x] RESEARCH_BATCH 意图驱动 + 多角色(Task 4):`ResearchProcessor`(router 意图门控→retriever 命中才检索→AgentContext 注入→summarizer LLM→schema 校验);`ResearchBatchDecomposer`;`RagSearchSkill`;复用 SubtaskProcessor 按 type 路由
+- [x] E2E 验收(Task 5,本轮):`scripts/w7-rag-demo.sh` 实盘——需检索项 `usedRag=true` 且 `retrieved` 含 kafka-2;不需项(`hello there`)`usedRag=false` 不检索;任务 COMPLETED、trace 完整、`/llm/usage` 累计
+
+**W7 实盘/评审发现(记录供后续)**:
+- **JDK HttpClient h2c 陷阱**:默认 HTTP/2 对明文 uvicorn 做 h2c 升级会丢 POST body(FastAPI 报 422 body missing)。已在 `RagClient` 固定 `HTTP_1_1`。`OpenAiLlmClient` 走 HTTPS(ALPN 协商 h2)不受影响,但若指向明文自建服务同样要注意。
+- **确定性 embedding 只有词面相似**(bag-of-words 哈希),无深层语义;真实 embedding(sentence-transformers / OpenAI 兼容)列 backlog 配置开关。Recall@3=1.0 是本标注集 + 词面相似下的结果,不代表真实语义检索质量。
+- **意图判断为启发式**(问句/关键词正则);更准可用 LLM 判意图,但每条多一次 LLM 调用,成本/延迟权衡,列 backlog。
+- **多角色是"子任务内角色流水"**(router→retriever→summarizer),非跨 Agent 的 DAG 依赖边调度(DAG 调度本就在 backlog);抓取/分析/汇总的独立 Agent 编排留后续。
+- **pgvector 未进 docker-compose.yml**:本机该文件被占用(疑似并行会话),用 `docker run` 起(端口 5433),compose 片段记在 README 供后续合入。
+- **pgvector 精确检索**(无 ivfflat 索引):演示规模够;量大需建索引 / 分片(backlog)。
+- **RAG 服务无鉴权/无连接池**:psycopg 每次 `connect`(演示够);生产需连接池 + 鉴权(backlog)。
+
+## 自检(W7 里程碑,对应设计文档考点)
+
+17. **为何独立 Python 微服务而非 Java 内做 embedding/检索?**
+    ① embedding/向量生态在 Python 最成熟(sentence-transformers 等),真实模型时直接受益;
+    ② 跨语言微服务本身是架构加分(美国 AIE 岗友好),且 RAG 是 Agent 的一个"工具",独立部署/扩缩容/
+    迭代不牵动主链路;③ 边界清晰:Java 主链路管调度/状态/可靠性,Python 管检索,经 HTTP 契约解耦。
+    代价是多一个服务 + 跨语言联调,用确定性 embedding + mock 让两侧都能离线单测抵消。
+
+18. **意图驱动检索怎么做?为何不是每步都查?**
+    `ResearchProcessor` 先 router 角色判意图(`needsRetrieval`:问句/研究类关键词),**命中才** `RagClient.search`
+    并把资料注入 AgentContext,否则跳过直接汇总。检索是有成本的旁路工具(网络 + 向量计算 + 更多 prompt
+    token),无脑每步查既慢又贵还会把无关资料塞进上下文;由意图门控让"该查才查"。硬答案:检索是工具、
+    由意图触发,呼应面经"agent 自主决定是否检索"。
+
+19. **pgvector 选型理由(polyglot persistence)?**
+    向量近邻检索(ANN)是独立访问模式,不适合塞进任务状态机的 MySQL;pgvector 是 Postgres 扩展,
+    一个 `vector` 类型 + `<=>` 距离算子即得 ANN,运维成本极低(不引 Milvus/Qdrant 这类独立向量库),
+    符合"按访问模式选存储 + 三问(主链路依赖?ROI?运维成本?)"。至此存储已 polyglot:MySQL(状态机)
+    / Kafka(队列)/ Redis(锁/限流/记账)/ MongoDB(trace)/ pgvector(向量),各司其职。
+
+20. **Recall@K 怎么测?确定性 embedding 的取舍?**
+    自建小标注集(doc + query→期望 doc id),灌库后每 query 取 topK,`Recall@K = 命中期望/期望总数`
+    取平均。用确定性词哈希 embedding 是取舍:优点是离线、可复现、无 key、CI 能跑、Recall 数字稳定;
+    缺点是只有词面相似、无深层语义,数字不代表真实语义检索质量——真实 embedding 列 backlog 开关,
+    届时同一套 Recall@K 脚本可直接复测。
