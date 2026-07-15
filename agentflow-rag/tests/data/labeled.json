@@ -1,0 +1,28 @@
+{
+  "docs": [
+    {"id": "kafka-1", "text": "Kafka is a distributed log with partitions and consumer groups for horizontal scaling"},
+    {"id": "kafka-2", "text": "Kafka consumer group rebalance reassigns partitions when workers join or leave"},
+    {"id": "kafka-3", "text": "Kafka has no native delay queue so staged retry topics simulate delayed redelivery"},
+    {"id": "redis-1", "text": "Redis token bucket rate limiting uses a Lua script for atomic read modify write"},
+    {"id": "redis-2", "text": "Redis distributed lock and idempotency key with TTL prevent duplicate processing"},
+    {"id": "redis-3", "text": "Redis single threaded execution makes a whole Lua script atomic without extra locks"},
+    {"id": "mysql-1", "text": "MySQL compare and swap status transition uses update where id and status equals expected"},
+    {"id": "mysql-2", "text": "MySQL counter columns track subtask done and failed for O(1) progress aggregation"},
+    {"id": "mongo-1", "text": "MongoDB stores run trace events one document per event indexed by traceId and timestamp"},
+    {"id": "mongo-2", "text": "MongoDB nested json trace avoids joins and is retrieved whole by traceId for replay"},
+    {"id": "pgvector-1", "text": "pgvector stores embeddings and does approximate nearest neighbor cosine search"},
+    {"id": "pgvector-2", "text": "pgvector cosine distance operator orders documents by semantic similarity to a query"},
+    {"id": "llm-1", "text": "The LLM gateway routes models applies token bucket rate limit and records token usage"},
+    {"id": "llm-2", "text": "AgentContext trims history and truncates long input to a token budget preventing context bloat"},
+    {"id": "misc-1", "text": "Banana smoothie recipe with yogurt honey and frozen fruit blended in the kitchen"},
+    {"id": "misc-2", "text": "A hiking trail through the mountain forest with a river crossing and scenic viewpoints"}
+  ],
+  "queries": [
+    {"query": "how does kafka reassign partitions when a worker leaves", "expected": ["kafka-2"]},
+    {"query": "atomic rate limiting with a lua script in redis", "expected": ["redis-1", "redis-3"]},
+    {"query": "idempotency key ttl to avoid duplicate processing", "expected": ["redis-2"]},
+    {"query": "compare and swap status transition in mysql", "expected": ["mysql-1"]},
+    {"query": "nearest neighbor cosine search over embeddings", "expected": ["pgvector-1", "pgvector-2"]},
+    {"query": "trace events stored per document indexed by traceId", "expected": ["mongo-1", "mongo-2"]}
+  ]
+}
