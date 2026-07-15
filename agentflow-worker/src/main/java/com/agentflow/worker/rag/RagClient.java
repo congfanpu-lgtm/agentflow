@@ -26,7 +26,9 @@ public class RagClient {
     private static final ObjectMapper OM = new ObjectMapper();
 
     private final RagProperties props;
+    // 固定 HTTP/1.1:JDK HttpClient 默认 HTTP/2,对明文 uvicorn 做 h2c 升级时会丢 POST body(→422)。
     private final HttpClient http = HttpClient.newBuilder()
+            .version(HttpClient.Version.HTTP_1_1)
             .connectTimeout(Duration.ofSeconds(3)).build();
 
     public List<Hit> search(String query, int topK) {
