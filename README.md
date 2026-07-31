@@ -1,6 +1,8 @@
 # AgentFlow
 
-分布式多 Agent 任务编排平台(开发中,W1–2 骨架已通)。
+> 🇬🇧 English: [`README.en.md`](README.en.md) · 🏗️ 架构图:[`docs/architecture.md`](docs/architecture.md) · 📄 简历 bullets:[`docs/resume-bullets.md`](docs/resume-bullets.md)
+
+分布式多 Agent 任务编排平台(W1–8 已完成 + Web 控制台;核心系统全部实测)。
 设计文档见 `docs/specs/2026-07-11-agentflow-design.md`。
 
 ## 架构(当前骨架)

@@ -288,3 +288,16 @@
     被测对象是自研的调度/并发/容错/幂等/可观测,不是 LLM 本身。mock LLM 确定性、零成本、可复现,
     让吞吐/扩展/零丢失这些数字只反映系统能力、不被模型延迟与费用污染(master 设计文档第 149 行既定策略)。
     真实 LLM 下的端到端延迟由模型决定,可另做但会烧钱,按需进行。
+
+## W9–10 收尾(门面 + 简历)
+
+- [x] 架构图:`docs/architecture.md`(Mermaid,GitHub 直接渲染;Harness/Runtime 边界 + 五存储 polyglot)
+- [x] 英文 README:`README.en.md`(美国市场叙事:定位/架构/5 卖点/7 指标/快速开始/Why-not-Temporal);中文 README 顶部加 EN 交叉链接
+- [x] 中英简历 bullets:`docs/resume-bullets.md`(基于实测数字 + 面试讲点速查 + 诚实边界)
+- [ ] demo GIF/截图:Web 控制台已实盘验证可用(本会话 chrome 驱动跑通 ECHO_BATCH→COMPLETED、trace 时间线渲染),GIF **录制需本地手动**(无法在此环境录屏);README.en 已留占位说明。
+- [ ] 云部署(GCP/AWS 免费层)+ Prometheus:可选加分,需云凭证,未做。
+- [ ] Zookeeper 选主/Worker 注册:可选加分,主线有兜底(消费组 rebalance + 单协调器),未做。
+
+**W9 环境发现**:本机 Redis 容器现要求密码(`NOAUTH Authentication required`)——疑似并行会话重配。
+应用端 Redisson 无密码配置故起不来。未改应用配置(密码未知 + 避免与并行会话冲突);如需本地起栈,
+需要么给 Redis 去掉 auth,要么在 server/worker 的 `spring.data.redis`/Redisson 配 password。
