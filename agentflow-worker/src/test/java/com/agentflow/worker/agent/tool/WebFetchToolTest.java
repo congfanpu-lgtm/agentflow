@@ -38,11 +38,26 @@ class WebFetchToolTest {
             ex.getResponseBody().write(b);
             ex.close();
         });
+        server.createContext("/slow", ex -> {
+            // 先发响应头,正文每 300ms 吐 1 个字节:请求头超时管不到,只有正文读取的总时限能挡住
+            ex.sendResponseHeaders(200, 0);
+            try {
+                for (int i = 0; i < 100; i++) {
+                    ex.getResponseBody().write('x');
+                    ex.getResponseBody().flush();
+                    Thread.sleep(300);
+                }
+            } catch (Exception ignored) {
+                // 客户端超时断开
+            }
+            ex.close();
+        });
         server.createContext("/redirect", ex -> {
             ex.getResponseHeaders().add("Location", "http://169.254.169.254/latest/meta-data");
             ex.sendResponseHeaders(302, -1);
             ex.close();
         });
+        server.setExecutor(java.util.concurrent.Executors.newCachedThreadPool());
         server.start();
         base = "http://127.0.0.1:" + server.getAddress().getPort();
     }
@@ -85,5 +100,16 @@ class WebFetchToolTest {
     @Test
     void htmlToTextStripsTagsScriptsAndEntities() {
         assertEquals("a b & c", WebFetchTool.htmlToText("<div>a</div><script>x()</script><b>b</b> &amp; c"));
+    }
+
+    @Test
+    void slowDripBodyIsCutOffByOverallDeadline() {
+        WebFetchTool tool = new WebFetchTool(allowLocalStub, java.time.Duration.ofSeconds(1));
+        long start = System.nanoTime();
+        Exception e = assertThrows(Exception.class,
+                () -> tool.run(OM.createObjectNode().put("url", base + "/slow")));
+        long ms = (System.nanoTime() - start) / 1_000_000;
+        assertTrue(ms < 3000, "应在总时限附近放弃,实际耗时 " + ms + "ms");
+        assertTrue(e.getMessage().contains("超时"), e.getMessage());
     }
 }
