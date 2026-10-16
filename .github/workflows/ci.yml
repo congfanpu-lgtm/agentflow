@@ -1,0 +1,31 @@
+name: CI
+on:
+  push:
+  pull_request:
+
+jobs:
+  java:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+      - name: Start middleware
+        run: docker compose up -d --wait mysql redis mongo kafka pgvector rag
+      - name: Test (mock LLM, no API key)
+        run: mvn -B test
+
+  rag:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Start pgvector
+        run: docker compose up -d --wait pgvector
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r agentflow-rag/requirements.txt
+      - run: cd agentflow-rag && pytest -q
