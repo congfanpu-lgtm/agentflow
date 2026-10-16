@@ -23,7 +23,7 @@ spring:
         max.poll.interval.ms: 600000
     listener:
       immediate-stop: false
-      concurrency: 2
+      concurrency: 4          # 2 worker × 4 = 8 线程,对应 SUBTASK 的 8 个分区
 
 server:
   shutdown: graceful

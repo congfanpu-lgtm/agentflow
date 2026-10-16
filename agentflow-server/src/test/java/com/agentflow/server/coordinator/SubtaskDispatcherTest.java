@@ -27,6 +27,7 @@ import java.util.concurrent.CompletableFuture;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
@@ -73,5 +74,28 @@ class SubtaskDispatcherTest {
         assertEquals(task.getId(), msg.getTaskId());
         assertEquals("ECHO_BATCH", msg.getType());
         assertNotNull(msg.getInputJson());
+    }
+
+    @Test
+    void spreadsSiblingSubtasksAcrossPartitionsForParallelism() throws Exception {
+        // 8 个分区:同一阶段的子任务 id 连续,按 id % 分区数显式指定分区 → 各落一个分区,被不同消费线程并行处理
+        List<org.apache.kafka.common.PartitionInfo> parts = new java.util.ArrayList<>();
+        for (int i = 0; i < 8; i++) {
+            parts.add(new org.apache.kafka.common.PartitionInfo(Topics.SUBTASK, i, null, null, null));
+        }
+        when(kafkaTemplate.partitionsFor(Topics.SUBTASK)).thenReturn(parts);
+        var record = new ProducerRecord<String, Object>(Topics.SUBTASK, "k", "v");
+        var meta = new RecordMetadata(new TopicPartition(Topics.SUBTASK, 0), 0L, 0, 0L, 0, 0);
+        when(kafkaTemplate.send(eq(Topics.SUBTASK), any(Integer.class), anyString(), any()))
+                .thenReturn(CompletableFuture.completedFuture(new SendResult<>(record, meta)));
+
+        TaskEntity task = submitService.submit("ECHO_BATCH", om.readTree("{\"items\":[\"a\",\"b\",\"c\"]}"));
+
+        ArgumentCaptor<Integer> partition = ArgumentCaptor.forClass(Integer.class);
+        verify(kafkaTemplate, times(3)).send(eq(Topics.SUBTASK), partition.capture(), anyString(), any());
+        List<SubtaskEntity> subs = subtaskMapper.selectList(
+                new QueryWrapper<SubtaskEntity>().eq("task_id", task.getId()).orderByAsc("id"));
+        assertEquals(subs.stream().map(s -> (int) (s.getId() % 8)).toList(), partition.getAllValues());
+        assertEquals(3, partition.getAllValues().stream().distinct().count());
     }
 }

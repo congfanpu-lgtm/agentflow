@@ -12,7 +12,8 @@ public class KafkaTopicConfig {
 
     @Bean
     public NewTopic subtaskTopic() {
-        return TopicBuilder.name(Topics.SUBTASK).partitions(3).replicas(1).build();
+        // 8 分区 = 2 worker × 4 消费线程,每个线程一个分区;KafkaAdmin 启动时会把已有 topic 扩到 8 分区
+        return TopicBuilder.name(Topics.SUBTASK).partitions(8).replicas(1).build();
     }
 
     @Bean
