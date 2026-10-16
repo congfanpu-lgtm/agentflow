@@ -103,4 +103,18 @@ class ResearchAgentFlowTest {
         assertEquals("FAILED", taskMapper.selectById(ids[0]).getStatus());
         assertTrue(subs(ids[0], "AGENT").isEmpty());
     }
+
+    @Test
+    void allAgentsFailedEndsFailedWithoutSynthesize() {
+        long[] ids = fixture();
+        long taskId = ids[0];
+        service.handle(new ResultMessage(taskId, ids[1], true, "{\"subQuestions\":[\"a\",\"b\"]}", null));
+        List<SubtaskEntity> agents = subs(taskId, "AGENT");
+        agents.forEach(this::dispatched);
+        service.handle(new ResultMessage(taskId, agents.get(0).getId(), false, null, "e1"));
+        service.handle(new ResultMessage(taskId, agents.get(1).getId(), false, null, "e2"));
+
+        assertTrue(subs(taskId, "SYNTHESIZE").isEmpty());
+        assertEquals("FAILED", taskMapper.selectById(taskId).getStatus());   // 没有报告就是失败(spec §6)
+    }
 }

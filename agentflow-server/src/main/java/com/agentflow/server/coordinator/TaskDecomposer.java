@@ -1,5 +1,6 @@
 package com.agentflow.server.coordinator;
 
+import com.agentflow.common.state.TaskStatus;
 import com.agentflow.server.entity.SubtaskEntity;
 import com.agentflow.server.entity.TaskEntity;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -18,5 +19,10 @@ public interface TaskDecomposer {
      */
     default List<SubtaskDef> nextStage(TaskEntity task, List<SubtaskEntity> subs) {
         return List.of();
+    }
+
+    /** 全部落定、即将进终态时调用:可按业务语义改判计数得出的终态。默认不改。 */
+    default TaskStatus terminalStatus(TaskEntity task, List<SubtaskEntity> subs, TaskStatus computed) {
+        return computed;
     }
 }

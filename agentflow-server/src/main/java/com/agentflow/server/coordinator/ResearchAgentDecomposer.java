@@ -1,6 +1,7 @@
 package com.agentflow.server.coordinator;
 
 import com.agentflow.common.state.SubtaskStatus;
+import com.agentflow.common.state.TaskStatus;
 import com.agentflow.server.entity.SubtaskEntity;
 import com.agentflow.server.entity.TaskEntity;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -88,6 +89,14 @@ public class ResearchAgentDecomposer implements TaskDecomposer {
         ObjectNode in = input(payload.path("question").asText(), model);
         in.set("findings", findings);
         return List.of(new SubtaskDef(maxSeq + 1, in.toString(), SYNTHESIZE));
+    }
+
+    /** 研究任务的产物是报告:合成没有成功(拆题失败 / agent 全败 / 合成失败)一律 FAILED,不报"部分失败"。 */
+    @Override
+    public TaskStatus terminalStatus(TaskEntity task, List<SubtaskEntity> subs, TaskStatus computed) {
+        boolean reported = subs.stream().anyMatch(s -> SYNTHESIZE.equals(s.getKind())
+                && SubtaskStatus.COMPLETED.name().equals(s.getStatus()));
+        return reported ? computed : TaskStatus.FAILED;
     }
 
     private ObjectNode input(String question, String model) {

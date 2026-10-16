@@ -2,6 +2,7 @@ package com.agentflow.server.service;
 
 import com.agentflow.common.state.TaskStatus;
 import com.agentflow.common.trace.TraceStage;
+import com.agentflow.server.coordinator.TaskDecomposer;
 import com.agentflow.server.entity.SubtaskEntity;
 import com.agentflow.server.entity.TaskEntity;
 import com.agentflow.server.mapper.SubtaskMapper;
@@ -16,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * 任务终态落定的唯一入口:两条独立触发源(结果回传 {@link ResultHandleService}、
@@ -34,6 +36,7 @@ public class TaskFinalizer {
     private final ObjectMapper objectMapper;
     private final TraceEmitter traceEmitter;
     private final NotificationService notificationService;
+    private final List<TaskDecomposer> decomposers;
 
     public void finalizeIfAllSettled(Long taskId) {
         TaskEntity task = taskMapper.selectById(taskId);
@@ -48,15 +51,21 @@ public class TaskFinalizer {
         } else {
             terminal = TaskStatus.PARTIAL_FAILED;  // 部分失败:成功输出保留,失败原因可见
         }
-        if (stateMachine.transitionTask(taskId, TaskStatus.RUNNING, terminal)) {
-            aggregate(task, terminal);
-        }
-    }
-
-    private void aggregate(TaskEntity task, TaskStatus terminal) {
         List<SubtaskEntity> subs = subtaskMapper.selectList(
                 new QueryWrapper<SubtaskEntity>()
                         .eq("task_id", task.getId()).orderByAsc("seq"));
+        // 多阶段任务类型可按业务语义改判(如 RESEARCH_AGENT:没有报告就是失败)
+        for (TaskDecomposer d : decomposers) {
+            if (Objects.equals(d.type(), task.getType())) {
+                terminal = d.terminalStatus(task, subs, terminal);
+            }
+        }
+        if (stateMachine.transitionTask(taskId, TaskStatus.RUNNING, terminal)) {
+            aggregate(task, terminal, subs);
+        }
+    }
+
+    private void aggregate(TaskEntity task, TaskStatus terminal, List<SubtaskEntity> subs) {
         ArrayNode arr = objectMapper.createArrayNode();
         for (SubtaskEntity s : subs) {
             ObjectNode item = objectMapper.createObjectNode();
