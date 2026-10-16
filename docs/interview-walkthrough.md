@@ -97,6 +97,11 @@ AgentFlow 是一个跑在 Kafka worker 池上的多 agent 研究系统。用户�
   3. 没有就交给 `TaskFinalizer` 判终态。
 - **为什么(并发)**:`incrementDone` 是对任务行的 `UPDATE`,行锁一直持有到事务提交。3 个 agent 的结果同时回来,
   第二个、第三个会在这一行上排队。只有最后一个能看到"全部落定",所以合成子任务只会被创建一次,不需要分布式锁。
+- **为什么要 READ_COMMITTED(踩过的坑)**:行锁只保证"计数"是对的。MySQL 默认的 REPEATABLE READ 会在事务里第一次读库时
+  拍一个快照,之后读子任务表看到的还是那个旧快照:排在后面的事务虽然看到了最新的计数,却可能看不到排在前面那个事务刚提交的
+  agent 结果,于是合成时漏掉它(只有它成功时,整份报告都不会生成)。所以 `ResultHandleService.handle` 和
+  `TimeoutSweepService.sweep` 都改成 READ_COMMITTED,每条语句都读最新已提交的数据。`StageAdvanceIsolationTest`
+  用 mock 的轨迹发送器在处理中途插入另一个事务的提交,稳定复现了这个竞态,改成 READ_COMMITTED 之前测试是失败的。
 - **为什么(同事务)**:插入新子任务和调大 total 跟"落定当前结果"在同一个事务里。如果分开,中间有一瞬间
   `done == total`,`TaskFinalizer` 可能把任务提前判成 COMPLETED。
 - **为什么(afterCommit)**:如果在事务提交前就发消息,worker 可能比事务先跑完,回传结果时数据库里还查不到这个子任务。

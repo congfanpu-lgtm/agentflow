@@ -11,6 +11,7 @@ import com.agentflow.server.trace.TraceEmitter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -31,7 +32,9 @@ public class ResultHandleService {
     private final StageAdvancer stageAdvancer;
     private final TraceEmitter traceEmitter;
 
-    @Transactional
+    // READ_COMMITTED:任务计数行锁让落定串行化,但 MySQL 默认 REPEATABLE READ 会让阶段推进读到事务开始时的旧快照,
+    // 漏掉并发提交的结果(见 StageAdvanceIsolationTest)。每条语句读最新已提交数据才能配合行锁得出正确的下一阶段。
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void handle(ResultMessage msg) {
         SubtaskEntity sub = subtaskMapper.selectById(msg.getSubtaskId());
         if (sub == null) {
