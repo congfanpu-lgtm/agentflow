@@ -1,0 +1,6 @@
+**/target
+.git
+.env
+agentflow-rag/.venv
+**/__pycache__
+.superpowers
