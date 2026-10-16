@@ -14,7 +14,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
+import java.util.Set;
 
 /**
  * 默认 LLM 后端:确定性输出、不发网络、无需 API key——压测测调度不烧钱(master 设计文档第 149 行)。
@@ -30,6 +33,8 @@ import java.util.List;
 public class MockLlmClient implements LlmClient {
 
     private static final ObjectMapper OM = new ObjectMapper();
+    private static final Set<String> STOP = Set.of("what", "which", "does", "with", "from", "that", "this",
+            "between", "about", "versus", "when", "where", "there", "their", "have");
 
     @Value("${llm.mock.delay-ms:0}")
     private long delayMs;
@@ -86,7 +91,7 @@ public class MockLlmClient implements LlmClient {
         boolean toolsOffered = req.getTools() != null && !req.getTools().isEmpty();
         if (toolsOffered && toolOutputs.isEmpty()) {
             return withCall("MOCK 思路:先在 Wikipedia 搜索关键词。",
-                    new ToolCall("call_1", "wiki_search", OM.createObjectNode().put("query", question).toString()));
+                    new ToolCall("call_1", "wiki_search", OM.createObjectNode().put("query", keywords(question)).toString()));
         }
         if (toolsOffered && toolOutputs.size() == 1) {
             String url = TextUtil.urls(toolOutputs.get(0)).stream()
@@ -111,6 +116,23 @@ public class MockLlmClient implements LlmClient {
         boolean hasSource = user.contains("\n[1] ");
         return new ChatResponse("MOCK 报告:以下综合了各子问题的结论" + (hasSource ? " [1]" : "") + "。\n\n"
                 + "(mock 模式不调用真实模型;配置 LLM_PROVIDER=openai 后这里是真实报告。)", null, null);
+    }
+
+    /**
+     * 剧本里的"模型"会提炼搜索关键词:整句问题直接丢给 Wikipedia 全文搜索几乎搜不到结果。
+     * 优先取句中首字母大写的专有名词(Kafka、RabbitMQ),否则取前 3 个非停用词。
+     */
+    static String keywords(String question) {
+        String q = question.replaceAll("\\s+—.*$", "");
+        String[] words = q.split("[^\\p{L}\\p{N}-]+");
+        List<String> caps = Arrays.stream(words).skip(1)
+                .filter(w -> !w.isEmpty() && Character.isUpperCase(w.charAt(0))).toList();
+        if (!caps.isEmpty()) {
+            return String.join(" ", caps);
+        }
+        List<String> plain = Arrays.stream(words)
+                .filter(w -> w.length() > 3 && !STOP.contains(w.toLowerCase(Locale.ROOT))).limit(3).toList();
+        return plain.isEmpty() ? q : String.join(" ", plain);
     }
 
     private static ChatResponse withCall(String thought, ToolCall call) {

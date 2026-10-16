@@ -55,6 +55,30 @@
   th{color:var(--muted);font-weight:500;font-size:12px}
   td.num{font-family:var(--mono);text-align:right}
   @media(max-width:820px){main{grid-template-columns:1fr}.full{grid-column:1}}
+  [hidden]{display:none!important}
+  .tabs{margin-left:auto;display:flex;gap:6px}
+  .tab{margin:0;background:transparent;border:1px solid var(--border);color:var(--muted);padding:5px 14px}
+  .tab.active{background:var(--accent);border-color:var(--accent);color:#fff}
+  .rs{max-width:1180px;margin:0 auto;padding:20px}
+  .lead{color:var(--muted);margin:0 0 14px;max-width:860px}
+  .ask{display:flex;gap:10px}.ask input{flex:1;font-size:15px;padding:11px 12px}.ask button{margin:0}
+  .examples{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 18px}
+  .chip{margin:0;background:var(--panel2);border:1px solid var(--border);color:var(--fg);font-weight:500;padding:5px 12px;border-radius:999px}
+  .rs h3{font-size:13px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin:22px 0 10px;display:flex;gap:8px;align-items:center}
+  .agents{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:12px}
+  .agent{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:14px}
+  .agent .q{font-weight:600;margin-bottom:6px}
+  .agent .meta{font-size:12px;color:var(--muted);margin-bottom:8px}
+  .step{border-left:2px solid var(--border);padding:2px 0 8px 10px;font-size:13px}
+  .step{overflow-wrap:anywhere} .step .t{color:var(--muted)} .step .c{font-family:var(--mono);font-size:12px;color:var(--accent)}
+  .step .r{font-size:12px;color:var(--muted);white-space:pre-wrap;max-height:4.5em;overflow:hidden}
+  .resume{color:var(--warn);font-weight:600;font-size:13px;padding:4px 0 8px}
+  .drop{color:var(--fail);font-size:12px}
+  .final{color:var(--ok)}
+  .report{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:16px 18px;line-height:1.7}
+  .report p{margin:0 0 10px} .report a{color:var(--accent);text-decoration:none}
+  .sources{font-size:13px;color:var(--muted)} .sources a{color:var(--accent)}
+  @media(max-width:600px){.ask{flex-direction:column}.agents{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -62,9 +86,29 @@
   <h1>AgentFlow 控制台</h1>
   <span class="tag"><span id="dot" class="dot"></span><span id="health">连接中…</span></span>
   <span class="tag">分布式多 Agent 任务编排 · 提交 / 追踪 / 记账</span>
+  <nav class="tabs"><button class="tab active" data-tab="research">Research</button><button class="tab" data-tab="ops">Ops</button></nav>
 </header>
 
-<main>
+<section id="tab-research" class="rs">
+  <p class="lead">Ask a research question. A planner LLM splits it into sub-questions; each one is investigated by a
+    ReAct agent (think → call a tool → read the result) running on a Kafka worker pool; a final LLM writes a cited report.
+    Kill a worker mid-run (<code>scripts/chaos-agent.sh</code>) and watch another worker resume the agent from its last
+    checkpointed step.</p>
+  <div class="ask"><input id="q" maxlength="500" placeholder="e.g. What are the trade-offs between Kafka and RabbitMQ for agent systems?"><button id="ask">Research</button></div>
+  <div class="examples" id="examples"></div>
+  <div id="rsBody" hidden>
+    <h3>① Plan <span id="planState" class="badge"></span></h3>
+    <ol id="plan"></ol>
+    <h3>② Agents</h3>
+    <div id="agents" class="agents"></div>
+    <h3>③ Report <span id="taskState" class="badge"></span></h3>
+    <div id="report" class="report"><span class="muted">Waiting for agents…</span></div>
+    <ol id="sources" class="sources"></ol>
+    <div id="usageLine" class="hint"></div>
+  </div>
+</section>
+
+<main id="tab-ops" hidden>
   <!-- 提交 -->
   <section class="card">
     <h2>提交任务</h2>
@@ -123,6 +167,7 @@
 <script>
 const API="/api/v1";
 const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 let pollTimer=null;
 
 async function jget(u){const r=await fetch(u);if(!r.ok)throw new Error(r.status);return r.json();}
@@ -197,8 +242,8 @@ function renderTrace(evs){
     const c=STAGE_COLOR[e.stage]||"#8b949e";
     const meta=[e.status,e.subtaskId!=null?`sub#${e.subtaskId}`:null,e.detail].filter(Boolean).join(" · ");
     return `<li><span class="mk" style="background:${c}"></span>`+
-      `<div class="st">${e.stage}</div>`+
-      `<div class="meta">${fmtTime(e.timestamp)}${meta?" — "+meta:""}</div></li>`;
+      `<div class="st">${esc(e.stage)}</div>`+
+      `<div class="meta">${fmtTime(e.timestamp)}${meta?" — "+esc(meta):""}</div></li>`;
   }).join("");
 }
 
@@ -208,7 +253,7 @@ async function loadUsage(){
     const real=rows.filter(r=>!/^(gw|rl)-/.test(r.model)); // 过滤集成测试残留键
     const show=real.length?real:rows;
     $("usage").innerHTML=show.length?show.map(r=>
-      `<tr><td class="mono">${r.model}</td><td class="num">${r.promptTokens}</td>`+
+      `<tr><td class="mono">${esc(r.model)}</td><td class="num">${r.promptTokens}</td>`+
       `<td class="num">${r.completionTokens}</td><td class="num">${r.totalTokens}</td>`+
       `<td class="num">$${r.costUsd.toFixed(6)}</td></tr>`).join("")
       :`<tr><td colspan="5" class="muted">暂无(提交 LLM/RESEARCH 任务后出现)</td></tr>`;
@@ -216,6 +261,134 @@ async function loadUsage(){
 }
 $("refreshUsage").addEventListener("click",loadUsage);
 loadUsage();
+
+// ---------- 页签 ----------
+document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>{
+  document.querySelectorAll(".tab").forEach(x=>x.classList.toggle("active",x===b));
+  $("tab-research").hidden=b.dataset.tab!=="research";
+  $("tab-ops").hidden=b.dataset.tab!=="ops";
+}));
+
+// ---------- Research ----------
+// 所有模型/网页文本一律 textContent 渲染;链接只放行 http(s)。
+const EXAMPLES=["What are the trade-offs between Kafka and RabbitMQ for agent systems?",
+  "How does retrieval-augmented generation reduce LLM hallucinations?",
+  "Compare pgvector with dedicated vector databases."];
+const TERMINAL=["COMPLETED","FAILED","PARTIAL_FAILED"];
+let rsTimer=null;
+function el(tag,cls,text){const n=document.createElement(tag);if(cls)n.className=cls;if(text!=null)n.textContent=text;return n;}
+function parse(s){try{return JSON.parse(s)}catch{return null}}
+function safeLink(url,text){
+  if(!/^https?:\/\//i.test(url||""))return el("span",null,text||url);
+  const a=el("a",null,text||url);a.href=url;a.target="_blank";a.rel="noopener noreferrer";return a;
+}
+EXAMPLES.forEach(x=>{const b=el("button","chip",x);b.addEventListener("click",()=>{$("q").value=x;ask();});$("examples").append(b);});
+$("ask").addEventListener("click",ask);
+$("q").addEventListener("keydown",e=>{if(e.key==="Enter")ask();});
+
+async function ask(){
+  const question=$("q").value.trim();
+  if(!question)return;
+  $("ask").disabled=true;
+  try{
+    const r=await fetch(`${API}/tasks`,{method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({type:"RESEARCH_AGENT",payload:{question}})});
+    const d=await r.json();
+    if(!r.ok)throw new Error(d.error||r.status);
+    watch(d.taskUuid);
+  }catch(e){alert("Submit failed: "+e.message);}
+  finally{$("ask").disabled=false;}
+}
+
+function watch(uuid){
+  clearInterval(rsTimer);
+  $("rsBody").hidden=false;
+  const tick=async()=>{
+    try{
+      const [t,tr]=await Promise.all([jget(`${API}/tasks/${uuid}`),jget(`${API}/tasks/${uuid}/trace`)]);
+      renderResearch(t,tr);
+      if(TERMINAL.includes(t.status))clearInterval(rsTimer);
+    }catch{/* 轮询中容忍瞬时错误 */}
+  };
+  tick();rsTimer=setInterval(tick,1000);
+}
+
+function renderResearch(t,trace){
+  const adv=trace.map(e=>e.stage==="STAGE_ADVANCED"?parse(e.detail):null).find(d=>d&&d.kind==="AGENT");
+  const agents=adv?adv.subtasks:[];
+  const planFailed=!adv&&TERMINAL.includes(t.status);
+  setBadge($("planState"),adv?"COMPLETED":planFailed?"FAILED":"RUNNING",adv?"done":planFailed?"failed":"planning…");
+  $("plan").replaceChildren(...agents.map(a=>el("li",null,a.input&&a.input.question)));
+
+  const subBySeq={};(t.subtasks||[]).forEach(s=>subBySeq[s.seq]=s);
+  $("agents").replaceChildren(...agents.map(a=>agentCard(a,trace.filter(e=>e.subtaskId===a.subtaskId),subBySeq[a.seq])));
+
+  setBadge($("taskState"),t.status,t.status);
+  const items=t.result||[];
+  const rep=items.map(i=>i.output).find(o=>o&&o.report);
+  if(rep)renderReport(rep);
+  else if(TERMINAL.includes(t.status))$("report").replaceChildren(el("span","muted","No report (see agent errors above or the Ops tab)."));
+
+  const u=items.map(i=>i.output&&i.output.usage).filter(Boolean)
+    .reduce((s,x)=>({calls:s.calls+x.calls,tokens:s.tokens+x.promptTokens+x.completionTokens,cost:s.cost+x.costMicro}),{calls:0,tokens:0,cost:0});
+  $("usageLine").textContent=u.calls?`${u.calls} LLM calls · ${u.tokens.toLocaleString()} tokens · ≈ $${(u.cost/1e6).toFixed(4)}`:"";
+}
+
+function setBadge(node,status,text){node.className="badge b-"+status;node.textContent=text;}
+
+function agentCard(a,events,sub){
+  const card=el("div","agent");
+  card.append(el("div","q",a.input&&a.input.question));
+  const workers=[];
+  const steps=el("div");
+  let lastWorker=null;
+  events.forEach(e=>{
+    const d=parse(e.detail)||{};
+    if(e.stage==="AGENT_STEP"){
+      if(d.workerId&&!workers.includes(d.workerId))workers.push(d.workerId);
+      lastWorker=d.workerId||lastWorker;
+      const s=el("div","step");
+      if(d.final){s.append(el("div","final",`#${d.step} ✅ ${d.answer||""}`));}
+      else{
+        s.append(el("div","t",`#${d.step} 🤔 ${d.thought||"(no reasoning text)"}`));
+        (d.calls||[]).forEach(c=>{s.append(el("div","c",`🔧 ${c.tool}(${c.args})`));s.append(el("div","r",`📄 ${c.resultPreview}`));});
+      }
+      steps.append(s);
+    }else if(e.stage==="RESUMED"){
+      if(d.workerId&&!workers.includes(d.workerId))workers.push(d.workerId);
+      steps.append(el("div","resume",`⚡ ${lastWorker||"previous worker"} died → ${d.workerId} resumed from step ${d.fromStep+1} (tools not re-run)`));
+      lastWorker=d.workerId;
+    }else if(e.stage==="CITATION_DROPPED"){
+      steps.append(el("div","drop",`⚠ dropped unverified source(s): ${(d.urls||[]).join(", ")}`));
+    }
+  });
+  const status=sub?sub.status:"PENDING";
+  const meta=el("div","meta");
+  const b=el("span","badge b-"+status,status);
+  meta.append(b,document.createTextNode(workers.length?`  on ${workers.join(" → ")}`:""));
+  if(sub&&sub.error)meta.append(el("div","drop",sub.error));
+  card.append(meta,steps);
+  return card;
+}
+
+function renderReport(rep){
+  const box=$("report");box.replaceChildren();
+  const max=(rep.sources||[]).length;
+  String(rep.report).split(/\n{2,}/).forEach(par=>{
+    const p=el("p");
+    par.split(/(\[\d{1,3}\])/).forEach(part=>{
+      const m=part.match(/^\[(\d{1,3})\]$/);
+      if(m&&+m[1]>=1&&+m[1]<=max){const a=el("a",null,part);a.href="#src-"+m[1];p.append(a);}
+      else p.append(document.createTextNode(part));
+    });
+    box.append(p);
+  });
+  $("sources").replaceChildren(...(rep.sources||[]).map(s=>{
+    const li=el("li");li.id="src-"+s.n;li.append(safeLink(s.url,s.title));
+    if(/^https?:/i.test(s.url||""))li.append(document.createTextNode(" — "+s.url));
+    return li;
+  }));
+}
 </script>
 </body>
 </html>

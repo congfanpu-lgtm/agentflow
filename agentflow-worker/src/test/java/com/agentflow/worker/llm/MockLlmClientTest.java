@@ -62,7 +62,7 @@ class MockLlmClientTest {
         r1.setTools(tools);
         ChatResponse s1 = mock.chat(r1);
         assertEquals("wiki_search", s1.getToolCalls().get(0).getName());
-        assertTrue(s1.getToolCalls().get(0).getArgumentsJson().contains("what is kafka"));
+        assertEquals("{\"query\":\"kafka\"}", s1.getToolCalls().get(0).getArgumentsJson());
 
         msgs.add(ChatMessage.assistant(s1.getContent(), s1.getToolCalls()));
         msgs.add(ChatMessage.tool("call_1", "标题: Apache Kafka\nURL: https://en.wikipedia.org/wiki/Apache_Kafka\n摘要: x"));
@@ -88,5 +88,13 @@ class MockLlmClientTest {
                 new ChatMessage("system", Prompts.SYNTHESIZER),
                 new ChatMessage("user", "问题:q\n\n可引用来源:\n[1] Kafka https://x.y\n")), 100));
         assertTrue(r.getContent().contains("[1]"));
+    }
+
+    @Test
+    void agentScriptSearchesKeywordsNotWholeSentence() {
+        assertEquals("Kafka RabbitMQ", MockLlmClient.keywords(
+                "What are the trade-offs between Kafka and RabbitMQ for agent systems? — 关键取舍"));
+        assertEquals("retrieval-augmented generation reduce", MockLlmClient.keywords(
+                "how does retrieval-augmented generation reduce hallucinations"));
     }
 }
