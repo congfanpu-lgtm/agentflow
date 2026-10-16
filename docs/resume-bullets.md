@@ -60,3 +60,31 @@
 - 压测用 mock LLM——测的是调度/并发/容错,不是模型;扩展比 2.77×(非满 3×)是单机资源瓶颈非架构瓶颈。
 - 确定性 embedding 只有词面相似,Recall 数字不代表真实语义检索;真实 embedding 是配置开关(留 backlog)。
 - 多角色是"子任务内角色流水",跨 Agent DAG 依赖边调度尚未做(backlog)。
+
+---
+
+## RESEARCH_AGENT(2026-10)
+
+> 只写代码里真实存在、并且实测过的内容。数字来源:`scripts/chaos-agent.sh` / `scripts/e2e-agent.sh` 输出,
+> `mvn -B test`(129 个 Java 测试)。真实模型的效果(报告质量、成本)还没有测,接入 key 实测后再补。
+
+**English**
+- Built a **resumable multi-agent research pipeline** (plan → parallel ReAct agents → cited report) on the Kafka
+  orchestration layer, with **native LLM tool calling** (Wikipedia, web fetch, pgvector RAG) and **per-step checkpoints
+  in Redis**; a chaos test that `docker kill`s a worker mid-run shows another worker **resuming from the next step
+  without re-running tools**.
+- Made multi-stage orchestration **exactly-once at the stage boundary**: the next stage is created in the same DB
+  transaction that settles the last result (row lock on the task counter), dispatched after commit; partial agent
+  failures still yield a report (`PARTIAL_FAILED`).
+- Hardened the agent against untrusted model/web output: **SSRF guard** re-checked on every redirect, tool errors fed back
+  to the model, duplicate-call cache, and **citation verification** that drops URLs no tool actually returned.
+
+**中文**
+- 在 Kafka 编排层上实现**可续跑的多 agent 研究流水线**(拆题 → 并行 ReAct agent → 带引用报告),
+  **原生 tool calling**(Wikipedia / 网页抓取 / pgvector 知识库),**每步存档到 Redis**;chaos 脚本中途
+  `docker kill` worker,另一个 worker **从下一步续跑、已调用工具不重跑**。
+- 多阶段编排在阶段边界**只推进一次**:下一阶段与"落定最后一个结果"同事务创建(任务计数行锁),提交后再分发;
+  部分 agent 失败仍产出报告(`PARTIAL_FAILED`)。
+- 对模型/网页输出做防护:**SSRF 防护**(每次重定向重新校验)、工具错误回传模型、重复调用缓存、
+  **引用校验**(删除工具从未返回过的 URL)。
+
