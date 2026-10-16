@@ -1,5 +1,7 @@
 package com.agentflow.server.service;
 
+import com.agentflow.common.mq.Topics;
+
 import com.agentflow.server.entity.SubtaskEntity;
 import com.agentflow.server.entity.TaskEntity;
 import com.agentflow.server.mapper.SubtaskMapper;
@@ -16,7 +18,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest(properties = "agentflow.timeout.stuck-seconds=2")
+@SpringBootTest(properties = {"agentflow.timeout.stuck-seconds=2", "agentflow.timeout.pending-seconds=2"})
 class TimeoutSweepServiceTest {
 
     @Autowired private TimeoutSweepService sweep;
@@ -62,5 +64,24 @@ class TimeoutSweepServiceTest {
         sweep.sweep();
         assertEquals("FAILED", subtaskMapper.selectById(subId).getStatus());
         assertEquals("FAILED", taskMapper.selectById(taskId).getStatus()); // 单子任务全败→FAILED
+    }
+
+    @Test
+    void redispatchesSubtaskLeftPendingAfterFailedSend() throws Exception {
+        // 阶段推进 / 提交后的 afterCommit 发送失败:子任务停在 PENDING,任务 RUNNING,没有任何东西会再发它
+        seedStuck(0);
+        subtaskMapper.casStatus(subId, "DISPATCHED", "PENDING");
+        subtaskMapper.setUpdatedAt(subId, LocalDateTime.now().minusSeconds(30));
+        var record = new org.apache.kafka.clients.producer.ProducerRecord<String, Object>(Topics.SUBTASK, "k", "v");
+        var meta = new org.apache.kafka.clients.producer.RecordMetadata(
+                new org.apache.kafka.common.TopicPartition(Topics.SUBTASK, 0), 0L, 0, 0L, 0, 0);
+        org.mockito.Mockito.when(kafkaTemplate.send(org.mockito.ArgumentMatchers.eq(Topics.SUBTASK),
+                        org.mockito.ArgumentMatchers.anyString(), org.mockito.ArgumentMatchers.any()))
+                .thenReturn(java.util.concurrent.CompletableFuture.completedFuture(
+                        new org.springframework.kafka.support.SendResult<>(record, meta)));
+
+        sweep.sweep();
+
+        assertEquals("DISPATCHED", subtaskMapper.selectById(subId).getStatus());
     }
 }

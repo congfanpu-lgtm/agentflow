@@ -46,15 +46,26 @@ public class TimeoutSweepService {
     private final StageAdvancer stageAdvancer;
     private final KafkaTemplate<String, Object> kafkaTemplate;
     private final TraceEmitter traceEmitter;
+    private final SubtaskDispatcher dispatcher;
 
     // 默认 600s:高于重试阶梯全程耗时(约 5s+30s+5m ≈ 335s)且留有余量,避免抢占仍在阶梯中的子任务。
     @Value("${agentflow.timeout.stuck-seconds:600}")
     private long stuckSeconds;
 
+    // PENDING 补发阈值:正常提交/阶段推进从插入到发送只有毫秒级,60s 仍是 PENDING 说明那次发送失败了
+    @Value("${agentflow.timeout.pending-seconds:60}")
+    private long pendingSeconds;
+
     // READ_COMMITTED:任务计数行锁让落定串行化,但 MySQL 默认 REPEATABLE READ 会让阶段推进读到事务开始时的旧快照,
     // 漏掉并发提交的结果(见 StageAdvanceIsolationTest)。每条语句读最新已提交数据才能配合行锁得出正确的下一阶段。
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public void sweep() {
+        // 1) 补发:发送 MQ 失败而停在 PENDING 的子任务(提交、阶段推进都在 afterCommit 发送,失败只记日志)
+        for (Long id : subtaskMapper.findTasksWithStalePending(LocalDateTime.now().minusSeconds(pendingSeconds))) {
+            log.warn("补发停在 PENDING 的子任务 taskId={}", id);
+            dispatcher.dispatchPending(taskMapper.selectById(id));
+        }
+        // 2) 静默失败:卡在 DISPATCHED 的子任务
         LocalDateTime cutoff = LocalDateTime.now().minusSeconds(stuckSeconds);
         List<SubtaskEntity> stuck = subtaskMapper.findStuckDispatched(cutoff);
         for (SubtaskEntity s : stuck) {

@@ -18,6 +18,11 @@ public interface SubtaskMapper extends BaseMapper<SubtaskEntity> {
     @Select("SELECT * FROM subtask WHERE status = 'DISPATCHED' AND updated_at < #{cutoff}")
     List<SubtaskEntity> findStuckDispatched(@Param("cutoff") LocalDateTime cutoff);
 
+    /** 停在 PENDING 超过 cutoff、且所属任务仍 RUNNING 的子任务所在任务 id(afterCommit 发送失败的遗留)。 */
+    @Select("SELECT DISTINCT s.task_id FROM subtask s JOIN task t ON t.id = s.task_id "
+            + "WHERE s.status = 'PENDING' AND t.status = 'RUNNING' AND s.updated_at < #{cutoff}")
+    List<Long> findTasksWithStalePending(@Param("cutoff") LocalDateTime cutoff);
+
     @Update("UPDATE subtask SET redispatch_count = redispatch_count + 1 WHERE id = #{id}")
     int incrementRedispatch(@Param("id") Long id);
 
