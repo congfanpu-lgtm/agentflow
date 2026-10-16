@@ -23,6 +23,7 @@ spring:
         max.poll.interval.ms: 600000
     listener:
       immediate-stop: false
+      concurrency: 2
 
 server:
   shutdown: graceful
@@ -31,6 +32,9 @@ server:
 llm:
   provider: mock
   default-model: mock-small
+  # mock 每次调用的模拟耗时(ms):docker compose 里设 1500,便于在页面看清每一步、演示杀 worker
+  mock:
+    delay-ms: 0
   models:
     - name: mock-small        # 便宜/高频模型:桶大、便宜
       capacity: 20
@@ -40,6 +44,10 @@ llm:
       capacity: 5
       refill-per-sec: 2
       price-per1k-tokens: 0.01
+    - name: ${LLM_MODEL:mock-small}   # 真实模型(.env 的 LLM_MODEL);未设置时与 mock-small 同名,不生效
+      capacity: 10
+      refill-per-sec: 2
+      price-per1k-tokens: ${LLM_PRICE_PER1K:0.001}
 
 # RAG 检索服务(Python/FastAPI + pgvector)
 rag:

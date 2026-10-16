@@ -62,7 +62,7 @@ public class SubtaskListener {
             if (processor == null) {
                 throw new IllegalArgumentException("未知任务类型:" + msg.getType());
             }
-            String output = processor.process(msg.getInputJson());
+            String output = processor.process(msg);
             traceEmitter.emit(String.valueOf(msg.getTaskId()), msg.getTaskId(), msg.getSubtaskId(),
                     TraceStage.PROCESSED, "OK", null);
             // 先发 RESULT,再标记幂等键:发送更安全——服务端子任务 CAS 已对重复结果去重,

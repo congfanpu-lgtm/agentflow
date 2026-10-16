@@ -28,7 +28,7 @@ class SubtaskListenerIdempotencyTest {
         when(guard.key(any(), any())).thenReturn("k");
         when(guard.alreadyProcessed("k")).thenReturn(true);
         listener.onMessage(new SubtaskMessage(1L, 10L, "u", "ECHO_BATCH", 0, "{\"text\":\"a\"}"), null);
-        verify(processor, never()).process(any());
+        verify(processor, never()).process(anyString());
         verify(template, never()).send(eq(Topics.RESULT), anyString(), any());
         verify(guard, never()).markProcessed(any());
     }
