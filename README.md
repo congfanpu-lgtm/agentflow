@@ -1,173 +1,195 @@
 # AgentFlow
 
-> 🇬🇧 English: [`README.en.md`](README.en.md) · 🏗️ 架构图:[`docs/architecture.md`](docs/architecture.md) · 📄 简历 bullets:[`docs/resume-bullets.md`](docs/resume-bullets.md)
+[![CI](https://github.com/congfanpu-lgtm/agentflow/actions/workflows/ci.yml/badge.svg)](https://github.com/congfanpu-lgtm/agentflow/actions/workflows/ci.yml)
+· [中文](README.zh.md) · design doc [`docs/specs/2026-07-11-agentflow-design.md`](docs/specs/2026-07-11-agentflow-design.md)
 
-分布式多 Agent 任务编排平台(W1–8 已完成 + Web 控制台;核心系统全部实测)。
-设计文档见 `docs/specs/2026-07-11-agentflow-design.md`。
+**A crash-tolerant multi-agent research system on a Kafka worker pool.** Ask a question → a planner LLM splits it
+into sub-questions → each sub-question is researched in parallel by a ReAct agent (native tool calling:
+Wikipedia, web fetch, local RAG) → a final LLM writes a report with verified citations.
+Kill a worker mid-run and the agent resumes on another worker **from its last checkpointed step, without
+re-running tools**.
 
-## 架构(当前骨架)
+<!-- ![demo](docs/img/demo.gif) -->
 
-用户 → API(8080) → 协调器拆解 → Kafka(AGENTFLOW_SUBTASK) → Worker 池
-→ 回传(AGENTFLOW_RESULT) → 状态机聚合 → 查询结果
+```bash
+cp .env.example .env          # default: mock LLM (no key, no cost). Set LLM_PROVIDER=openai + key for a real model
+docker compose up -d --build --wait
+open http://localhost:8080    # click an example question
+scripts/chaos-agent.sh        # kill a worker mid-run, watch the agent resume
+```
 
-## 快速开始
+```mermaid
+flowchart LR
+  UI[Console] -->|RESEARCH_AGENT| S[Server<br/>CAS state machine]
+  S -->|PLAN| K[(Kafka)]
+  K --> W1[Worker 1] & W2[Worker 2]
+  W1 & W2 -->|result| S
+  S -->|N × AGENT| K
+  S -->|SYNTHESIZE| K
+  W1 & W2 <-->|checkpoint per step| R[(Redis)]
+  W1 & W2 -->|LLM via gateway<br/>rate limit + token accounting| L[LLM API]
+  W1 & W2 -->|trace| T[(MongoDB)]
+```
 
-前置:JDK 17+、Maven 3.9+、Docker(OrbStack / Docker Desktop)。
+**How a research task runs**
 
-    docker compose up -d                          # MySQL/Redis/Kafka(KRaft)/MongoDB
-    mvn -q -pl agentflow-server -am spring-boot:run   # 终端 A
-    mvn -q -pl agentflow-worker -am spring-boot:run   # 终端 B
-    ./scripts/e2e-smoke.sh                        # 终端 C:端到端验证
+| Stage | Subtasks | What happens |
+|---|---|---|
+| ① Plan | 1 | LLM splits the question into 2–4 sub-questions (schema-validated) |
+| ② Agents | N, in parallel | ReAct loop, max 6 steps; each step checkpointed to Redis; tools are read-only |
+| ③ Synthesize | 1 | LLM writes the report; citations limited to URLs tools actually returned |
 
-提交任务:
+Every stage is an ordinary Kafka subtask, so it inherits the existing reliability layer: staged retries
+(5s/30s/5m) → DLQ with replay, timeout sweep, idempotency guard, partial-failure semantics, full run trace.
 
-    curl -X POST localhost:8080/api/v1/tasks -H 'Content-Type: application/json' \
-      -d '{"type":"ECHO_BATCH","payload":{"items":["hello","world"]}}'
+> ⚠️ No authentication. Keep it on localhost / a private network; add auth before exposing it publicly,
+> especially with a real LLM key configured.
 
-查询:`GET /api/v1/tasks/{taskUuid}`
+Positioning keywords: **controllable · operable · observable/traceable · recoverable · idempotent**
+— an *infra for controllable, operable workflow agents*, not an autonomous black box.
 
-**Web 控制台**:server 起来后浏览器打开 `http://localhost:8080/`——单文件看板(原生 JS,零依赖,
-server `static/` 直供):提交任务(ECHO/LLM/RESEARCH)、实时进度条、Run Trace 执行轨迹时间线、
-LLM token 记账,轮询刷新。用于 demo 演示。
+---
 
-## 多 Worker 水平扩展
+## Architecture
 
-主 topic 3 分区,最多 3 个 Worker 并行(同消费组自动 rebalance):
+**Harness (control plane)** owns orchestration, state, reliability, observability and side-effects.
+**Runtime (execution plane)** only "thinks and acts" — every side-effect and persistence flows back
+to the Harness through the Policy layer. Full diagram: [`docs/architecture.md`](docs/architecture.md).
 
-    # 终端各起一个,同 group 自动分走分区
-    mvn -q -pl agentflow-worker -am spring-boot:run
-    mvn -q -pl agentflow-worker -am spring-boot:run
-    mvn -q -pl agentflow-worker -am spring-boot:run
+```mermaid
+flowchart LR
+    user([Client]) --> api[REST API]
+    api --> coord[Coordinator<br/>decompose → dispatch → aggregate]
+    coord --> mysql[("MySQL<br/>state machine · CAS")]
+    coord -->|dispatch| kafka[["Kafka<br/>subtask + staged-retry/DLQ"]]
+    kafka --> worker
+    subgraph worker["Worker pool ×N (Runtime)"]
+        proc[SubtaskProcessor<br/>Echo / LLM / Research]
+        gw[LLM Gateway<br/>Redis+Lua token bucket · routing · accounting]
+        ctx[AgentContext<br/>context trimming]
+        proc --> ctx --> gw
+    end
+    gw --> llm[LLM API<br/>mock / OpenAI-compatible]
+    proc -->|intent-gated| rag[RAG service<br/>Python/FastAPI + pgvector]
+    proc -->|result| coord
+    coord & proc -->|trace events| mongo[("MongoDB<br/>Run Trace")]
+    gw --> redis[("Redis<br/>rate-limit · idempotency · accounting")]
+    coord --> policy[Side-effect Policy<br/>business idempotency · afterCommit]
+```
 
-优雅停机:`Ctrl-C` 后 Worker 处理完在途子任务、提交 offset 再退出,配合幂等去重保证不丢不重。
-(1→3 Worker 吞吐提升比在 W8 压测量化。)
+**Polyglot persistence** (right store per access pattern): MySQL (transactional state machine) ·
+Kafka (durable partitioned queue, replayable) · Redis (locks/rate-limit/accounting/idempotency) ·
+MongoDB (nested-JSON execution traces) · pgvector (ANN vector search).
 
-## 可观测与治理(Run Trace + Policy)
+---
 
-**Run Trace(事件溯源 → MongoDB 回放)**:server/worker 各组件在每个生命周期节点(提交、拆解、
-分发、worker 接收/处理/回传、子任务落定、超时重投、DLQ 恢复、任务终态落定……)统一经
-`TraceEmitter.emit(traceId, taskId, subtaskId, stage, status, detail)` 发一条 `TraceEvent` 到
-Kafka `AGENTFLOW_TRACE` topic;server 侧唯一的 `TraceConsumer` 消费落 MongoDB(`trace_event`
-集合,一事件一文档)。`traceId = String.valueOf(taskId)`,对外用 `taskUuid` 反查。
-`GET /api/v1/tasks/{taskUuid}/trace` 按时间排序返回完整轨迹,可回放/审计"闭环是否执行成功"
-(是否一路走到 `TASK_FINALIZED`)。经 Kafka 而非各处直写 Mongo 的原因:统一出口(Mongo 只在
-`TraceConsumer` 一处被写)、保存时机是"状态变更即刻 emit、先落 Kafka 落盘再落 Mongo"(消费者/
-进程崩溃也不丢事件)、worker 侧无需引入 Mongo 依赖。
+## Self-built core (résumé highlights)
 
-**统一副作用 Policy 层**:所有有外部/持久后果的动作(通知、建 case 等)必须经
-`SideEffectPolicy.execute(businessKey, action)` 这一个闸执行——不给旁路。用 Redis
-`setIfAbsent(key, ttl)` 做业务级幂等:同一 `businessKey`(如 `notify:<taskUuid>`)首次执行
-并占位,重复触发直接跳过("副作用去重跳过"日志),防止重复入队/二次 finalize 导致重复发通知。
-执行失败会释放占位键,保证失败的副作用允许被重试而不会被"假幂等"卡死。代表性接入:
-`TaskFinalizer` 判定终态后调用 `NotificationService.notifyTaskFinished`,均经 Policy 闸。
+- **Resumable ReAct agents** — native OpenAI tool calling; per-step checkpoint in Redis keyed by subtask UUID;
+  on redelivery (worker crash, retry, timeout sweep) the agent replays saved steps and continues — tools are never re-run.
+  At-least-once delivery + read-only tools ⇒ effectively exactly-once tool side effects.
+- **Multi-stage orchestration** — plan → map → reduce built on the same subtask state machine; the next stage is
+  created in the same DB transaction that settles the last result (row lock on the task counter ⇒ created exactly once),
+  dispatched after commit.
+- **Agent guardrails** — SSRF guard on `web_fetch` (blocks loopback/private/link-local/CGNAT, re-checked on every redirect);
+  tool errors fed back to the model instead of crashing; duplicate-call cache; fabricated citations dropped and traced.
 
-演示脚本:`./scripts/trace-demo.sh`(提交任务 → 轮询到 COMPLETED → 打印完整 trace)。
+1. **Coordinator + state machine** — DAG decomposition, **partial-failure semantics**
+   (`PARTIAL_FAILED`), DB compare-and-swap transitions, timeout sweeper.
+2. **Kafka reliability layer** — self-built **staged delay-retry topics (5s/30s/5m) + DLQ + replay**
+   (Kafka has no native delay/DLQ; built on top, comparable to RocketMQ semantics).
+3. **Cost-aware LLM gateway** — **Redis + Lua token-bucket** rate limiting (atomic, shared across
+   workers), multi-model routing, token accounting — the single choke-point for all LLM calls.
+4. **Run Trace** — event-sourced through Kafka → MongoDB; full lifecycle is auditable/replayable
+   to prove a task closed the loop (`SUBMITTED → … → TASK_FINALIZED`).
+5. **Unified side-effect Policy** — every side-effect goes through one gate with business-level
+   idempotency, fired `afterCommit`; enforced structurally in code, not by prompt.
 
-## LLM 网关与可控 Agent(W5–6)
+Plus **AgentContext** (token-budget context trimming to prevent context bloat), **dynamic Skill
+registry** (Spring-collected, schema-constrained output so the model can't free-wheel, multi-hit
+priority ordering), and an **intent-driven RAG tool** (retrieve only when intent warrants it).
 
-**LLM 网关(唯一出口)**:所有 LLM 调用只能经 `LlmGateway.chat(ChatRequest)`——业务代码拿不到底层
-`LlmClient`,没有旁路(代码层 enforce)。网关职责:① 多模型路由(按 `model` 选桶 + 计价)
-② 限流 ③ 调用 ④ token 记账。默认后端 `MockLlmClient`(确定性、不烧钱、无需 API key,压测/单测都用它);
-`llm.provider=openai` 切真实模型(OpenAI 兼容协议,JDK HttpClient,base-url/key 走环境变量)。
+---
 
-**Redis + Lua 令牌桶限流**:桶状态存 Redis(跨 worker 实例共享,水平扩展下限流才是全局的),
-"读令牌→按时间补充→判够→扣减→回写"整段用一个 Lua 脚本原子执行(Redis 单线程 = 天然原子,
-免分布式锁,与状态机用 MySQL CAS 同源)。扣不到令牌 → `RateLimitedException`,worker 侧当普通失败
-交 W3 阶梯重试(复用可靠性层,不另造机制)。
+## Measured metrics
 
-**token 记账**:每次调用把 prompt/completion token 数 + 估算成本(微美元)原子累加到 Redis;
-`GET /api/v1/llm/usage` 按模型返回累计 token 与成本(简历指标3/6 数据源)。
+Environment: Apple M5 (10 cores) · JDK 21 · all middleware in Docker · **mock LLM** (load-testing
+the scheduler, not the model — free & deterministic). Reproduce: `scripts/load_test.py`.
 
-**AgentContext(防上下文膨胀)**:`AgentContext.build(system, input, history)` 按 token 预算裁剪——
-超预算优先丢最老历史,历史丢光仍超则截断超长输入(保留头尾),裁剪量记日志。绝不无上限塞给模型。
-
-**Skill 动态注册 + schema 约束输出**:实现 `Skill` 接口 + `@Component` 即被 `SkillRegistry` 自动收录
-(动态加载);多个 skill 命中同一 intent 按 `priority` 排序;每个 skill 声明 `outputSchema`,LLM 输出
-必须过 `SchemaValidator` 校验,不合规视为失败交重试——**输出稳定是代码层校验,不是求模型听话**。
-
-**真 Agent**:新任务类型 `LLM_BATCH`,worker `LlmProcessor`(Runtime)= AgentContext 组 prompt →
-网关调模型 → 按 skill schema 校验输出;`SubtaskListener` 按 `msg.type` 路由到处理器(策略模式,
-Echo/LLM 并存)。副作用一律回 Harness 经 Policy——处理器不产生外部副作用。
-
-提交 LLM 任务(默认 mock):
-
-    curl -X POST localhost:8080/api/v1/tasks -H 'Content-Type: application/json' \
-      -d '{"type":"LLM_BATCH","payload":{"items":["文本A","文本B"],"model":"mock-small"}}'
-
-演示脚本:`./scripts/w5-6-demo.sh`(提交 LLM_BATCH → 打印结果 + trace + `GET /llm/usage` 记账)。
-
-## RAG 检索与多角色 Agent(W7)
-
-**独立 Python/FastAPI RAG 微服务(`agentflow-rag/`)**:跨语言架构——Java 主链路 + Python
-embedding 生态。`/rag/ingest` 灌库、`/rag/search` 近邻检索、`/health` 探活;向量存 **pgvector**
-(`documents(id,content,embedding vector(256))`,余弦 `<=>` ANN)。embedding 默认**确定性词哈希投影**
-(离线、可复现、无需 API key,延续 mock-first 哲学),真实 embedding 是 backlog 配置开关。
-自建小标注集测 **Recall@K**(`tests/test_recall.py`,确定性 embedding 下 mean Recall@3=1.0)。
-
-**意图驱动检索 + 多角色**:worker 经 `RagClient`(唯一检索入口,与 LLM 经网关同构)调 RAG 服务。
-新任务类型 `RESEARCH_BATCH` 由 `ResearchProcessor` 处理,是一条子任务内的角色流水:
-router(意图判断是否需要检索)→ retriever(**命中才检索**,不是每步都查)→ AgentContext 注入资料
-→ summarizer(经网关调 LLM)→ RagSearchSkill schema 校验。跨子任务的聚合(汇总)由 `TaskFinalizer`
-完成。检索只读、不产生副作用故不经 Policy。
-
-启动 RAG 服务(前置:pgvector 容器):
-
-    # pgvector 容器(compose 文件本机被占用,用 docker run;等价 compose 见下)
-    docker run -d --name agentflow-pgvector -p 5433:5432 \
-      -e POSTGRES_PASSWORD=agentflow -e POSTGRES_DB=agentflow_rag pgvector/pgvector:pg16
-    cd agentflow-rag && python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
-    ./run.sh                                       # RAG 服务(:8000)
-
-> 等价 docker-compose 片段(供后续合入 `docker-compose.yml`):
-> ```yaml
->   pgvector:
->     image: pgvector/pgvector:pg16
->     container_name: agentflow-pgvector
->     ports: ["5433:5432"]
->     environment:
->       POSTGRES_PASSWORD: agentflow
->       POSTGRES_DB: agentflow_rag
-> ```
-
-提交研究任务(mock LLM + 确定性 embedding,离线可跑):
-
-    curl -X POST localhost:8080/api/v1/tasks -H 'Content-Type: application/json' \
-      -d '{"type":"RESEARCH_BATCH","payload":{"questions":["kafka 如何重分配分区?","hello there"],"model":"mock-small"}}'
-
-演示脚本:`./scripts/w7-rag-demo.sh`(灌库 → RESEARCH_BATCH:需检索项 `usedRag=true` 带
-`retrieved` ids;不需项 `usedRag=false` 不检索)。
-
-## 压测与指标(W8)
-
-零依赖 Python 压测脚本 `scripts/load_test.py`(标准库并发提交+轮询,测**端到端完成延迟**而非
-纯 HTTP 延迟),全程 mock LLM 不烧钱。实测(环境:Apple M5 / JDK 21 / 中间件全 Docker;负载 ECHO_BATCH,
-每子任务模拟 300ms):
-
-| 指标 | 实测 |
+| Metric | Result |
 |---|---|
-| 吞吐/延迟(3 worker) | 提交 P50 40ms/P99 137ms;端到端 P50 5.3s/P99 6.9s;103 任务/分;8.6 子任务/秒 |
-| 水平扩展 1→3 worker | 子任务吞吐 3.1→8.6/秒 = **2.77×**(单机资源瓶颈,非架构瓶颈) |
-| 成本控制(幂等拦截) | 崩溃场景 45/165 = **27.3%** 重复投递被幂等拦住,省冗余处理(≈LLM 调用) |
-| 容错(零丢失) | kill -9 一个 worker 于压测中途 → **24/24 任务仍 COMPLETED** |
-| 检索质量 | mean **Recall@3 = 1.0**(W7,确定性 embedding) |
-| 副作用幂等 | 85 任务落定 → **85 通知,0 重复** |
-| 可观测 | trace 完整率 **100%**(每任务 SUBMITTED→…→TASK_FINALIZED) |
+| Throughput / latency (3 workers) | submit P50 40ms / P99 137ms; **end-to-end** P50 5.3s / P99 6.9s; 103 tasks/min; 8.6 subtasks/s |
+| Horizontal scaling 1→3 workers | 3.1 → 8.6 subtasks/s = **2.77×** (single-machine resource bound, not architectural) |
+| Cost control (idempotency) | crash scenario: **27.3%** of redeliveries intercepted (no duplicate LLM calls) |
+| Fault tolerance | `kill -9` a worker mid-load → **24/24 tasks still COMPLETED** (zero loss) |
+| Retrieval quality | mean **Recall@3 = 1.0** (deterministic embedding) |
+| Side-effect idempotency | 85 finalized tasks → **85 notifications, 0 duplicates** |
+| Observability | Run Trace completeness **100%** |
 
-> 数字与机器强相关,绝对值不跨机可比;架构结论看**相对值**(扩展比、拦截率、零丢失、trace 100%)。
-> 复现:`python3 scripts/load_test.py --tasks 30 --items 5 --concurrency 10 --trace-check`(先起 server + N worker)。
+> Absolute numbers are machine-specific; the architectural conclusions are the **relative** ones
+> (scaling ratio, interception rate, zero-loss, 100% trace completeness).
 
-## 测试
+---
 
-    mvn test        # Java:需 MySQL/Kafka/Mongo/Redis + pgvector 容器(集成测试直连本地中间件)
-    cd agentflow-rag && .venv/bin/python -m pytest -q   # Python RAG:需 pgvector 容器
+## Quick start
 
-> 注:本机 Maven 运行时若为 JDK 21+ 之外版本(lombok 兼容),构建用 `JAVA_HOME=$(/usr/libexec/java_home -v 21)`。
+```bash
+# Full stack in containers (9 services: MySQL, Redis, MongoDB, Kafka, pgvector, RAG, server, 2 workers)
+cp .env.example .env
+docker compose up -d --build --wait
+scripts/e2e-agent.sh          # research task end-to-end
+scripts/chaos-agent.sh        # kill a worker mid-run → resume from checkpoint
 
-## 路线图
+# Local development: middleware in containers, apps from Maven
+docker compose up -d mysql redis mongo kafka pgvector rag
+mvn -q install -DskipTests
+mvn -q -f agentflow-server/pom.xml spring-boot:run     # terminal A  (:8080)
+mvn -q -f agentflow-worker/pom.xml spring-boot:run     # terminal B  (scale: run N)
+```
 
-- [x] W1–2 骨架:API + 状态机 + Kafka 分发 + echo Worker
-- [x] W3–4 可靠性核心: 幂等、Kafka 自研重试/死信+恢复、超时兜底、优雅停机
-- [x] W3–4 可观测:Run Trace(事件溯源→Mongo 回放)+ 统一副作用 Policy 层
-- [x] W5–6 LLM 网关(Redis+Lua 令牌桶/多模型路由/token 记账)+ 真 Agent(经网关,mock 默认)+ AgentContext + Skill 注册/schema 约束
-- [x] W7 RAG 检索服务(Python/FastAPI + pgvector,确定性 embedding + Recall@K)+ 意图驱动检索 + 多角色处理器
-- [x] W8 压测与容错演练:7 项指标实测(见"压测与指标",水平扩展 2.77×、零丢失、trace 100%)
+Upgrading an existing database: run `docker/mysql/migrations/2026-10-15-subtask-kind.sql` once.
+
+**Web console** — open `http://localhost:8080/` (single-file dashboard: submit tasks, live progress,
+Run Trace timeline, LLM token accounting). See screenshot below.
+
+Submit via API:
+
+```bash
+curl -X POST localhost:8080/api/v1/tasks -H 'Content-Type: application/json' \
+  -d '{"type":"LLM_BATCH","payload":{"items":["text A","text B"],"model":"mock-small"}}'
+# GET /api/v1/tasks/{uuid}        -> status + progress + aggregated result
+# GET /api/v1/tasks/{uuid}/trace  -> full execution trace
+# GET /api/v1/llm/usage           -> token accounting per model
+```
+
+Task types: `RESEARCH_AGENT` (plan → parallel ReAct agents → cited report) · `ECHO_BATCH` (echo, for load tests) ·
+`LLM_BATCH` (LLM summarize via gateway) · `RESEARCH_BATCH` (intent-gated RAG retrieval → summarize).
+
+> Demo GIF: recording steps are in [`README.zh.md`](README.zh.md#录制-demo-gif); save it as `docs/img/demo.gif`
+> and uncomment the image line at the top of this README.
+
+---
+
+## Tech stack
+
+Java 17 · Spring Boot 3 · Kafka (KRaft) · Redis/Redisson · MySQL · MongoDB · pgvector ·
+Python 3 / FastAPI (RAG microservice) · JDK HttpClient (LLM/RAG clients, no SDK bloat) ·
+Docker Compose. Tests: **85 Java + 6 Python**, integration tests hit real middleware.
+
+## Why not Temporal / LangGraph?
+
+The core scheduler is self-built on purpose — to demonstrate distributed-systems design rather than
+framework usage, and to keep every component explainable from principle to implementation. The
+agent's inner LLM loop is where off-the-shelf pieces are fine; the orchestration/reliability layer
+is the moat.
+
+## Roadmap
+
+- [x] W1–8: skeleton → reliability & observability → LLM gateway & controllable agent → RAG &
+  multi-role → load test & fault drill (all 7 metrics measured) + Web console
+- [ ] W9 (optional add-ons): cloud deploy (GCP/AWS free tier), Prometheus metrics, Zookeeper
+  leader-election/registration
+- [x] Research agent: real tool-calling ReAct loop, per-step checkpoint & resume, one-command compose, CI
+- [ ] Future work: durable execution with one Kafka message per agent step (Temporal-style) — today a long loop
+  occupies one worker; SSE instead of 1s polling; general web search tool; auth
+- [ ] W10: résumé bullets finalized (see [`docs/resume-bullets.md`](docs/resume-bullets.md))
