@@ -2,11 +2,12 @@ package com.agentflow.common.llm;
 
 import java.util.List;
 
-/** LLM 调用请求。model 可空 → 网关用默认模型。 */
+/** LLM 调用请求。model 可空 → 网关用默认模型;tools 可空 → 不提供工具(纯对话)。 */
 public class ChatRequest {
     private String model;
     private List<ChatMessage> messages;
     private int maxTokens = 512;
+    private List<ToolSpec> tools;
 
     public ChatRequest() {}
 
@@ -22,4 +23,6 @@ public class ChatRequest {
     public void setMessages(List<ChatMessage> messages) { this.messages = messages; }
     public int getMaxTokens() { return maxTokens; }
     public void setMaxTokens(int maxTokens) { this.maxTokens = maxTokens; }
+    public List<ToolSpec> getTools() { return tools; }
+    public void setTools(List<ToolSpec> tools) { this.tools = tools; }
 }
