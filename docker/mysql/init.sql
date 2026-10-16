@@ -18,6 +18,7 @@ CREATE TABLE IF NOT EXISTS subtask (
   subtask_uuid  VARCHAR(36)  NOT NULL,
   task_id       BIGINT       NOT NULL,
   seq           INT          NOT NULL,
+  kind          VARCHAR(16)  NULL,
   status        VARCHAR(16)  NOT NULL,
   input         JSON         NULL,
   output        JSON         NULL,

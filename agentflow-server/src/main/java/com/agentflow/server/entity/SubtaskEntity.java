@@ -15,6 +15,7 @@ public class SubtaskEntity {
     private String subtaskUuid;
     private Long taskId;
     private Integer seq;
+    private String kind;         // 子任务处理类型(PLAN/AGENT/SYNTHESIZE);null = 沿用 task.type
     private String status;       // SubtaskStatus.name()
     private String input;        // JSON 字符串
     private String output;       // JSON 字符串

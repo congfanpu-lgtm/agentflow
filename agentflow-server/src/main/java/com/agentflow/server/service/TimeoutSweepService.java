@@ -4,6 +4,8 @@ import com.agentflow.common.mq.SubtaskMessage;
 import com.agentflow.common.mq.Topics;
 import com.agentflow.common.state.SubtaskStatus;
 import com.agentflow.common.trace.TraceStage;
+import com.agentflow.server.coordinator.StageAdvancer;
+import com.agentflow.server.coordinator.SubtaskDispatcher;
 import com.agentflow.server.entity.SubtaskEntity;
 import com.agentflow.server.mapper.SubtaskMapper;
 import com.agentflow.server.mapper.TaskMapper;
@@ -28,7 +30,7 @@ import java.util.List;
  * 或消息丢失,既无结果回传也无重试活动)。{@code stuck-seconds} 默认值刻意设置在整条重试阶梯
  * 总时长之上(留有余量),使兜底只对"确实静默"的子任务生效,不会在阶梯进行中把它误判为卡死、
  * 抢先重投/落定,从而打断正在进行的重试。
- * 终态落定复用 {@link TaskFinalizer},与 {@link ResultHandleService} 共用同一套判终态/聚合逻辑(DRY)。
+ * 落定后统一经 {@link StageAdvancer}(推进下一阶段或判终态),与 {@link ResultHandleService} 共用(DRY)。
  */
 @Slf4j
 @Service
@@ -40,7 +42,7 @@ public class TimeoutSweepService {
     private final SubtaskMapper subtaskMapper;
     private final TaskMapper taskMapper;
     private final TaskStateMachine stateMachine;
-    private final TaskFinalizer taskFinalizer;
+    private final StageAdvancer stageAdvancer;
     private final KafkaTemplate<String, Object> kafkaTemplate;
     private final TraceEmitter traceEmitter;
 
@@ -58,7 +60,7 @@ public class TimeoutSweepService {
                 // 重投后 incrementRedispatch 的 ON UPDATE 会刷新 updated_at,重新计时。
                 // 修 backlog T4b:type 取自任务而非硬编码 ECHO_BATCH,否则多任务类型下会把
                 // LLM_BATCH 子任务错标成 ECHO_BATCH,worker 路由到错处理器。
-                String type = taskMapper.selectById(s.getTaskId()).getType();
+                String type = SubtaskDispatcher.typeOf(taskMapper.selectById(s.getTaskId()).getType(), s);
                 kafkaTemplate.send(Topics.SUBTASK, String.valueOf(s.getId()),
                         new SubtaskMessage(s.getTaskId(), s.getId(), s.getSubtaskUuid(),
                                 type, s.getSeq(), s.getInput()));
@@ -73,7 +75,7 @@ public class TimeoutSweepService {
                     s.setErrorMsg("超时未回传,重投耗尽");
                     subtaskMapper.updateById(s);
                     taskMapper.incrementFailed(s.getTaskId());
-                    taskFinalizer.finalizeIfAllSettled(s.getTaskId());
+                    stageAdvancer.onSettled(s.getTaskId());
                     log.error("超时失败落定 subtaskId={}", s.getId());
                 }
             }

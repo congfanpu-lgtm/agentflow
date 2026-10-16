@@ -3,6 +3,7 @@ package com.agentflow.server.service;
 import com.agentflow.common.mq.ResultMessage;
 import com.agentflow.common.state.SubtaskStatus;
 import com.agentflow.common.trace.TraceStage;
+import com.agentflow.server.coordinator.StageAdvancer;
 import com.agentflow.server.entity.SubtaskEntity;
 import com.agentflow.server.mapper.SubtaskMapper;
 import com.agentflow.server.mapper.TaskMapper;
@@ -16,7 +17,8 @@ import org.springframework.transaction.annotation.Transactional;
  * 结果回收(部分失败语义):子任务状态落定 → 按成败原子累加计数 →
  * done+failed==total 时判终态:全成 COMPLETED / 部分成 PARTIAL_FAILED / 全败 FAILED。
  * 终态判定用「计数列 + CAS」而非 COUNT(*),并发下只有一个回调触发聚合。
- * 终态判定 + 聚合逻辑抽到 {@link TaskFinalizer},与超时兜底 {@link TimeoutSweepService} 共用。
+ * 终态判定 + 聚合逻辑抽到 {@link TaskFinalizer},与超时兜底 {@link TimeoutSweepService} 共用;
+ * 落定后先经 {@link StageAdvancer} 判断是否有下一阶段(RESEARCH_AGENT 的 plan → agents → synthesize)。
  */
 @Slf4j
 @Service
@@ -26,7 +28,7 @@ public class ResultHandleService {
     private final TaskMapper taskMapper;
     private final SubtaskMapper subtaskMapper;
     private final TaskStateMachine stateMachine;
-    private final TaskFinalizer taskFinalizer;
+    private final StageAdvancer stageAdvancer;
     private final TraceEmitter traceEmitter;
 
     @Transactional
@@ -56,6 +58,6 @@ public class ResultHandleService {
         } else {
             taskMapper.incrementFailed(msg.getTaskId());
         }
-        taskFinalizer.finalizeIfAllSettled(msg.getTaskId());
+        stageAdvancer.onSettled(msg.getTaskId());
     }
 }

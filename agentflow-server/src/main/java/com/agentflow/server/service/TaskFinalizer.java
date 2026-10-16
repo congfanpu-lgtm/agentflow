@@ -62,6 +62,9 @@ public class TaskFinalizer {
             ObjectNode item = objectMapper.createObjectNode();
             item.put("seq", s.getSeq());
             item.put("status", s.getStatus());
+            if (s.getKind() != null) {
+                item.put("kind", s.getKind());
+            }
             try {
                 item.set("output", s.getOutput() == null
                         ? null : objectMapper.readTree(s.getOutput()));

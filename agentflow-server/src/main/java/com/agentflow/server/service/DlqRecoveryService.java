@@ -3,6 +3,7 @@ package com.agentflow.server.service;
 import com.agentflow.common.mq.SubtaskMessage;
 import com.agentflow.common.mq.Topics;
 import com.agentflow.common.trace.TraceStage;
+import com.agentflow.server.coordinator.SubtaskDispatcher;
 import com.agentflow.server.entity.SubtaskEntity;
 import com.agentflow.server.entity.TaskEntity;
 import com.agentflow.server.mapper.SubtaskMapper;
@@ -62,7 +63,7 @@ public class DlqRecoveryService {
         // 3. 重投主 topic(attempt 归零,不带 header)
         kafkaTemplate.send(Topics.SUBTASK, String.valueOf(s.getId()),
                 new SubtaskMessage(t.getId(), s.getId(), s.getSubtaskUuid(),
-                        t.getType(), s.getSeq(), s.getInput()));
+                        SubtaskDispatcher.typeOf(t.getType(), s), s.getSeq(), s.getInput()));
         traceEmitter.emit(String.valueOf(t.getId()), t.getId(), s.getId(),
                 TraceStage.RECOVERED, "DISPATCHED", "manual replay");
         log.info("DLQ 恢复:子任务重置并重投 subtaskId={} taskId={}", subtaskId, t.getId());

@@ -22,4 +22,8 @@ public interface TaskMapper extends BaseMapper<TaskEntity> {
     /** DLQ 恢复:失败计数原子回退(子任务由 FAILED 重置为 PENDING 时对应扣减)。 */
     @Update("UPDATE task SET subtask_failed = subtask_failed - 1 WHERE id = #{id}")
     int decrementFailed(@Param("id") Long id);
+
+    /** 阶段推进:新增下一阶段子任务时原子调大 total(与落定计数同事务,防提前判终态)。 */
+    @Update("UPDATE task SET subtask_total = subtask_total + #{n} WHERE id = #{id}")
+    int addTotal(@Param("id") Long id, @Param("n") int n);
 }

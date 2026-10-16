@@ -1,12 +1,10 @@
 package com.agentflow.server.service;
 
-import com.agentflow.common.state.SubtaskStatus;
 import com.agentflow.common.state.TaskStatus;
 import com.agentflow.common.trace.TraceStage;
 import com.agentflow.server.coordinator.SubtaskDef;
 import com.agentflow.server.coordinator.SubtaskDispatcher;
 import com.agentflow.server.coordinator.TaskDecomposer;
-import com.agentflow.server.entity.SubtaskEntity;
 import com.agentflow.server.entity.TaskEntity;
 import com.agentflow.server.mapper.SubtaskMapper;
 import com.agentflow.server.mapper.TaskMapper;
@@ -75,13 +73,7 @@ public class TaskSubmitService {
         taskMapper.insert(task);
 
         for (SubtaskDef def : defs) {
-            SubtaskEntity sub = new SubtaskEntity();
-            sub.setSubtaskUuid(UUID.randomUUID().toString());
-            sub.setTaskId(task.getId());
-            sub.setSeq(def.seq());
-            sub.setStatus(SubtaskStatus.PENDING.name());
-            sub.setInput(def.inputJson());
-            subtaskMapper.insert(sub);
+            subtaskMapper.insert(def.toEntity(task.getId()));
         }
         return task;
     }

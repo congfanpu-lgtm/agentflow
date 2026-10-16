@@ -38,6 +38,11 @@ public class SubtaskDispatcher {
             log.warn("任务已被并发分发,跳过 taskId={}", task.getId());
             return;
         }
+        dispatchPending(task);
+    }
+
+    /** 发送该任务所有 PENDING 子任务(提交时 / 阶段推进后共用;不做 task 状态迁移)。 */
+    public void dispatchPending(TaskEntity task) {
         List<SubtaskEntity> subs = subtaskMapper.selectList(
                 new QueryWrapper<SubtaskEntity>()
                         .eq("task_id", task.getId())
@@ -45,7 +50,7 @@ public class SubtaskDispatcher {
         for (SubtaskEntity sub : subs) {
             SubtaskMessage msg = new SubtaskMessage(
                     task.getId(), sub.getId(), sub.getSubtaskUuid(),
-                    task.getType(), sub.getSeq(), sub.getInput());
+                    typeOf(task.getType(), sub), sub.getSeq(), sub.getInput());
             try {
                 // .get() 同步等待 broker ack:发送成功才迁移状态
                 kafkaTemplate.send(Topics.SUBTASK, String.valueOf(sub.getId()), msg).get();
@@ -61,5 +66,10 @@ public class SubtaskDispatcher {
                         sub.getId(), e);
             }
         }
+    }
+
+    /** worker 按此路由处理器:子任务有自己的 kind 就用 kind,否则沿用任务类型。 */
+    public static String typeOf(String taskType, SubtaskEntity sub) {
+        return sub.getKind() != null ? sub.getKind() : taskType;
     }
 }
