@@ -19,7 +19,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * RESEARCH_AGENT 三阶段推进(经 ResultHandleService 真实入口)。
+ * RESEARCH_AGENT 多阶段推进(plan → agents → reflect → 追问 agent → synthesize,经 ResultHandleService 真实入口)。
  * 测试事务最终回滚,afterCommit 的分发不会触发 → 新阶段子任务停在 PENDING,便于断言。
  */
 @SpringBootTest
@@ -63,7 +63,7 @@ class ResearchAgentFlowTest {
     }
 
     @Test
-    void planThenAgentsThenSynthesizeThenPartialFailed() {
+    void planAgentsReflectFollowUpSynthesizeThenPartialFailed() {
         long[] ids = fixture();
         long taskId = ids[0];
 
@@ -81,10 +81,29 @@ class ResearchAgentFlowTest {
         assertTrue(subs(taskId, "SYNTHESIZE").isEmpty());   // 还有 agent 没落定,不能合成
 
         service.handle(new ResultMessage(taskId, agents.get(1).getId(), false, null, "boom"));
+        assertTrue(subs(taskId, "SYNTHESIZE").isEmpty());   // agent 落定后先反思,不直接合成
+        List<SubtaskEntity> reflect = subs(taskId, "REFLECT");
+        assertEquals(1, reflect.size());
+        assertEquals(3, reflect.get(0).getSeq());
+        assertEquals(4, taskMapper.selectById(taskId).getSubtaskTotal());
+
+        dispatched(reflect.get(0));
+        service.handle(new ResultMessage(taskId, reflect.get(0).getId(), true,
+                "{\"gaps\":[\"c\"],\"reason\":\"r\"}", null));
+        List<SubtaskEntity> followUps = subs(taskId, "AGENT").stream().filter(x -> x.getSeq() > 3).toList();
+        assertEquals(1, followUps.size());                   // 反思发现 1 个缺口 → 1 个追问 agent
+        assertEquals(4, followUps.get(0).getSeq());
+        assertTrue(followUps.get(0).getInput().replace(" ", "").contains("\"followUp\":true"));
+        assertEquals(5, taskMapper.selectById(taskId).getSubtaskTotal());
+
+        dispatched(followUps.get(0));
+        service.handle(new ResultMessage(taskId, followUps.get(0).getId(), true,
+                "{\"answer\":\"C1\",\"sources\":[]}", null));
         List<SubtaskEntity> synth = subs(taskId, "SYNTHESIZE");
         assertEquals(1, synth.size());
-        assertEquals(3, synth.get(0).getSeq());
-        assertEquals(4, taskMapper.selectById(taskId).getSubtaskTotal());
+        assertEquals(5, synth.get(0).getSeq());
+        assertTrue(synth.get(0).getInput().contains("C1"), "追问结论要进入合成");
+        assertEquals(6, taskMapper.selectById(taskId).getSubtaskTotal());
         assertEquals("RUNNING", taskMapper.selectById(taskId).getStatus());
 
         dispatched(synth.get(0));

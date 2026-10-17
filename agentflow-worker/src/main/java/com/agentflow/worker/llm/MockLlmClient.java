@@ -25,7 +25,7 @@ import java.util.Set;
  *
  * <p>RESEARCH_AGENT 剧本:按系统提示的角色标签({@link Prompts})分流——
  * planner 固定拆 3 个子问题;agent 第 1 步 wiki_search、第 2 步 web_fetch、第 3 步给答案;
- * synthesizer 返回引用 [1] 的报告。其余请求保持原有"摘要"行为。
+ * reflector 固定追问 1 个"最新进展";synthesizer 返回引用 [1] 的报告。其余请求保持原有"摘要"行为。
  * {@code llm.mock.delay-ms} 模拟模型耗时,便于在页面上看清每一步、演示中途杀 worker。
  */
 @Component
@@ -55,6 +55,8 @@ public class MockLlmClient implements LlmClient {
             resp = plan(firstUser(msgs));
         } else if (system.startsWith(Prompts.AGENT_TAG)) {
             resp = agentStep(request, msgs);
+        } else if (system.startsWith(Prompts.REFLECTOR_TAG)) {
+            resp = reflect(lastUser(msgs));
         } else if (system.startsWith(Prompts.SYNTHESIZER_TAG)) {
             resp = synthesize(lastUser(msgs));
         } else {
@@ -81,6 +83,13 @@ public class MockLlmClient implements LlmClient {
                 .add(question + " — 背景与定义")
                 .add(question + " — 关键取舍")
                 .add(question + " — 实际案例");
+        return new ChatResponse(out.toString(), null, null);
+    }
+
+    private ChatResponse reflect(String user) {
+        String question = user.startsWith("原问题:") ? user.substring(4, Math.max(4, user.indexOf('\n'))) : user;
+        ObjectNode out = OM.createObjectNode().put("reason", "MOCK 审稿:缺少最新进展");
+        out.putArray("gaps").add(question + " — 最新进展");
         return new ChatResponse(out.toString(), null, null);
     }
 

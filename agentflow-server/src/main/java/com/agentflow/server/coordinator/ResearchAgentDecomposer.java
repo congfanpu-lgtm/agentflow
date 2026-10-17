@@ -15,8 +15,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * RESEARCH_AGENT:plan → map → reduce 三阶段。
- * 提交时只建 1 个 PLAN;PLAN 成功 → N 个 AGENT(并行);AGENT 全部落定且至少 1 个成功 → 1 个 SYNTHESIZE。
+ * RESEARCH_AGENT:plan → map → reflect → (追问 map) → reduce。
+ * 提交时只建 1 个 PLAN;PLAN 成功 → N 个 AGENT(并行);AGENT 全部落定且至少 1 个成功 → 1 个 REFLECT
+ * 检查结论是否足以回答原问题;有缺口 → 最多 {@link #MAX_FOLLOW_UPS} 个追问 AGENT;之后 → 1 个 SYNTHESIZE。
+ * 反思只做一轮(成本可控、不会无限追问);REFLECT 失败不拖垮任务,直接合成。payload.reflect=false 跳过反思。
  * 每个阶段的每个子任务都是普通 Kafka 子任务,复用重试 / DLQ / 超时兜底 / 幂等 / trace。
  */
 @Component
@@ -27,6 +29,8 @@ public class ResearchAgentDecomposer implements TaskDecomposer {
     static final String PLAN = "PLAN";
     static final String AGENT = "AGENT";
     static final String SYNTHESIZE = "SYNTHESIZE";
+    static final String REFLECT = "REFLECT";
+    static final int MAX_FOLLOW_UPS = 2;
 
     private final ObjectMapper objectMapper;
 
@@ -69,11 +73,40 @@ public class ResearchAgentDecomposer implements TaskDecomposer {
             return defs;
         }
 
-        // 阶段②结束:汇总成功的 agent 结论,交给合成
+        // 阶段②结束:汇总成功的 agent 结论(含追问 agent),交给反思或合成
+        int maxSeq = subs.stream().mapToInt(SubtaskEntity::getSeq).max().orElse(0);
+        ArrayNode findings = findings(agents);
+        if (findings.isEmpty()) {
+            return List.of();
+        }
+        SubtaskEntity reflect = subs.stream().filter(s -> REFLECT.equals(s.getKind())).findFirst().orElse(null);
+        if (reflect == null && payload.path("reflect").asBoolean(true)) {
+            ObjectNode in = input(payload.path("question").asText(), model);
+            in.set("findings", findings);
+            return List.of(new SubtaskDef(maxSeq + 1, in.toString(), REFLECT));
+        }
+        boolean followUpsCreated = reflect != null && agents.stream().anyMatch(a -> a.getSeq() > reflect.getSeq());
+        if (reflect != null && !followUpsCreated && SubtaskStatus.COMPLETED.name().equals(reflect.getStatus())) {
+            List<SubtaskDef> defs = new ArrayList<>();
+            for (JsonNode gap : json(reflect.getOutput()).path("gaps")) {
+                if (defs.size() == MAX_FOLLOW_UPS) {
+                    break;
+                }
+                defs.add(new SubtaskDef(maxSeq + 1 + defs.size(),
+                        input(gap.asText(), model).put("followUp", true).toString(), AGENT));
+            }
+            if (!defs.isEmpty()) {
+                return defs;
+            }
+        }
+        ObjectNode in = input(payload.path("question").asText(), model);
+        in.set("findings", findings);
+        return List.of(new SubtaskDef(maxSeq + 1, in.toString(), SYNTHESIZE));
+    }
+
+    private ArrayNode findings(List<SubtaskEntity> agents) {
         ArrayNode findings = objectMapper.createArrayNode();
-        int maxSeq = 0;
         for (SubtaskEntity a : agents) {
-            maxSeq = Math.max(maxSeq, a.getSeq());
             if (!SubtaskStatus.COMPLETED.name().equals(a.getStatus())) {
                 continue;
             }
@@ -83,12 +116,7 @@ public class ResearchAgentDecomposer implements TaskDecomposer {
                     .put("answer", out.path("answer").asText());
             f.set("sources", out.path("sources"));
         }
-        if (findings.isEmpty()) {
-            return List.of();
-        }
-        ObjectNode in = input(payload.path("question").asText(), model);
-        in.set("findings", findings);
-        return List.of(new SubtaskDef(maxSeq + 1, in.toString(), SYNTHESIZE));
+        return findings;
     }
 
     /** 研究任务的产物是报告:合成没有成功(拆题失败 / agent 全败 / 合成失败)一律 FAILED,不报"部分失败"。 */

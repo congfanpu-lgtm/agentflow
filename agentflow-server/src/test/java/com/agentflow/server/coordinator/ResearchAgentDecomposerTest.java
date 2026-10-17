@@ -63,9 +63,17 @@ class ResearchAgentDecomposerTest {
         assertTrue(d.nextStage(task(), List.of(sub(0, "PLAN", "FAILED", "{}", null))).isEmpty());
     }
 
+    private static TaskEntity noReflect() {
+        TaskEntity t = task();
+        t.setPayload("{\"question\":\"kafka vs rabbitmq\",\"reflect\":false}");
+        return t;
+    }
+
+    private static final String A1 = "{\"answer\":\"A1\",\"sources\":[{\"title\":\"K\",\"url\":\"https://k\"}]}";
+
     @Test
     void settledAgentsProduceOneSynthesizeWithSuccessfulFindingsOnly() throws Exception {
-        List<SubtaskDef> next = d.nextStage(task(), List.of(
+        List<SubtaskDef> next = d.nextStage(noReflect(), List.of(
                 sub(0, "PLAN", "COMPLETED", "{}", "{\"subQuestions\":[\"a\",\"b\"]}"),
                 sub(1, "AGENT", "COMPLETED", "{\"question\":\"a\"}",
                         "{\"answer\":\"A1\",\"sources\":[{\"title\":\"K\",\"url\":\"https://k\"}]}"),
@@ -89,5 +97,67 @@ class ResearchAgentDecomposerTest {
                 sub(0, "PLAN", "COMPLETED", "{}", "{\"subQuestions\":[\"a\"]}"),
                 sub(1, "AGENT", "COMPLETED", "{\"question\":\"a\"}", "{\"answer\":\"x\",\"sources\":[]}"),
                 sub(2, "SYNTHESIZE", "COMPLETED", "{}", "{\"report\":\"r\"}"))).isEmpty());
+    }
+
+
+    // ---- 反思补漏:AGENT 全部落定 → REFLECT 找缺口 → 最多 2 个追问 AGENT → SYNTHESIZE
+
+    @Test
+    void settledAgentsGoToReflectByDefault() throws Exception {
+        List<SubtaskDef> next = d.nextStage(task(), List.of(
+                sub(0, "PLAN", "COMPLETED", "{}", "{\"subQuestions\":[\"a\",\"b\"]}"),
+                sub(1, "AGENT", "COMPLETED", "{\"question\":\"a\"}", A1),
+                sub(2, "AGENT", "FAILED", "{\"question\":\"b\"}", null)));
+        assertEquals(1, next.size());
+        assertEquals("REFLECT", next.get(0).kind());
+        assertEquals(3, next.get(0).seq());
+        var in = om.readTree(next.get(0).inputJson());
+        assertEquals("kafka vs rabbitmq", in.get("question").asText());
+        assertEquals(1, in.get("findings").size());
+        assertEquals("A1", in.at("/findings/0/answer").asText());
+    }
+
+    @Test
+    void reflectGapsFanOutFollowUpAgents() throws Exception {
+        List<SubtaskDef> next = d.nextStage(task(), List.of(
+                sub(0, "PLAN", "COMPLETED", "{}", "{\"subQuestions\":[\"a\"]}"),
+                sub(1, "AGENT", "COMPLETED", "{\"question\":\"a\"}", A1),
+                sub(2, "REFLECT", "COMPLETED", "{}", "{\"gaps\":[\"x\",\"y\",\"z\"]}")));
+        assertEquals(List.of(3, 4), next.stream().map(SubtaskDef::seq).toList(), "最多 2 个追问");
+        assertTrue(next.stream().allMatch(x -> "AGENT".equals(x.kind())));
+        var in = om.readTree(next.get(0).inputJson());
+        assertEquals("x", in.get("question").asText());
+        assertTrue(in.get("followUp").asBoolean());
+    }
+
+    @Test
+    void reflectWithoutGapsOrFailedGoesToSynthesize() throws Exception {
+        for (SubtaskEntity reflect : List.of(sub(2, "REFLECT", "COMPLETED", "{}", "{\"gaps\":[]}"),
+                sub(2, "REFLECT", "FAILED", "{}", null))) {
+            List<SubtaskDef> next = d.nextStage(task(), List.of(
+                    sub(0, "PLAN", "COMPLETED", "{}", "{\"subQuestions\":[\"a\"]}"),
+                    sub(1, "AGENT", "COMPLETED", "{\"question\":\"a\"}", A1), reflect));
+            assertEquals(1, next.size(), "反思失败不应拖垮任务:直接合成");
+            assertEquals("SYNTHESIZE", next.get(0).kind());
+            assertEquals(3, next.get(0).seq());
+            assertEquals(1, om.readTree(next.get(0).inputJson()).get("findings").size());
+        }
+    }
+
+    @Test
+    void followUpAgentsSettledGoToSynthesizeWithAllFindings() throws Exception {
+        List<SubtaskDef> next = d.nextStage(task(), List.of(
+                sub(0, "PLAN", "COMPLETED", "{}", "{\"subQuestions\":[\"a\"]}"),
+                sub(1, "AGENT", "COMPLETED", "{\"question\":\"a\"}", A1),
+                sub(2, "REFLECT", "COMPLETED", "{}", "{\"gaps\":[\"x\",\"y\"]}"),
+                sub(3, "AGENT", "COMPLETED", "{\"question\":\"x\",\"followUp\":true}",
+                        "{\"answer\":\"X1\",\"sources\":[]}"),
+                sub(4, "AGENT", "FAILED", "{\"question\":\"y\",\"followUp\":true}", null)));
+        assertEquals(1, next.size());
+        assertEquals("SYNTHESIZE", next.get(0).kind());
+        assertEquals(5, next.get(0).seq());
+        var f = om.readTree(next.get(0).inputJson()).get("findings");
+        assertEquals(2, f.size());
+        assertEquals("x", f.at("/1/subQuestion").asText());
     }
 }

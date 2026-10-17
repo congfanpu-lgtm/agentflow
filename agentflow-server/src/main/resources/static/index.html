@@ -77,7 +77,7 @@
   /* 有报告时输入框和内容区同宽,与左右两栏对齐,不再悬在中间压住两栏 */
   .rs.active .ask{width:min(1192px,calc(100% - 32px))}
   /* pipeline */
-  .pipe{list-style:none;margin:0 0 14px;padding:0;display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+  .pipe{list-style:none;margin:0 0 14px;padding:0;display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
   .pipe li{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:7px 12px;display:flex;gap:10px;align-items:center;position:relative;overflow:hidden}
   .pipe li>div{display:flex;align-items:baseline;gap:8px;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .pipe .n{width:22px;height:22px;flex:none;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:11.5px;
@@ -123,6 +123,9 @@
   .step.final:before{background:var(--ok)} .step.final .t{color:var(--fg)}
   .resume{color:var(--warn);font-weight:600;font-size:12.5px;padding:2px 0 10px 18px}
   .drop{color:var(--fail);font-size:12px;padding:0 0 8px 18px}
+  .review{border:1px dashed var(--border2);border-radius:var(--radius);padding:10px 14px;font-size:12.5px;color:var(--fg2);line-height:1.5}
+  .review b{color:var(--fg)}
+  .agent .fu{flex:none;font-size:10.5px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--warn);border:1px solid currentColor;border-radius:5px;padding:0 5px;margin-top:2px}
   .err{color:var(--fail);font-size:12px;margin:6px 0 0 26px}
 
   /* report */
@@ -175,7 +178,7 @@
     .rs.active .grid>.side,.rs.active .grid>.main{position:static;max-height:none;min-height:0;overflow:auto;padding-bottom:100px}
     .rs.active .col-h{position:sticky;top:0;z-index:2;background:var(--bg);padding-bottom:8px;margin-bottom:0}
   }
-  @media(max-width:900px){.grid{grid-template-columns:1fr}.grid>.side{position:static;max-height:none;overflow:visible;order:2}.ops{grid-template-columns:1fr}}
+  @media(max-width:900px){.pipe{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr}.grid>.side{position:static;max-height:none;overflow:visible;order:2}.ops{grid-template-columns:1fr}}
   @media(max-width:640px){
     header{padding:10px 16px}.health span:last-child{display:none}
     .rs{padding:20px 16px 110px}.hero h1{font-size:22px}
@@ -195,10 +198,10 @@
   <div class="hero">
     <h1>Ask a research question</h1>
     <p>A planner splits it into sub-questions, parallel ReAct agents investigate each one with real tools on a Kafka
-      worker pool, and a writer turns their findings into a cited report.</p>
+      worker pool, a reviewer sends follow-up agents to fill gaps, and a writer turns the findings into a cited report.</p>
     <div class="ask"><input id="q" maxlength="500" placeholder="e.g. What are the trade-offs between Kafka and RabbitMQ for agent systems?"><button id="ask" class="btn">Research</button></div>
     <div class="examples" id="examples"></div>
-    <div class="how"><span><b>① Plan</b> split into sub-questions</span><span><b>② Research</b> agents think → call tools → read</span><span><b>③ Report</b> synthesize with citations</span></div>
+    <div class="how"><span><b>① Plan</b> split into sub-questions</span><span><b>② Research</b> agents think → call tools → read</span><span><b>③ Review</b> find gaps → follow up</span><span><b>④ Report</b> synthesize with citations</span></div>
   </div>
 
   <div id="rsBody" hidden>
@@ -206,7 +209,8 @@
     <ol class="pipe">
       <li id="pPlan"><span class="n">1</span><div><b>Plan</b><small id="planState">waiting</small></div></li>
       <li id="pAgents"><span class="n">2</span><div><b>Research</b><small id="agentsState">waiting</small></div><span class="flag" id="resumeFlag"></span></li>
-      <li id="pReport"><span class="n">3</span><div><b>Report</b><small id="taskState">waiting</small></div></li>
+      <li id="pReview"><span class="n">3</span><div><b>Review</b><small id="reviewState">waiting</small></div></li>
+      <li id="pReport"><span class="n">4</span><div><b>Report</b><small id="taskState">waiting</small></div></li>
     </ol>
     <div class="grid">
       <div class="side">
@@ -437,15 +441,17 @@ function setStep(li,state,small,text){li.className=state;small.textContent=text;
 
 function renderResearch(t,trace){
   const advs=trace.map(e=>e.stage==="STAGE_ADVANCED"?parse(e.detail):null).filter(Boolean);
-  const adv=advs.find(d=>d.kind==="AGENT");
+  const [adv,followAdv]=advs.filter(d=>d.kind==="AGENT");   // 第二次 AGENT 扇出 = 反思后的追问
+  const reflectAdv=advs.find(d=>d.kind==="REFLECT");
   const synth=advs.find(d=>d.kind==="SYNTHESIZE");
-  const agents=adv?adv.subtasks:[];
+  const first=adv?adv.subtasks:[], follow=followAdv?followAdv.subtasks:[];
+  const agents=[...first,...follow];
   const terminal=TERMINAL.includes(t.status);
   const subBySeq={};(t.subtasks||[]).forEach(s=>subBySeq[s.seq]=s);
 
   // ① Plan
   setStep($("pPlan"),adv?"done":terminal?"fail":"run",$("planState"),
-    adv?`${agents.length} sub-questions`:terminal?"failed":"splitting the question…");
+    adv?`${first.length} sub-questions`:terminal?"failed":"splitting the question…");
   // ② Research
   const st=agents.map(a=>(subBySeq[a.seq]||{}).status);
   const done=st.filter(s=>s==="COMPLETED").length, failed=st.filter(s=>s==="FAILED").length;
@@ -454,13 +460,35 @@ function renderResearch(t,trace){
     !adv?"waiting":`${done}/${agents.length} agents done${failed?` · ${failed} failed`:""}`);
   const resumes=trace.filter(e=>e.stage==="RESUMED").length;
   $("resumeFlag").textContent=resumes?`⚡ ${resumes} resumed after a worker crash`:"";
-  // ③ Report
+  // ③ Review:反思是否发现缺口(追问 agent 来自第二次 AGENT 扇出)
   const items=t.result||[];
+  const reflectSub=reflectAdv&&subBySeq[reflectAdv.subtasks[0].seq];
+  const reflectOut=reflectAdv&&(items.find(i=>i.kind==="REFLECT")||{}).output;
+  const reviewed=reflectSub&&["COMPLETED","FAILED"].includes(reflectSub.status);
+  const reviewText=!reflectAdv?(synth?"skipped":"waiting")
+    :!reviewed?"checking for gaps…"
+    :reflectSub.status==="FAILED"?"skipped (review failed)"
+    :follow.length?`${follow.length} follow-up${follow.length>1?"s":""}`:(synth?"no gaps found":"…");
+  setStep($("pReview"),!reflectAdv?(synth?"done":""):reviewed?"done":"run",$("reviewState"),reviewText);
+  // ④ Report
   const rep=items.map(i=>i.output).find(o=>o&&o.report);
   setStep($("pReport"),rep?"done":terminal?"fail":synth?"run":"",$("taskState"),
     rep?(t.status==="COMPLETED"?"done":t.status):terminal?t.status:synth?"writing…":"waiting");
 
-  if(adv)$("agents").replaceChildren(...agents.map((a,i)=>agentCard(a,i,trace.filter(e=>e.subtaskId===a.subtaskId),subBySeq[a.seq])));
+  if(adv){
+    const card=(a,i,fu)=>agentCard(a,i,trace.filter(e=>e.subtaskId===a.subtaskId),subBySeq[a.seq],fu);
+    const nodes=first.map((a,i)=>card(a,i,false));
+    if(reflectAdv){
+      const r=el("div","review");
+      r.append(el("b",null,"🔍 Review · "),document.createTextNode(
+        !reviewed?"checking whether the findings answer the whole question…"
+        :reflectOut&&reflectOut.reason?reflectOut.reason+(follow.length?` → ${follow.length} follow-up agent${follow.length>1?"s":""}`:"")
+        :follow.length?`found ${follow.length} gap${follow.length>1?"s":""} → follow-up agents below`:"no gaps found"));
+      nodes.push(r);
+    }
+    follow.forEach((a,i)=>nodes.push(card(a,first.length+i,true)));
+    $("agents").replaceChildren(...nodes);
+  }
   else if(terminal)$("agents").replaceChildren(el("div","muted","Planning failed — see the Ops tab for the trace."));
 
   if(rep)renderReport(rep,items,trace);
@@ -473,7 +501,7 @@ function shortArgs(json){
   return json||"";
 }
 
-function agentCard(a,i,events,sub){
+function agentCard(a,i,events,sub,followUp){
   const card=el("details","agent");
   card.open=openCards.has(a.subtaskId);
   card.addEventListener("toggle",()=>card.open?openCards.add(a.subtaskId):openCards.delete(a.subtaskId));
@@ -515,7 +543,9 @@ function agentCard(a,i,events,sub){
 
   const sum=el("summary");
   const top=el("div","top");
-  top.append(el("span","idx",String(i+1).padStart(2,"0")),el("div","q",a.input&&a.input.question),el("span","chev","›"));
+  top.append(el("span","idx",String(i+1).padStart(2,"0")),el("div","q",a.input&&a.input.question));
+  if(followUp)top.append(el("span","fu","follow-up"));
+  top.append(el("span","chev","›"));
   const meta=el("div","meta");
   meta.append(el("span","badge b-"+status,status==="COMPLETED"?"done":status.toLowerCase()));
   if(workers.length)meta.append(el("span",null,workers.join(" → ")));

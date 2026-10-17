@@ -91,6 +91,17 @@ class MockLlmClientTest {
     }
 
     @Test
+    void reflectorScriptAsksOneFollowUp() throws Exception {
+        // mock 也走完整的"反思 → 追问 agent"路径,CI / 演示不花钱就能看到这一段
+        ChatResponse r = new MockLlmClient().chat(new ChatRequest("mock-small", List.of(
+                new ChatMessage("system", Prompts.REFLECTOR),
+                new ChatMessage("user", "原问题:kafka vs rabbitmq\n\n各子问题结论:\n### a\nA1\n")), 100));
+        var out = OM.readTree(r.getContent());
+        assertEquals(1, out.get("gaps").size());
+        assertTrue(out.at("/gaps/0").asText().startsWith("kafka vs rabbitmq"), r.getContent());
+    }
+
+    @Test
     void agentScriptSearchesKeywordsNotWholeSentence() {
         assertEquals("Kafka RabbitMQ", MockLlmClient.keywords(
                 "What are the trade-offs between Kafka and RabbitMQ for agent systems? — 关键取舍"));

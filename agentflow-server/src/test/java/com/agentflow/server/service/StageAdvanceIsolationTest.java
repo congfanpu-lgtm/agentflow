@@ -27,7 +27,7 @@ import static org.mockito.Mockito.doAnswer;
 /**
  * 竞态复现:agent B 的失败结果正在处理(事务已开始读库),此时 agent A 的成功结果在另一个事务里提交。
  * B 累加计数后看到"全部落定",推进阶段时必须读到 A 已 COMPLETED——
- * 在 MySQL 默认的 REPEATABLE READ 下会读到事务开始时的旧快照(A 还是 DISPATCHED),合成被漏掉。
+ * 在 MySQL 默认的 REPEATABLE READ 下会读到事务开始时的旧快照(A 还是 DISPATCHED),下一阶段被漏掉。
  * 本测试不加 @Transactional:handle 必须是最外层事务,隔离级别注解才生效;数据在 @AfterEach 清理。
  */
 @SpringBootTest
@@ -95,7 +95,7 @@ class StageAdvanceIsolationTest {
         service.handle(new ResultMessage(taskId, b.getId(), false, null, "boom"));
 
         assertEquals(1, subtaskMapper.selectCount(new QueryWrapper<SubtaskEntity>()
-                .eq("task_id", taskId).eq("kind", "SYNTHESIZE")), "A 已成功,必须进入合成阶段");
+                .eq("task_id", taskId).eq("kind", "REFLECT")), "A 已成功,必须进入下一阶段(反思)");
         assertEquals("RUNNING", taskMapper.selectById(taskId).getStatus());
     }
 }
