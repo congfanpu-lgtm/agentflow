@@ -1,5 +1,7 @@
 package com.agentflow.server.controller;
 
+import com.agentflow.server.demo.DemoGuard;
+import jakarta.servlet.http.HttpServletRequest;
 import com.agentflow.server.controller.dto.SubmitTaskRequest;
 import com.agentflow.server.controller.dto.TaskView;
 import com.agentflow.server.entity.TaskEntity;
@@ -19,9 +21,11 @@ public class TaskController {
 
     private final TaskSubmitService submitService;
     private final TaskQueryService queryService;
+    private final DemoGuard demoGuard;
 
     @PostMapping
-    public ResponseEntity<Map<String, String>> submit(@RequestBody SubmitTaskRequest req) {
+    public ResponseEntity<Map<String, String>> submit(@RequestBody SubmitTaskRequest req, HttpServletRequest http) {
+        demoGuard.checkSubmit(http, req.getType(), req.getPayload());
         TaskEntity task = submitService.submit(req.getType(), req.getPayload());
         return ResponseEntity.status(HttpStatus.ACCEPTED)
                 .body(Map.of("taskUuid", task.getTaskUuid()));
@@ -31,6 +35,11 @@ public class TaskController {
     public ResponseEntity<TaskView> get(@PathVariable("taskUuid") String taskUuid) {
         TaskView view = queryService.findByUuid(taskUuid);
         return view == null ? ResponseEntity.notFound().build() : ResponseEntity.ok(view);
+    }
+
+    @ExceptionHandler(DemoGuard.Rejected.class)
+    public ResponseEntity<Map<String, String>> demoRejected(DemoGuard.Rejected e) {
+        return ResponseEntity.status(e.status()).body(Map.of("error", e.getMessage()));
     }
 
     @ExceptionHandler(IllegalArgumentException.class)

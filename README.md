@@ -131,6 +131,28 @@ the scheduler, not the model — free & deterministic). Reproduce: `scripts/load
 
 ---
 
+## Research-agent evaluation
+
+`eval/run_eval.py` runs 20 fixed questions (EN + ZH; current events, systems, comparisons, ML concepts)
+through the real stack and scores the reports. A judge model (Claude Sonnet) grades each question's
+required aspects 0/1/2, and **checks citations against the cited page itself**: it samples cited sentences,
+fetches the source URL, and asks whether that page supports the sentence. Model under test: Claude Haiku.
+Full per-question tables: [`eval/results/`](eval/results/).
+
+| Run | What changed | Citation accuracy (strict / lenient) | Depth | Agents with no sources | Cost / question | p50 |
+|---|---|---|---|---|---|---|
+| v2-noreflect | baseline (after language + Wikipedia 429 fixes) | 54% / 86% | 95% | 25% | $0.039 | 21s |
+| v2-reflect | + review stage with up to 2 follow-up agents | 47% / 82% | 95% | 40% | $0.072 | 39s |
+| v3-evidence-1600tok | + evidence quotes, verified against tool output; larger answer budget | **67% / 85%** | 93% | **13%** | $0.047 | 21s |
+
+What the numbers changed:
+- **v1 → v2:** English questions were answered in Chinese (the prompts are Chinese), and 36 of 41 tool errors were Wikipedia HTTP 429s. Fixed: the response language is pinned from the question, and `wiki_search` now makes one API call instead of four.
+- **Reflection didn't pay off.** It added +85% cost and ~2× latency for no gain in depth, so it is **off by default**. Turn it on with `payload.reflect=true` or the *Deep review* toggle.
+- **Citations were the real weakness.** The report writer never saw the source text, so it attached sources to claims they don't make. Fix: each agent returns a verbatim quote per source; the loop drops any quote that isn't in the tool output; and the writer cites only what the evidence supports.
+- **Truncated answers lost their sources.** An 800-token answer budget truncated the JSON, so sources were silently lost; raising it to 1600 fixed this. The *agents with no sources* metric was added because of this bug.
+
+Re-run: `python3 eval/run_eval.py --label my-run` (judge reads `.env`; `--self-check` runs in CI).
+
 ## Quick start
 
 ```bash
@@ -162,8 +184,23 @@ curl -X POST localhost:8080/api/v1/tasks -H 'Content-Type: application/json' \
 # GET /api/v1/llm/usage           -> token accounting per model
 ```
 
-Task types: `RESEARCH_AGENT` (plan → parallel ReAct agents → cited report) · `ECHO_BATCH` (echo, for load tests) ·
+Task types: `RESEARCH_AGENT` (plan → parallel ReAct agents → review & follow-ups → cited report) · `ECHO_BATCH` (echo, for load tests) ·
 `LLM_BATCH` (LLM summarize via gateway) · `RESEARCH_BATCH` (intent-gated RAG retrieval → summarize).
+
+### Public demo (Cloudflare Tunnel)
+
+```bash
+# .env: DEMO_ACCESS_CODE=<code you hand out>, DEMO_TRUST_PROXY_HEADER=true
+#       optional: DEMO_PER_IP_DAILY=5, DEMO_DAILY_BUDGET_USD=1.0
+brew install cloudflared
+scripts/demo-tunnel.sh        # prints https://<random>.trycloudflare.com; Ctrl-C takes it offline
+```
+
+With `DEMO_ACCESS_CODE` set, every `/api/**` call needs the code (the page asks for it), only
+`RESEARCH_AGENT` with the default model can be submitted, each client IP gets N tasks per day, and new
+tasks are refused once today's estimated LLM spend reaches the budget. The tunnel dials out from the
+machine, so no port is opened; the script refuses to start without an access code or with port 8080
+bound beyond localhost (the per-IP limit trusts `CF-Connecting-IP`, which is only safe behind the tunnel).
 
 > Demo GIF: recording steps are in [`README.zh.md`](README.zh.md#录制-demo-gif); save it as `docs/img/demo.gif`
 > and uncomment the image line at the top of this README.
