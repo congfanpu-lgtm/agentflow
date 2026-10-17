@@ -29,3 +29,5 @@ jobs:
           python-version: '3.12'
       - run: pip install -r agentflow-rag/requirements.txt
       - run: cd agentflow-rag && pytest -q
+      - name: Eval harness self-check
+        run: python3 eval/run_eval.py --self-check

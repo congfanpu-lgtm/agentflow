@@ -93,6 +93,7 @@ class AgentLoopTest {
         List<ChatRequest> reqs = requests(2);
         assertEquals("search", reqs.get(0).getTools().get(0).name());
         assertTrue(reqs.get(0).getMessages().get(0).getContent().contains("Today is " + java.time.LocalDate.now(java.time.ZoneOffset.UTC).toString()));
+                assertTrue(reqs.get(0).getMessages().get(0).getContent().endsWith(Prompts.ENGLISH));
         assertEquals("tool", reqs.get(1).getMessages().get(3).getRole());
         assertEquals("c1", reqs.get(1).getMessages().get(3).getToolCallId());
         assertTrue(detailsOf(TraceStage.AGENT_STEP).get(0).contains("\"tool\":\"search\""));

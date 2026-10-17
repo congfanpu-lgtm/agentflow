@@ -50,6 +50,7 @@ class SynthesizeProcessorTest {
         verify(gateway).chat(c.capture());
         String user = c.getValue().getMessages().get(1).getContent();
         assertTrue(c.getValue().getMessages().get(0).getContent().contains("Today is " + java.time.LocalDate.now(java.time.ZoneOffset.UTC).toString()));
+                assertTrue(c.getValue().getMessages().get(0).getContent().endsWith(com.agentflow.worker.agent.Prompts.ENGLISH));
         assertTrue(user.contains("[1] K https://k"));
         assertTrue(user.contains("[2] R https://r"));
         assertTrue(user.contains("### a\nA1"));

@@ -12,13 +12,21 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 
-/** 搜索英文 Wikipedia(免费、无需 key):search 接口取前 3 个词条,再逐个取 summary。 */
+/**
+ * 搜索英文 Wikipedia(免费、无需 key):generator=search 一次请求拿前 3 个词条的标题、导语摘要和 URL。
+ * (早先是 1 次搜索 + 3 次 summary,并发 agent 一多就被 Wikipedia 429;评测里 41 次工具报错有 36 次是它。)
+ * 429 时按 Retry-After(封顶 3s)等一次再试。
+ */
 @Component
 public class WikiSearchTool implements AgentTool {
 
     /** Wikimedia API 政策要求可识别的 User-Agent。 */
-    static final String USER_AGENT = "AgentFlow/0.1 (portfolio research-agent demo)";
+    static final String USER_AGENT = "AgentFlow/0.1 (https://github.com/congfanpu-lgtm/agentflow; research-agent demo)";
+    static final long MAX_RETRY_WAIT_MS = 3000;
     private static final ObjectMapper OM = new ObjectMapper();
 
     private final String baseUrl;
@@ -52,16 +60,18 @@ public class WikiSearchTool implements AgentTool {
         if (q.isEmpty()) {
             throw new IllegalArgumentException("query 不能为空");
         }
-        JsonNode search = get(baseUrl + "/w/api.php?action=query&list=search&format=json&srlimit=3&srsearch=" + enc(q));
+        JsonNode res = get(baseUrl + "/w/api.php?action=query&format=json&formatversion=2&generator=search"
+                + "&gsrlimit=3&prop=extracts%7Cinfo&exintro=1&explaintext=1&exlimit=3&inprop=url&gsrsearch=" + enc(q));
+        List<JsonNode> pages = new ArrayList<>();
+        res.path("query").path("pages").forEach(pages::add);
+        pages.sort(Comparator.comparingInt(p -> p.path("index").asInt(Integer.MAX_VALUE)));   // index = 相关度排名
         StringBuilder sb = new StringBuilder();
-        for (JsonNode hit : search.path("query").path("search")) {
-            String title = hit.path("title").asText();
-            String slug = enc(title.replace(' ', '_'));
-            JsonNode s = get(baseUrl + "/api/rest_v1/page/summary/" + slug);
+        for (JsonNode p : pages) {
+            String title = p.path("title").asText();
             sb.append("Title: ").append(title).append('\n')
-                    .append("URL: ").append(s.path("content_urls").path("desktop").path("page")
-                            .asText("https://en.wikipedia.org/wiki/" + slug)).append('\n')
-                    .append("Summary: ").append(s.path("extract").asText("")).append("\n\n");
+                    .append("URL: ").append(p.path("fullurl")
+                            .asText("https://en.wikipedia.org/wiki/" + enc(title.replace(' ', '_')))).append('\n')
+                    .append("Summary: ").append(p.path("extract").asText("")).append("\n\n");
         }
         return sb.isEmpty() ? "没有找到相关词条:" + q : sb.toString().trim();
     }
@@ -71,6 +81,17 @@ public class WikiSearchTool implements AgentTool {
                 .header("User-Agent", USER_AGENT)
                 .timeout(Duration.ofSeconds(10)).build();
         HttpResponse<String> resp = http.send(req, HttpResponse.BodyHandlers.ofString());
+        if (resp.statusCode() == 429) {
+            long waitMs = resp.headers().firstValue("Retry-After").map(v -> {
+                try {
+                    return Long.parseLong(v.trim()) * 1000;
+                } catch (NumberFormatException e) {
+                    return 1000L;   // HTTP-date 形式的 Retry-After 不解析,等 1s
+                }
+            }).orElse(1000L);
+            Thread.sleep(Math.min(waitMs, MAX_RETRY_WAIT_MS));
+            resp = http.send(req, HttpResponse.BodyHandlers.ofString());
+        }
         if (resp.statusCode() / 100 != 2) {
             throw new IllegalStateException("Wikipedia HTTP " + resp.statusCode());
         }

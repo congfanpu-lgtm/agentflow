@@ -63,7 +63,8 @@ class PlanProcessorTest {
         verify(gateway).chat(req.capture());
         List<ChatMessage> msgs = req.getValue().getMessages();
         assertEquals("kafka vs rabbitmq", msgs.get(1).getContent());
-        assertTrue(msgs.get(0).getContent().contains("Today is " + java.time.LocalDate.now(java.time.ZoneOffset.UTC).toString()), "规划提示词应注入当前日期");   // 首条 user 仍是原问题(mock 依赖)
+        assertTrue(msgs.get(0).getContent().contains("Today is " + java.time.LocalDate.now(java.time.ZoneOffset.UTC).toString()), "规划提示词应注入当前日期");
+        assertTrue(msgs.get(0).getContent().endsWith(com.agentflow.worker.agent.Prompts.ENGLISH), "英文问题要明确要求英文作答");   // 首条 user 仍是原问题(mock 依赖)
         String last = msgs.get(msgs.size() - 1).getContent();
         assertTrue(last.contains("不要直接回答") && last.contains("subQuestions"), last);
     }

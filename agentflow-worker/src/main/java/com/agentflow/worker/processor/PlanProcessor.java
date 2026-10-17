@@ -47,7 +47,7 @@ public class PlanProcessor implements SubtaskProcessor {
         }
         String model = in.hasNonNull("model") ? in.get("model").asText() : null;
         ChatResponse resp = gateway.chat(new ChatRequest(model, List.of(
-                new ChatMessage("system", Prompts.withDate(Prompts.PLANNER)), new ChatMessage("user", question),
+                new ChatMessage("system", Prompts.system(Prompts.PLANNER, question)), new ChatMessage("user", question),
                 new ChatMessage("user", Prompts.PLANNER_REMINDER)), 400));
 
         JsonNode plan = TextUtil.parseObject(resp.getContent());

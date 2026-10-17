@@ -72,7 +72,7 @@ public class AgentLoop {
 
     public ObjectNode run(AgentRun run) {
         List<ChatMessage> messages = new ArrayList<>();
-        messages.add(new ChatMessage("system", Prompts.withDate(Prompts.AGENT)));
+        messages.add(new ChatMessage("system", Prompts.system(Prompts.AGENT, run.question())));
         messages.add(new ChatMessage("user", run.question()));
         Map<String, String> cache = new HashMap<>();
         Set<String> seenUrls = new LinkedHashSet<>();
