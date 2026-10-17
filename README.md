@@ -118,10 +118,12 @@ the scheduler, not the model — free & deterministic). Reproduce: `scripts/load
 
 | Metric | Result |
 |---|---|
-| Throughput / latency (3 workers) | submit P50 40ms / P99 137ms; **end-to-end** P50 5.3s / P99 6.9s; 103 tasks/min; 8.6 subtasks/s |
+| Throughput / latency (2 workers × 4 consumer threads, compose stack) | 120 tasks × 5 subtasks: submit P50 36ms / P99 357ms; end-to-end P50 3.8s / P99 4.3s; **25.5 subtasks/s = 96% of the 26.7/s ceiling** (8 threads × 300ms echo work) |
+| Throughput / latency (3 workers, earlier run) | submit P50 40ms / P99 137ms; end-to-end P50 5.3s / P99 6.9s; 103 tasks/min; 8.6 subtasks/s |
 | Horizontal scaling 1→3 workers | 3.1 → 8.6 subtasks/s = **2.77×** (single-machine resource bound, not architectural) |
 | Cost control (idempotency) | crash scenario: **27.3%** of redeliveries intercepted (no duplicate LLM calls) |
-| Fault tolerance | `kill -9` a worker mid-load → **24/24 tasks still COMPLETED** (zero loss) |
+| Fault tolerance | `docker kill` a worker 3s into a 60-task load → **60/60 COMPLETED**, 300/300 subtasks processed once; P99 47s = Kafka session timeout before the partitions move (`scripts/chaos-load.sh`) |
+| Agent crash recovery (real Claude) | kill the worker mid-agent, 3 runs → **3/3 COMPLETED**, all 6 in-flight agents resumed from step 2 on the other worker, finished steps not re-run (`scripts/chaos-agent.sh`) |
 | Retrieval quality | mean **Recall@3 = 1.0** (deterministic embedding) |
 | Side-effect idempotency | 85 finalized tasks → **85 notifications, 0 duplicates** |
 | Observability | Run Trace completeness **100%** |
