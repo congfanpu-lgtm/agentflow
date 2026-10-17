@@ -145,12 +145,15 @@ Full per-question tables: [`eval/results/`](eval/results/).
 |---|---|---|---|---|---|---|
 | v2-noreflect | baseline (after language + Wikipedia 429 fixes) | 54% / 86% | 95% | 25% | $0.039 | 21s |
 | v2-reflect | + review stage with up to 2 follow-up agents | 47% / 82% | 95% | 40% | $0.072 | 39s |
-| v3-evidence-1600tok | + evidence quotes, verified against tool output; larger answer budget | **67% / 85%** | 93% | **13%** | $0.047 | 21s |
+| v3-evidence-1600tok | + evidence quotes verified against tool output; larger answer budget | 67% / 85% | 93% | 13% | $0.047 | 21s |
+| **v4-final** (default config) | + quote must come from the cited source's own text (review fix) | **60% / 87%** | 95% | **12%** | $0.049 | 24s |
+
+Each run checks about 70 cited sentences, so strict accuracy has a ±11-point 95% interval. The 54 → 60–67% trend is suggestive but not conclusive. The solid gains are structural: agents that silently lost all their sources fell from 25% to 12%, and every citation now carries a verified quote that a reader can check.
 
 What the numbers changed:
 - **v1 → v2:** English questions were answered in Chinese (the prompts are Chinese), and 36 of 41 tool errors were Wikipedia HTTP 429s. Fixed: the response language is pinned from the question, and `wiki_search` now makes one API call instead of four.
 - **Reflection didn't pay off.** It added +85% cost and ~2× latency for no gain in depth, so it is **off by default**. Turn it on with `payload.reflect=true` or the *Deep review* toggle.
-- **Citations were the real weakness.** The report writer never saw the source text, so it attached sources to claims they don't make. Fix: each agent returns a verbatim quote per source; the loop drops any quote that isn't in the tool output; and the writer cites only what the evidence supports.
+- **Citations are the real weakness, and the hardest to move.** The report writer never saw the source text, so it attached sources to claims they don't make. Fix: each agent returns a verbatim quote per source, the loop keeps a quote only if it appears in that source's own tool output, and the writer cites only what the evidence supports. Remaining errors are mostly "partial" support: a date or number is not in the excerpt the agent read.
 - **Truncated answers lost their sources.** An 800-token answer budget truncated the JSON, so sources were silently lost; raising it to 1600 fixed this. The *agents with no sources* metric was added because of this bug.
 
 Re-run: `python3 eval/run_eval.py --label my-run` (judge reads `.env`; `--self-check` runs in CI).

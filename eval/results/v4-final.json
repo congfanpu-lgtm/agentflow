@@ -1,0 +1,3044 @@
+{
+ "meta": {
+  "label": "v4-final",
+  "date": "2026-10-16 23:27",
+  "model": "claude-haiku-5-5",
+  "judge": "claude-sonnet-5-5",
+  "concurrency": 3,
+  "reflect": false
+ },
+ "summary": {
+  "questions": 20,
+  "completed": 20,
+  "completionRate": 1.0,
+  "latencyP50": 24.2,
+  "latencyP95": 36.3,
+  "costPerQuestionUsd": 0.049,
+  "tokensPerQuestion": 48648.25,
+  "llmCallsPerQuestion": 15.0,
+  "citationDensity": 0.456,
+  "sourceUtilization": 0.923,
+  "sourcesPerReport": 7.8,
+  "danglingCitations": 0,
+  "langMatchRate": 1.0,
+  "coverage": 1.0,
+  "depth": 0.95,
+  "agentsPerQuestion": 4.0,
+  "agentsWithoutSources": 0.125,
+  "reflectGapsPerQuestion": null,
+  "citationChecks": 76,
+  "citationVerifiable": 68,
+  "citationAccuracyStrict": 0.603,
+  "citationAccuracyLenient": 0.868,
+  "toolErrors": 3,
+  "citationsDroppedByGuard": 0
+ },
+ "records": [
+  {
+   "id": "news-fomc",
+   "category": "current",
+   "question": "What were the main announcements from the most recent Federal Reserve FOMC meeting?",
+   "taskUuid": "d101ced0-554a-44a9-a0ba-9e4152ad6f21",
+   "status": "COMPLETED",
+   "latencySec": 24.5,
+   "subQuestions": [
+    "What was the decision on the federal funds rate at the most recent FOMC meeting before October 17, 2026, and what was the target range?",
+    "What changes, if any, did the FOMC make to its statement language, forward guidance, or policy outlook at that meeting?",
+    "What were the updated economic projections (Summary of Economic Projections) released at that meeting for inflation, unemployment, and GDP growth?",
+    "What were the notable dissents, voting details, or press conference remarks from the Fed chair at that meeting?"
+   ],
+   "agents": [
+    {
+     "status": "COMPLETED",
+     "steps": 3,
+     "sources": 2,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 3,
+     "sources": 4,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 3,
+     "sources": 4,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 4,
+     "sources": 4,
+     "error": null
+    }
+   ],
+   "usage": {
+    "calls": 15,
+    "promptTokens": 40815,
+    "completionTokens": 6570,
+    "costMicro": 47385
+   },
+   "reflectGaps": null,
+   "citations": {
+    "sentences": 17,
+    "citedSentences": 11,
+    "density": 0.647,
+    "sources": 7,
+    "utilization": 1.0,
+    "dangling": 0
+   },
+   "tools": {
+    "calls": {
+     "web_search": 7,
+     "wiki_search": 1,
+     "kb_search": 2,
+     "web_fetch": 7
+    },
+    "errors": 0,
+    "citationsDropped": 0
+   },
+   "langMatch": true,
+   "report": "The most recent FOMC meeting before October 17, 2026 concluded on September 16, 2026. The Committee unanimously raised the federal funds target range by 25 basis points to 3.75%–4.00%, its first hike since July 2023 [1][2]. The statement described inflation as \"elevated\" and said the action would support a \"timelier return\" to the 2% goal [1].\n\nThe statement was largely unchanged from June's significant rewrite. Activity was still described as \"solid,\" consumer spending as \"resilient,\" and inflation as \"elevated.\" The main wording change was dropping the reference to energy supply shocks [1]. Chair Kevin Warsh avoided explicit forward guidance, saying the Fed would focus on broad economic trends rather than individual data releases [2]. I could not retrieve the full statement text, so the verbatim forward-guidance language is not confirmed here.\n\nThe Summary of Economic Projections raised the growth outlook and kept inflation projections high. Median 2026 real GDP growth was revised up to 2.3% from 2.2% in June [3]. The median unemployment projection is 4.1% for Q4 2026, holding there through Q4 2029 [3]. Median headline PCE inflation for year-end 2026 stayed at 3.7%, with core PCE at 3.4% [4]. The median federal funds rate projection is 4.1% at end-2026, implying one more hike, and 3.9% at end-2028 [4]. These are participant projections, not a committee plan.\n\nThe vote was 12–0, with no dissents [5]. In the press conference, Warsh said that because inflation has run above target for more than five years, \"our predominant focus is on the price-stability side of our mandate\" [5]. Markets initially shrugged off the hike, but stocks fell during Warsh's remarks, and the Dow closed 1.21% lower [6][7]. I could not retrieve the full press conference transcript, so these remarks rely on secondary reporting.",
+   "sources": [
+    {
+     "n": 1,
+     "url": "https://am.jpmorgan.com/us/en/asset-management/adv/insights/portfolio-insights/fixed-income/fixed-income-perspectives/fomc-statement-september-2026",
+     "title": "FOMC Statement: September 2026 | J.P. Morgan Asset Management"
+    },
+    {
+     "n": 2,
+     "url": "https://us.plus500.com/newsandmarketinsights/fomc-meetings-what-you-need-to-know",
+     "quote": "On Wednesday, 16 September 2026, the Federal Reserve announced its latest monetary policy decision, raising interest rates by 0.25 percentage point and bringing the federal funds target range to 3.75%-4.00%.",
+     "title": "FOMC Meeting: What You Need to Know | Plus500"
+    },
+    {
+     "n": 3,
+     "url": "https://fred.stlouisfed.org/blog/2026/09/fomc-summary-of-economic-projections-september-2026",
+     "quote": "For 2026, real GDP growth was revised up from 2.2% in June to 2.3% in September, still shy of the 2.4% projected in March.",
+     "title": "FOMC Summary of Economic Projections, September 2026 | FRED Blog"
+    },
+    {
+     "n": 4,
+     "url": "https://fxnx.com/en/blog/how-read-fed-dot-plot-september-2026-projections",
+     "quote": "In September 2026, the median projected US real GDP growth rate for the full year was upwardly revised to 2.3%. Simultaneously, the median projected headline PCE inflation rate for year-end stuck at a stubbornly high 3.7%, with core PCE at 3.4%.",
+     "title": "How to Read the Fed Dot Plot: September 2026 Shift | FXNX"
+    },
+    {
+     "n": 5,
+     "url": "https://knowledge.wharton.upenn.edu/opinion/the-fed-chair-picked-a-side-the-committee-should-write-it-down",
+     "quote": "In his press conference afterward, Federal Reserve Chair Kevin Warsh said that because inflation has run above target for more than five years, \"our predominant focus is on the price-stability side of our mandate.\"",
+     "title": "The Fed Chair Picked a Side. The Committee Should Write It Down. - Knowledge at Wharton"
+    },
+    {
+     "n": 6,
+     "url": "https://www.newsquawk.com/how-to-trade/fomc",
+     "title": "How to Trade FOMC: Fed Statement, Dots & Presser | Newsquawk"
+    },
+    {
+     "n": 7,
+     "url": "https://www.youtube.com/watch?v=REzJrm24InU",
+     "title": "LIVE: Chair Jerome Powell speaks after Fed holds rates steady"
+    }
+   ],
+   "coverage": {
+    "scores": [
+     2,
+     2,
+     2
+    ],
+    "score": 1.0,
+    "depth": 1.0
+   },
+   "citationChecks": [
+    {
+     "sentence": "The Committee unanimously raised the federal funds target range by 25 basis points to 3.75%–4.00%, its first hike since July 2023 [1][2].",
+     "n": 1,
+     "url": "https://am.jpmorgan.com/us/en/asset-management/adv/insights/portfolio-insights/fixed-income/fixed-income-perspectives/fomc-statement-september-2026",
+     "verdict": "partial",
+     "reason": "Source confirms unanimous 25bp hike to 3.75%–4.00%, but never says it is the first hike since July 2023."
+    },
+    {
+     "sentence": "Activity was still described as \"solid,\" consumer spending as \"resilient,\" and inflation as \"elevated.\" The main wording change was dropping the reference to energy supply shocks [1].",
+     "n": 1,
+     "url": "https://am.jpmorgan.com/us/en/asset-management/adv/insights/portfolio-insights/fixed-income/fixed-income-perspectives/fomc-statement-september-2026",
+     "verdict": "supported",
+     "reason": "Source confirms 'solid pace', 'resilient', 'elevated', and removal of 'supply shocks from energy' as the notable wording change."
+    },
+    {
+     "sentence": "The median unemployment projection is 4.1% for Q4 2026, holding there through Q4 2029 [3].",
+     "n": 3,
+     "url": "https://fred.stlouisfed.org/blog/2026/09/fomc-summary-of-economic-projections-september-2026",
+     "verdict": "supported",
+     "reason": "Source states median FOMC participant projects unemployment averaging 4.1% in Q4 2026 and remaining at that level through Q4 2029."
+    },
+    {
+     "sentence": "The vote was 12–0, with no dissents [5].",
+     "n": 5,
+     "url": "https://knowledge.wharton.upenn.edu/opinion/the-fed-chair-picked-a-side-the-committee-should-write-it-down",
+     "verdict": "supported",
+     "reason": "Source states the September 16 vote was 12 to 0, implying no dissents."
+    }
+   ]
+  },
+  {
+   "id": "news-qqq",
+   "category": "current",
+   "question": "Why did the Nasdaq-100 (QQQ) move today?",
+   "taskUuid": "6fcf2133-8881-458c-99a9-0ed728b75dc1",
+   "status": "COMPLETED",
+   "latencySec": 24.5,
+   "subQuestions": [
+    "What were the Nasdaq-100 (QQQ) price moves and trading volume on 2026-10-17?",
+    "Which major company earnings, guidance, or economic data releases came out on or just before 2026-10-17 that could affect the Nasdaq-100?",
+    "What macroeconomic or policy news (interest rates, Fed commentary, inflation, geopolitics) was driving market sentiment on 2026-10-17?",
+    "Which sector or mega-cap technology stocks had the largest contributions to the Nasdaq-100's move on 2026-10-17?"
+   ],
+   "agents": [
+    {
+     "status": "COMPLETED",
+     "steps": 3,
+     "sources": 2,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 3,
+     "sources": 4,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 3,
+     "sources": 6,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 3,
+     "sources": 0,
+     "error": null
+    }
+   ],
+   "usage": {
+    "calls": 14,
+    "promptTokens": 42925,
+    "completionTokens": 6446,
+    "costMicro": 49371
+   },
+   "reflectGaps": null,
+   "citations": {
+    "sentences": 20,
+    "citedSentences": 14,
+    "density": 0.7,
+    "sources": 11,
+    "utilization": 0.909,
+    "dangling": 0
+   },
+   "tools": {
+    "calls": {
+     "web_search": 12,
+     "web_fetch": 5
+    },
+    "errors": 0,
+    "citationsDropped": 0
+   },
+   "langMatch": true,
+   "report": "## Why the Nasdaq-100 (QQQ) Moved: Market Context Around October 16–17, 2026\n\n**Price action.** The latest completed session in the sources is October 16, 2026. QQQ closed at $709.80, down $18.20 (−2.50%) from $728.00, on volume of 66.7 million shares, well above the prior session's 49.8 million [1]. The Nasdaq Composite fell about 2.3% and the Nasdaq-100 about 2.4% that day [2]. I found no completed data for October 17 itself, so the October 17 move and volume should be rechecked after the close.\n\n**Main driver: AI-financing worries.** The October 16 selloff was led by technology. Hotter-than-expected US CPI pushed Treasury yields higher and revived concerns about the financing behind the AI boom [4]. Nasdaq-100 constituents Micron, AMD and Broadcom fell 3–4%, and Intel dropped 4.4% [4]. CoreWeave's bonds yielded above 15%, which sharpened the concern about AI infrastructure funding [4]. The Nasdaq had already posted its worst week since late June, down 4.5%, as the AI trade suffered [7].\n\n**Rates and inflation.** Inflation data kept the Fed in focus. Officials described recent data as discouraging but said there was \"no need for urgency,\" with a December hike seen as more likely than one at the October 27–28 FOMC meeting [9]. Traders had priced in further hikes, reportedly two by January [7]. Rising long-term and real yields weigh on long-duration growth stocks such as those in the Nasdaq-100 [4][7]. Labor data was softening (September payrolls +29,000, unemployment 4.2%), which left markets weighing a stagflation-style dilemma [8].\n\n**Geopolitics and commodities.** Oil rose to a one-month high after sanctions on the \"shadow fleet,\" and rising oil prices tied to the Iran conflict kept inflation worries alive [10][11]. Gold and the dollar were supported as safe-haven assets [11].\n\n**Earnings and data calendar.** Q3 earnings season is underway, and Big Tech results are still ahead; analysts flagged them as the next test of whether AI spending is paying off [3][4]. The September PPI was released October 15 [6].\n\n**Caveat on attribution.** I could not find a market wrap that breaks down which Nasdaq-100 constituents contributed most to the October 16 or 17 move. Individual-stock figures I found are from October 15 (Nvidia −1.84% to $217.23; Apple −0.28% to $342.00), so they are not a reliable basis for October 17 attribution.",
+   "sources": [
+    {
+     "n": 1,
+     "url": "https://finance.yahoo.com/quote/QQQ/history/",
+     "quote": "Oct 16, 2026 725.52 725.96 707.23 709.80 709.80 66,693,300",
+     "title": "Invesco QQQ Trust (QQQ) Historical Prices - Yahoo Finance"
+    },
+    {
+     "n": 2,
+     "url": "https://247wallst.com/cards/the-nasdaq-s-2-3-drop-was-more-than-four-times-the-dow-s-lo-gspc-market-bell-01m53502se09wdrvtj5fkd69w4",
+     "title": "S&P 500 Closes Down 84 Points as Tech Stocks Lead the Selloff | 24/7 Wall St."
+    },
+    {
+     "n": 3,
+     "url": "https://www.capitalstreetfx.com/market-analysis/daily-index-report-16-10-2026",
+     "title": "Nasdaq 100 Forecast: AI Chip Selloff And DAX Rally | Index Daily Analysis | 16/10/2026 - Capital Street FX"
+    },
+    {
+     "n": 4,
+     "url": "https://sg.finance.yahoo.com/news/stock-market-today-oct-16-141132915.html",
+     "quote": "US and Asian equities have borne the brunt of the sell-off, after hotter US CPI pushed Treasury yields higher and renewed concerns about the financing behind the AI boom.",
+     "title": "Stock Market Today (Oct. 16, 2026): AI 'bubble' worries mount as Nasdaq, Russell 2000 sink on tech declines - Yahoo Finance"
+    },
+    {
+     "n": 5,
+     "url": "https://www.bls.gov/news.release/pdf/cpi.pdf",
+     "title": "Consumer Price Index - August 2026 - BLS"
+    },
+    {
+     "n": 6,
+     "url": "https://www.bls.gov/news.release/archives/ppi_10152026.htm",
+     "quote": "Producer Price Index News Release - 2026 M09 Results",
+     "title": "Producer Price Index News Release - 2026 M09 Results - BLS"
+    },
+    {
+     "n": 7,
+     "url": "https://www.investing.com/analysis/inflation-reshapes-fed-rate-expectations-where-are-markets-heading-200689595",
+     "quote": "Traders have fully priced in two Fed rate hikes by the end of January, and expect three more steps by the end of next year.",
+     "title": "Inflation Reshapes Fed Rate Expectations: Where Are Markets Heading? | Investing.com"
+    },
+    {
+     "n": 8,
+     "url": "https://www.reuters.com/business/feds-collins-sees-another-rate-hike-table-before-end-2026-2026-10-13",
+     "title": "Fed's Collins sees another rate hike on the table before end of 2026 | Reuters"
+    },
+    {
+     "n": 9,
+     "url": "https://www.chase.com/personal/investments/learning-and-insights/article/will-the-federal-reserve-hike-rates-at-october-2026-fomc-meeting",
+     "title": "Will the Fed Hike Rates in October? | Chase"
+    },
+    {
+     "n": 10,
+     "url": "https://rgwealth.com/market-thoughts/market-update-october-2026",
+     "quote": "Rising oil prices and uncertainty surrounding the Iran conflict have heightened concerns about inflation and the potential for interest rates to remain elevated.",
+     "title": "Market Update | October 2026 | RGWM Insights"
+    },
+    {
+     "n": 11,
+     "url": "https://www.plotioglobal.com/daily-trading-strategies/202610160535282465",
+     "quote": "Gold supported by US Treasury bonds and the US dollar, oil market weighs \"shadow fleet\" sanctions, US crude oil hits one-month high.",
+     "title": "October 16th Financial Breakfast | Plotio Global"
+    }
+   ],
+   "coverage": {
+    "scores": [
+     2,
+     2,
+     2
+    ],
+    "score": 1.0,
+    "depth": 1.0
+   },
+   "citationChecks": [
+    {
+     "sentence": "QQQ closed at $709.80, down $18.20 (−2.50%) from $728.00, on volume of 66.7 million shares, well above the prior session's 49.8 million [1].",
+     "n": 1,
+     "url": "https://finance.yahoo.com/quote/QQQ/history/",
+     "verdict": "supported",
+     "reason": "Close 709.80, -18.20 (-2.50%), prior close 728.00, volume 66,693,300 vs 49,828,700 all match the source."
+    },
+    {
+     "sentence": "Nasdaq-100 constituents Micron, AMD and Broadcom fell 3–4%, and Intel dropped 4.4% [4].",
+     "n": 4,
+     "url": "https://sg.finance.yahoo.com/news/stock-market-today-oct-16-141132915.html",
+     "verdict": "unsupported",
+     "reason": "Source never mentions Micron, AMD, Broadcom, Intel or any of the cited percentage declines; only CoreWeave premarket is quantified."
+    },
+    {
+     "sentence": "Traders had priced in further hikes, reportedly two by January [7].",
+     "n": 7,
+     "verdict": "unverifiable"
+    },
+    {
+     "sentence": "**Geopolitics and commodities.** Oil rose to a one-month high after sanctions on the \"shadow fleet,\" and rising oil prices tied to the Iran conflict kept inflation worries alive [10][11].",
+     "n": 10,
+     "url": "https://rgwealth.com/market-thoughts/market-update-october-2026",
+     "verdict": "partial",
+     "reason": "Source supports oil/inflation worries tied to the Iran conflict, but nothing on a one-month high or shadow-fleet sanctions."
+    }
+   ]
+  },
+  {
+   "id": "news-euai",
+   "category": "current",
+   "question": "What are the latest developments in the EU AI Act implementation?",
+   "taskUuid": "b00a10ac-f875-4c32-9e1e-da2877de801e",
+   "status": "COMPLETED",
+   "latencySec": 36.6,
+   "subQuestions": [
+    "What is the current implementation timeline of the EU AI Act as of October 2026, including which obligations have already taken effect?",
+    "What secondary legislation, delegated acts, or guidelines has the European Commission or the AI Office issued recently to implement the EU AI Act?",
+    "What are the latest developments in enforcement, including the roles of national market surveillance authorities and the AI Office, and any penalties or first enforcement actions?",
+    "How have the EU AI Act's obligations for general-purpose AI models and high-risk AI systems changed in recent updates, including any proposed delays, simplification measures, or amendments such as the Digital Omnibus?"
+   ],
+   "agents": [
+    {
+     "status": "COMPLETED",
+     "steps": 3,
+     "sources": 4,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 3,
+     "sources": 4,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 4,
+     "sources": 5,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 4,
+     "sources": 3,
+     "error": null
+    }
+   ],
+   "usage": {
+    "calls": 16,
+    "promptTokens": 49302,
+    "completionTokens": 8049,
+    "costMicro": 57351
+   },
+   "reflectGaps": null,
+   "citations": {
+    "sentences": 22,
+    "citedSentences": 14,
+    "density": 0.636,
+    "sources": 14,
+    "utilization": 1.0,
+    "dangling": 0
+   },
+   "tools": {
+    "calls": {
+     "web_search": 9,
+     "wiki_search": 1,
+     "web_fetch": 8
+    },
+    "errors": 0,
+    "citationsDropped": 0
+   },
+   "langMatch": true,
+   "report": "## EU AI Act Implementation: Latest Developments (as of 17 October 2026)\n\n**Implementation timeline.** The AI Act entered into force on 1 August 2024 and applies in stages. The prohibitions on unacceptable-risk AI and the AI literacy duty have applied since 2 February 2025 [1][2]. On 2 August 2026 the Article 50 transparency obligations began to apply, covering chatbot disclosure, machine-readable marking of synthetic content, and deepfake disclosure [1]. Generative AI systems already on the market have until 2 December 2026 to meet the marking requirement [1].\n\nThe Digital Omnibus amendment, agreed by the Council and Parliament in May 2026 and approved by Parliament in June, postpones the high-risk obligations to 2 December 2027 for stand-alone systems and 2 August 2028 for systems embedded in regulated products [2][3]. Some secondary reporting cites a June 2026 enforcement milestone, but this does not appear in the Official Journal text or the Commission's timeline [4], so I have excluded it. I could not confirm the Omnibus's final Official Journal publication, so verify its adoption status before relying on the revised dates.\n\n**Secondary legislation and guidance.** The Commission and AI Office have issued several instruments. These include draft guidelines on high-risk classification under Article 6, published 19 May 2026 [5], and the GPAI Code of Practice of 10 July 2025, which supports the obligations in Articles 53 and 55 [8]. Recent sources also list final Article 50 transparency guidelines (20 July 2026), guidelines on the scope of general-purpose AI systems, and a transparency code of practice for AI-generated content [6][7]. I did not check these against the Official Journal, and the secondary sources differ on some details. Consult the AI Office's website for authoritative texts and any delegated acts adopted since.\n\n**Enforcement.** Enforcement is split between the AI Office and national authorities. The AI Office supervises providers of general-purpose AI models, including systemic-risk models, and AI systems built on those models by the same provider [9]. National market surveillance authorities, which Member States were required to designate by 2 August 2025, enforce the rules for all other AI systems [9][10]. Fines reach €35 million or 7% of worldwide turnover for prohibited practices, and €15 million or 3% for other breaches [9]. I found no reported first fine or formal enforcement decision. Commentators expect the early period to focus on guidance and investigation rather than penalties [11].\n\n**Changes to obligations.** The Digital Omnibus ties the start of high-risk obligations to the availability of harmonised standards and common specifications, with a long-stop date, rather than fixed dates [14]. It also adds new prohibited categories, narrows high-risk classification, and expands the AI Office's enforcement role [13]. The Commission's page describes the Omnibus as entering into force on 27 July 2026 [12]. I could not confirm any specific changes to the rules for general-purpose AI models in the sources I accessed.",
+   "sources": [
+    {
+     "n": 1,
+     "url": "https://www.cooley.com/news/insight/2026/2026-08-03-eu-ai-act-transparency-obligations-take-effect-2-august-2026",
+     "title": "EU AI Act: Transparency Obligations Take Effect 2 August 2026 // Cooley"
+    },
+    {
+     "n": 2,
+     "url": "https://tenhaw.com/guides/ai-governance-and-regulatory-evidence",
+     "quote": "The Digital Omnibus amendment, agreed between the Council and the Parliament in May 2026 and approved by the Parliament in June, moves those to 2 December 2027 and 2 August 2028 respectively.",
+     "title": "AI governance and regulatory evidence | Tenhaw"
+    },
+    {
+     "n": 3,
+     "url": "https://www.euronews.com/2026/05/10/imperfect-ai-omnibus-arrives-all-eyes-turn-to-digital-omnibus",
+     "quote": "Deadline-wise, the application of high-risk rules was pushed to 2 December 2027 (for stand-alone high-risk AI systems) and 2 August 2028 (for high-risk AI systems embedded in p…",
+     "title": "Imperfect AI Omnibus arrives. All eyes turn to Digital Omnibus | Euronews"
+    },
+    {
+     "n": 4,
+     "url": "https://alicelabs.ai/en/insights/eu-ai-act-timeline-2026",
+     "quote": "There is no separate June 2026 enforcement milestone — that claim circulates in secondary reporting but does not appear in the Official Journal text or on the Commission's Service Desk timeline.",
+     "title": "EU AI Act Timeline 2026: Aug 2 Milestone & Next Deadlines"
+    },
+    {
+     "n": 5,
+     "url": "https://www.mayerbrown.com/en/insights/publications/2026/07/eu-ai-act-news-digital-omnibus-on-ai-new-guidance-on-risk-classification-gpai-and-transparency-obligations",
+     "quote": "On 19 May 2026 , the European Commission published draft guidelines (the \"Guidance\") to support providers and deployers of AI systems, as well as the relevant market authorities, in assessing whether an AI system should be classified as high-risk, facilitating enforcement of Article 6 of the EU AI Act.",
+     "title": "EU AI Act News: Digital Omnibus on AI, New Guidance on Risk Classification, GPAI, and Transparency Obligations (Mayer Brown, 30 July 2026)"
+    },
+    {
+     "n": 6,
+     "url": "https://www.kennedyslaw.com/en/thought-leadership/article/2026/decoding-the-eu-ai-omnibus-2026-a-practical-guide-for-businesses",
+     "title": "Decoding the EU AI Omnibus 2026: a practical guide for businesses (Kennedys Law)"
+    },
+    {
+     "n": 7,
+     "url": "https://ai.gov.gr/en/press-releases/commission-starts-enforcing-ai-act-rules-and-new-transparency-requirements-on-2-august",
+     "title": "Commission starts enforcing AI Act rules and new transparency requirements on 2 August (Special Secretariat of AI & Data Governance, Greece)"
+    },
+    {
+     "n": 8,
+     "url": "https://www.quinnemanuel.com/media/avvj5y50/eu-ai-act-obligations-on-general-purpose-ai-model-providers.pdf",
+     "quote": "To help companies comply with the obligations contained in Articles 53 and 55 of the EU AI Act concerning GPAI models, the Commission issued on 10 July 2025 a GPAI Code of Practice.",
+     "title": "EU AI Act: Obligations on General-Purpose AI Model Providers (Quinn Emanuel)"
+    },
+    {
+     "n": 9,
+     "url": "https://digital-strategy.ec.europa.eu/en/policies/enforcement-ai-act",
+     "quote": "The AI Office enforces the rules for: Providers of general-purpose AI (GPAI) models, including the most advanced models which may pose systemic risks",
+     "title": "The enforcement framework of the AI Act | Shaping Europe's digital future"
+    },
+    {
+     "n": 10,
+     "url": "https://mmoww.net/ai/laws/eu-ai-act-national-competent-authorities",
+     "quote": "Under Article 70 of the EU AI Act, each Member State must establish or designate at least one notifying authority and at least one market surveillance authority as national competent authorities, designated by August 2, 2025, with a single point of contact identified publicly.",
+     "title": "National Competent Authorities Under the EU AI Act: Who Enforces What (2026) | MmowW"
+    },
+    {
+     "n": 11,
+     "url": "https://www.khairos.ai/blog/comply/ai-act-enforcement-predictions-2026",
+     "quote": "the first 18 months of serious enforcement will look a lot like the first 18 months of GDPR, heavy on guidance and investigation, lighter on fines",
+     "title": "AI Act Enforcement in 2026: What EU Regulators Have Signalled So Far"
+    },
+    {
+     "n": 12,
+     "url": "https://digital-strategy.ec.europa.eu/en/library/digital-omnibus-ai-regulation-proposal",
+     "quote": "On 27 July 2026, the AI Omnibus enters into force across the EU, bringing extended timelines to administrative simplification.",
+     "title": "Digital Omnibus on AI Regulation Proposal | European Commission"
+    },
+    {
+     "n": 13,
+     "url": "https://www.orrick.com/en/Insights/2026/07/EU-AI-Act-Update-Digital-Omnibus-Finalizes-8-Compliance-Changes",
+     "quote": "It delays high-risk AI obligations for many systems, adds new prohibited AI categories, extends the General Data Protection Regulation (GDPR) legal basis for certain bias-detection processing and expands the AI Office's enforcement role.",
+     "title": "EU AI Act Update: Digital Omnibus Finalizes 8 Compliance Changes (Orrick)"
+    },
+    {
+     "n": 14,
+     "url": "https://www.cooley.com/news/insight/2025/2025-11-24-eu-ai-act-proposed-digital-omnibus-on-ai-will-impact-businesses-ai-compliance-roadmaps",
+     "quote": "Under the current EU AI Act, the rules on high-risk AI systems apply from 2 August 2026 (for Annex III use cases) or 2 August 2027 (for high-risk systems embedded into or comprising regulated products). The omnibus proposal seeks to delay the application date for these requirements, making application conditional on the readiness of applicable harmonised standards, common specifications or guidelines.",
+     "title": "EU AI Act: Proposed 'Digital Omnibus on AI' Will Impact Businesses' AI Compliance Roadmaps (Cooley)"
+    }
+   ],
+   "coverage": {
+    "scores": [
+     2,
+     1,
+     2
+    ],
+    "score": 1.0,
+    "depth": 0.833
+   },
+   "citationChecks": [
+    {
+     "sentence": "The prohibitions on unacceptable-risk AI and the AI literacy duty have applied since 2 February 2025 [1][2].",
+     "n": 1,
+     "url": "https://www.cooley.com/news/insight/2026/2026-08-03-eu-ai-act-transparency-obligations-take-effect-2-august-2026",
+     "verdict": "unsupported",
+     "reason": "Source covers Article 50 transparency obligations from 2 August 2026; it never mentions prohibitions or AI literacy applying from 2 February 2025."
+    },
+    {
+     "sentence": "The Digital Omnibus amendment, agreed by the Council and Parliament in May 2026 and approved by Parliament in June, postpones the high-risk obligations to 2 December 2027 for stand-alone systems and 2 August 2028 for systems embedded in regulated products [2][3].",
+     "n": 2,
+     "url": "https://tenhaw.com/guides/ai-governance-and-regulatory-evidence",
+     "verdict": "supported",
+     "reason": "Source states Omnibus agreed May 2026, Parliament-approved June, with the 2 Dec 2027 and 2 Aug 2028 dates exactly."
+    },
+    {
+     "sentence": "The AI Office supervises providers of general-purpose AI models, including systemic-risk models, and AI systems built on those models by the same provider [9].",
+     "n": 9,
+     "url": "https://digital-strategy.ec.europa.eu/en/policies/enforcement-ai-act",
+     "verdict": "supported",
+     "reason": "Source states AI Office enforces rules for GPAI model providers, including systemic-risk models, and AI systems from the same provider."
+    },
+    {
+     "sentence": "Commentators expect the early period to focus on guidance and investigation rather than penalties [11].",
+     "n": 11,
+     "url": "https://www.khairos.ai/blog/comply/ai-act-enforcement-predictions-2026",
+     "verdict": "partial",
+     "reason": "Source says AI Act supervision likely follows GDPR's guidance-and-investigation-first arc, but it's the author's view, not multiple commentators; penalties aren't ruled out."
+    }
+   ]
+  },
+  {
+   "id": "news-nvda-zh",
+   "category": "current",
+   "question": "最近一周 NVIDIA 股价有什么重要动态？",
+   "taskUuid": "ca0360c0-bf2b-472a-9e24-49a1040a396c",
+   "status": "COMPLETED",
+   "latencySec": 27.2,
+   "subQuestions": [
+    "NVIDIA（英伟达）股价在最近一周（截至2026-10-17前后）的涨跌幅度和走势如何？",
+    "最近一周影响英伟达股价的主要新闻或公司公告有哪些（如财报、产品发布、合作协议等）？",
+    "最近一周宏观经济或行业层面（如美联储政策、AI芯片需求、出口管制、竞争对手动态）对英伟达股价产生了哪些影响？",
+    "分析师在最近一周对英伟达发布了哪些评级调整或目标价变动？"
+   ],
+   "agents": [
+    {
+     "status": "COMPLETED",
+     "steps": 5,
+     "sources": 4,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 4,
+     "sources": 0,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 3,
+     "sources": 5,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 4,
+     "sources": 3,
+     "error": null
+    }
+   ],
+   "usage": {
+    "calls": 18,
+    "promptTokens": 69105,
+    "completionTokens": 9660,
+    "costMicro": 78765
+   },
+   "reflectGaps": null,
+   "citations": {
+    "sentences": 27,
+    "citedSentences": 0,
+    "density": 0.0,
+    "sources": 12,
+    "utilization": 0.0,
+    "dangling": 0
+   },
+   "tools": {
+    "calls": {
+     "web_search": 16,
+     "web_fetch": 5,
+     "kb_search": 1
+    },
+    "errors": 0,
+    "citationsDropped": 0
+   },
+   "langMatch": true,
+   "report": "# 英伟达（NVDA）最近一周股价动态\n\n## 股价走势\n最近一周英伟达股价连续走低。10 月 13 日收于 228.52 美元（上涨约 1%）；10 月 14 日收于 221.30 美元（下跌约 3.2%），当日大盘也下挫，纳斯达克综合指数跌约 1.9%；10 月 15 日收于 217.23 美元（下跌约 1.8%）。三日累计下跌约 4.9%。截至 10 月 13 日，较上周约下跌 5.4%。目前股价较 52 周高点 243.37 美元回落约 10.7%，但年初至今仍上涨约 23%。由于 10 月 12 日前后的收盘价未能直接核实，上述周涨跌幅为近似值，建议以交易所或雅虎财经的官方数据为准。\n\n## 主要公告与新闻\n这一周没有单一的重大驱动事件，多为生态合作类消息，单日对股价的直接影响通常有限：\n- **RTX Spark Windows PC 上市（10 月 16 日）**：华硕、戴尔、惠普、联想、微软和 MSI 的笔记本同日上架，起售价 2599 美元。\n- **汽车合作扩大（10 月 15–16 日）**：与沃尔沃扩大合作（10 月 15 日），与梅赛德斯-奔驰延长合作、推进高度自动驾驶（10 月 16 日）。\n- **与 Adobe 扩大合作（10 月 15 日）**：优化 Photoshop、Premiere、Substance 3D 等工具的 AI 能力。\n- **英国 2.5 亿美元承诺（10 月 13 日）**：未来五年投入智能体安全与安防研究。\n- **Vera Rubin 平台标准化（OCP 全球峰会）**：推进下一代平台的基础设施标准，并与思科宣布合作计划。\n- **洽谈收购或增资 Reflection AI（10 月 10 日报道）**：据 FT 与彭博报道，交易尚处早期，条款未定。该报道时间略早于一周窗口，但仍值得关注。\n\n## 宏观与行业因素\n- **利率压力**：美联储开启三年来首次加息周期，10 年期美债收益率一度升至 2000 年代以来高位（约 5.1%–5.2%），抑制了科技股估值。10 月 15 日收益率回落约 9 个基点，但科技股反弹有限。\n- **需求与财报预期**：台积电 6 个季度创纪录的利润，但对 2027 年的谨慎表态拖累了 AI 芯片股，英伟达当日下跌约 1.8%。随后台积电与 ASML 的强劲业绩，以及黄仁勋关于 AI 芯片需求的表态，缓和了需求放缓的担忧，英伟达 10 月 16 日逆势走强。\n- **出口管制与竞争**：IDC 数据显示，2026 年上半年英伟达在中国数据中心 AI 芯片市场份额降至 34%，向中国出货量同比下降 44%，华为占 28%。中国拟对 23 项 AI 技术实施出口管制的消息也增加了不确定性。\n- **板块情绪**：媒体提到相关 AI 基础设施客户 CoreWeave 的债务压力，芯片板块已连续六个交易日下跌。来源未指明英伟达当日下跌的公司层面原因。\n\n## 分析师评级\n最近一周（10 月 10–17 日）我没有找到可确认的评级或目标价变动记录。近期可确认的动作集中在 10 月初：Cantor Fitzgerald 维持 Overweight、目标价 350 美元（10/1）；Barclays 维持 Buy、目标价 275 美元（10/1）；Wells Fargo 目标价 210 美元（10/2）；Morgan Stanley 目标价 230 美元（10/2）；UBS 维持 Buy、目标价 300 美元（10/9）；Citi 维持 Buy、目标价 315 美元（10/6）；Yorkville Ives 首次给予 Buy、目标价 300 美元（10/6）；Exane BNP Paribas 维持 Buy 并将目标价上调至 345 美元（10/5）。MarketBeat 显示截至 10 月 15 日的共识目标价约 321.89 美元，评级为 Buy。Wells Fargo 与 Morgan Stanley 的目标价明显低于其他机构，可能是数据录入或更新滞后所致。这些数据来自二手聚合页面，建议以券商原始研报或终端数据核实。",
+   "sources": [
+    {
+     "n": 1,
+     "url": "https://www.heygotrade.com/en/news/nvidia-nvda-stock-news-october-14-2026",
+     "title": "Nvidia Stock News (Oct 14, 2026): NVDA Rises 1.0% to $228.52 | Gotrade"
+    },
+    {
+     "n": 2,
+     "url": "https://www.heygotrade.com/en/news/nvidia-nvda-stock-news-october-15-2026",
+     "title": "Nvidia Stock News (Oct 15, 2026): NVDA Falls 3.2% to $221.30 | Gotrade"
+    },
+    {
+     "n": 3,
+     "url": "https://www.heygotrade.com/en/news/nvidia-nvda-stock-news-october-16-2026",
+     "title": "Nvidia Stock News (Oct 16, 2026): NVDA Falls 1.8% to $217.23 | Gotrade"
+    },
+    {
+     "n": 4,
+     "url": "https://naga.com/eu/instruments/NVDA.re",
+     "quote": "The NVIDIA price is declining this week. Compared to last week, the rate of NVIDIA is down -5.40%, and it's up 6.80% from one month ago.",
+     "title": "Is Nvidia a Good Stock to Buy in October 2026"
+    },
+    {
+     "n": 5,
+     "url": "https://rgwealth.com/market-thoughts/market-update-october-2026",
+     "quote": "The Federal Reserve initiated its first rate-hiking cycle in three years, the S&P 500 quickly rallied to a new high after a 3% pullback, the 10-year Treasury yield has reached its highest level since the 2000s",
+     "title": "Market Update | October 2026 | RGWM Insights"
+    },
+    {
+     "n": 6,
+     "url": "https://247wallst.com/cards/the-benchmark-yield-eased-9-basis-points-to-5-10-the-first-macro-release-01m53jkf0555qkteys4mv8j5gd",
+     "quote": "The 10-year Treasury yield fell 9 basis points to 5.10% on October 15, 2026, the first meaningful pullback since the benchmark climbed above its recent peak.",
+     "title": "10-Year Treasury Yield Drops to 5.10%: Relief or a False Turn? | 24/7 Wall St."
+    },
+    {
+     "n": 7,
+     "url": "https://buttondown.com/thedailyalphaai/archive/china-proposes-export-controls-on-23-ai",
+     "quote": "NVIDIA fell 1.84% after TSMC struck a cautious note on 2027 despite a sixth consecutive record quarter",
+     "title": "China: Proposes Export Controls on 23 AI Technologies • Buttondown"
+    },
+    {
+     "n": 8,
+     "url": "https://www.tradingkey.com/analysis/stocks/us-stocks/262221436-nvidia-nvda-stock-forecast-ai-chip-demand-dan-ives-target-price-300-tradingkey",
+     "quote": "Earlier this week, strong financial results and optimistic outlooks released by TSMC and ASML also eased market concerns over a potential slowdown in AI chip demand.",
+     "title": "Nvidia Stock Price Forecast: Jensen Huang Says AI Chip Demand Is Strong, Dan Ives Sees Selloff as Buying Opportunity; Can the Stock Return to an Uptrend?"
+    },
+    {
+     "n": 9,
+     "url": "https://www.tikr.com/blog/nvidia-china-ai-chip-market-share-falls-34-percent-export-controls",
+     "title": "U.S. Export Restrictions Drive Nvidia China AI Chip Market Share Down to 34% | TIKR.com"
+    },
+    {
+     "n": 10,
+     "url": "https://www.streetwisereports.com/article/2026/10/13/nvidia-commits-us-1b-to-american-science-push-in-tech-energy-and-healthcare.html",
+     "title": "Nvidia Commits US$1B to American Science Push in Tech Energy & Healthcare"
+    },
+    {
+     "n": 11,
+     "url": "https://www.marketbeat.com/instant-alerts/consensus-nvidia-corporation-nasdaq-nvda-stock-has-average-price-target-of-32189-2026-10-10",
+     "title": "NVIDIA Corporation (NASDAQ:NVDA) Stock Has Average Price Target of $321.89"
+    },
+    {
+     "n": 12,
+     "url": "https://stocktwits.com/news-articles/markets/equity/nvda-stock-new-2026-high-ahead-of-q4-fundstrat-mark-newton-warns-false-breakout/cZRUtEWR467",
+     "quote": "HSBC lowered its price target on Nvidia to '$310' from '$320' on Tuesday, implying a 61% upside from current levels, and kept a 'Buy' rating ahead of earnings.",
+     "title": "NVDA Stock Hits A New 2026 High Ahead Of Q4 Print — But Fundstrat's Mark Newton Warns 'False Breakout' Could Be Next"
+    }
+   ],
+   "coverage": {
+    "scores": [
+     2,
+     2,
+     2
+    ],
+    "score": 1.0,
+    "depth": 1.0
+   },
+   "citationChecks": []
+  },
+  {
+   "id": "news-python",
+   "category": "current",
+   "question": "What is the latest stable release of Python and what are its headline features?",
+   "taskUuid": "7b9e89fe-fef0-47d7-8132-c20a0d2b88b8",
+   "status": "COMPLETED",
+   "latencySec": 36.3,
+   "subQuestions": [
+    "What is the latest stable release version of Python as of 2026-10-17?",
+    "What is the release date of that latest stable Python version?",
+    "What are the headline new features and major changes introduced in that latest stable Python release?",
+    "What are the notable deprecations, removals, or breaking changes in that latest stable Python release?"
+   ],
+   "agents": [
+    {
+     "status": "COMPLETED",
+     "steps": 4,
+     "sources": 2,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 3,
+     "sources": 2,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 3,
+     "sources": 2,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 5,
+     "sources": 4,
+     "error": null
+    }
+   ],
+   "usage": {
+    "calls": 17,
+    "promptTokens": 48270,
+    "completionTokens": 5260,
+    "costMicro": 53530
+   },
+   "reflectGaps": null,
+   "citations": {
+    "sentences": 27,
+    "citedSentences": 17,
+    "density": 0.63,
+    "sources": 8,
+    "utilization": 0.875,
+    "dangling": 0
+   },
+   "tools": {
+    "calls": {
+     "web_search": 6,
+     "wiki_search": 3,
+     "web_fetch": 6
+    },
+    "errors": 0,
+    "citationsDropped": 0
+   },
+   "langMatch": true,
+   "report": "# Python 3.15: Latest Stable Release and Headline Features\n\nAs of 2026-10-17, the latest stable Python release is **Python 3.15.0**, released on October 9, 2026. Python 3.15 is in its bugfix phase and is supported through October 2031 [1][2][3]. Python 3.14 remains in bugfix support, and 3.13 and 3.12 are in security-only mode [1]. I could not confirm the exact patch number from the official downloads page, so \"3.15.0\" is the most likely first-release version rather than a verified one.\n\n## Headline Features\n\nPython 3.15 introduces several notable changes [5]:\n\n- **Lazy imports** (PEP 810) for faster startup.\n- **A built-in `frozendict` type** (PEP 814).\n- **A built-in `sentinel` type** (PEP 661).\n- **UTF-8 as the default encoding** (PEP 686), which differs from earlier versions [2].\n- **Unpacking in comprehensions** (PEP 798).\n- **Package startup configuration files** (PEP 829).\n- **A stable ABI for free-threaded builds.**\n- **A new profiling package**, including Tachyon, a high-frequency statistical sampling profiler [5].\n\nThe release also adds more color to command-line output and includes the usual correctness fixes [5]. The release notes page I retrieved was cut off before its JIT section, so I cannot describe JIT changes in detail.\n\n## Deprecations, Removals, and Breaking Changes\n\nSome changes may require action when upgrading:\n\n- **UTF-8 default encoding** can break code that depends on the locale encoding [2][5].\n- **Removed `sre_compile`, `sre_constants`, and `sre_parse`** with no compatibility shim, so libraries that import CPython's regex internals must be upgraded [7].\n- **Removed `codeobject.co_lnotab`**, which affects profilers, debuggers, and coverage tools [5].\n- **Removed NamedTuple keyword-argument syntax**, zero-field `TypedDict` construction, `glob.glob0`/`glob1`, `platform.java_ver`, `pathlib.PurePath.is_reserved`, and `ctypes.SetPointerType` [5].\n- **Changed `ctypes` complex type codes**: `c_float_complex` and related types now use `Zf`/`Zd`/`Zg` [5].\n- **`frozendict` does not subclass `dict`**, so `isinstance(x, dict)` checks need updating [5].\n- **`typing.ByteString` and `collections.abc.ByteString`** are dropped from `__all__` ahead of removal in 3.17 [5].\n- **`PyGILState_*` C API** is soft-deprecated [5].\n\nDeprecations already scheduled for removal in 3.16 include `asyncio.iscoroutinefunction()`, the asyncio event loop policy system, the `'u'` array format code, and the `strm` argument of logging for custom handlers [6]. For `asyncio.iscoroutinefunction()`, the replacement is `inspect.iscoroutinefunction()` [6].\n\nThe full list of 3.15 deprecations came from a secondary source, so check the \"Porting\" section of the official What's New document before relying on exact details [5][8].",
+   "sources": [
+    {
+     "n": 1,
+     "url": "https://devguide.python.org/versions/",
+     "quote": "3.15 PEP 790 bugfix 2026-10-09 2031-10 Hugo van Kemenade",
+     "title": "Status of Python versions - Python Developer Guide"
+    },
+    {
+     "n": 2,
+     "url": "https://en.wikipedia.org/wiki/Python_(programming_language)",
+     "quote": "As of 2026, the Python Software Foundation supports Python 3.11, 3.12, 3.13, 3.14, and 3.15, following the project's annual release cycle and five-year support policy. Python 3.15.0 the latest stable version defaults to UTF-8, unlike previous versions.",
+     "title": "Python (programming language) - Wikipedia"
+    },
+    {
+     "n": 3,
+     "url": "https://www.python.org/downloads/release/python-3150",
+     "quote": "Python 3.15.0 is the newest major release of the Python programming language, and it contains many new features and optimisations compared to Python 3.14, in 5,643 commits from 1,012 contributors.",
+     "title": "Python Release Python 3.15.0 | Python.org"
+    },
+    {
+     "n": 4,
+     "url": "https://tech-insider.org/ie/python-3-15-release-3-10-end-of-life-2026",
+     "title": "Python 3.15 Release: 3.10 End of Life Explained [2026]"
+    },
+    {
+     "n": 5,
+     "url": "https://docs.python.org/3.15/whatsnew/3.15.html",
+     "quote": "Python 3.15 is the latest stable release of the Python programming language, with a mix of changes to the language, the implementation, and the standard library. The biggest changes include lazy imports, frozendict and sentinel builtins, UTF-8 as the default encoding, unpacking in comprehensions, and a stable ABI for free-threaded builds.",
+     "title": "What's new in Python 3.15 — Python 3.15.0 documentation"
+    },
+    {
+     "n": 6,
+     "url": "https://docs.python.org/3/deprecations/index.html",
+     "quote": "asyncio: asyncio.iscoroutinefunction() is deprecated and will be removed in Python 3.16; use inspect.iscoroutinefunction() instead.",
+     "title": "Deprecations — Python 3.15.0 documentation"
+    },
+    {
+     "n": 7,
+     "url": "https://www.anaconda.com/blog/python-3-15",
+     "quote": "`sre_compile`, `sre_constants`, `sre_parse` removed | Older libraries that import CPython's regex internals | Upgrade the dependency. There is no shim",
+     "title": "Python 3.15: New Features for Data Scientists"
+    },
+    {
+     "n": 8,
+     "url": "https://medium.com/@mursalfk/python-3-15-just-dropped-heres-everything-that-changed-from-3-14-415820ed503b",
+     "title": "Python 3.15 just dropped. Here's everything that changed from 3.14"
+    }
+   ],
+   "coverage": {
+    "scores": [
+     2,
+     2,
+     2
+    ],
+    "score": 1.0,
+    "depth": 1.0
+   },
+   "citationChecks": [
+    {
+     "sentence": "Python 3.15 is in its bugfix phase and is supported through October 2031 [1][2][3].",
+     "n": 1,
+     "url": "https://devguide.python.org/versions/",
+     "verdict": "partial",
+     "reason": "Source lists 3.15 as bugfix status with end of life 2031-10, but its first release is scheduled 2026-10-09."
+    },
+    {
+     "sentence": "**A new profiling package**, including Tachyon, a high-frequency statistical sampling profiler [5].",
+     "n": 5,
+     "url": "https://docs.python.org/3.15/whatsnew/3.15.html",
+     "verdict": "supported",
+     "reason": "Source states a new profiling package with Tachyon, a high-frequency statistical sampling profiler, in the library changes."
+    },
+    {
+     "sentence": "**Removed `codeobject.co_lnotab`**, which affects profilers, debuggers, and coverage tools [5].",
+     "n": 5,
+     "url": "https://docs.python.org/3.15/whatsnew/3.15.html",
+     "verdict": "unsupported",
+     "reason": "The visible source text never mentions co_lnotab removal or its effects on profilers, debuggers, or coverage tools."
+    },
+    {
+     "sentence": "**`typing.ByteString` and `collections.abc.ByteString`** are dropped from `__all__` ahead of removal in 3.17 [5].",
+     "n": 5,
+     "url": "https://docs.python.org/3.15/whatsnew/3.15.html",
+     "verdict": "unsupported",
+     "reason": "The visible source text never mentions typing.ByteString, collections.abc.ByteString, __all__ changes, or removal in 3.17."
+    }
+   ]
+  },
+  {
+   "id": "tech-kraft",
+   "category": "technical",
+   "question": "How does Kafka's KRaft mode replace ZooKeeper, and what changed in Kafka 4.0?",
+   "taskUuid": "6407f9a9-8a72-4e8d-b09a-19a0eabd98cd",
+   "status": "COMPLETED",
+   "latencySec": 24.2,
+   "subQuestions": [
+    "How does KRaft mode use the Raft consensus protocol to store and manage Kafka cluster metadata in place of ZooKeeper?",
+    "What were the architectural and operational differences between ZooKeeper-based and KRaft-based Kafka clusters, including controller election, metadata propagation, and failover?",
+    "What changes and removals were introduced in Kafka 4.0 regarding ZooKeeper support and KRaft as the default mode?",
+    "What migration path and compatibility considerations exist for moving existing ZooKeeper-based Kafka clusters to KRaft?"
+   ],
+   "agents": [
+    {
+     "status": "COMPLETED",
+     "steps": 3,
+     "sources": 1,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 3,
+     "sources": 2,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 3,
+     "sources": 2,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 4,
+     "sources": 3,
+     "error": null
+    }
+   ],
+   "usage": {
+    "calls": 15,
+    "promptTokens": 36225,
+    "completionTokens": 5167,
+    "costMicro": 41392
+   },
+   "reflectGaps": null,
+   "citations": {
+    "sentences": 17,
+    "citedSentences": 8,
+    "density": 0.471,
+    "sources": 7,
+    "utilization": 1.0,
+    "dangling": 0
+   },
+   "tools": {
+    "calls": {
+     "kb_search": 2,
+     "web_search": 4,
+     "wiki_search": 2,
+     "web_fetch": 6
+    },
+    "errors": 0,
+    "citationsDropped": 0
+   },
+   "langMatch": true,
+   "report": "Kafka's KRaft mode replaces ZooKeeper by moving cluster metadata management into Kafka itself, using a Raft-based quorum of controller nodes introduced in KIP-500 [1]. A subset of nodes is designated as controllers; they form a Raft quorum, elect one active leader, and that leader records every metadata change in a replicated metadata log. Because the followers replicate that log, a new leader already holds the committed metadata and does not need to reload it from an external store, which is why controller failover is much faster than under ZooKeeper [1][2]. Snapshots compact the log so it stays bounded. The specific propagation mechanics are general Raft behavior rather than something I verified in the sources.\n\nIn the legacy architecture, metadata lived in ZooKeeper and one broker was elected controller through it. On failover, the new controller had to reload metadata from ZooKeeper and push it out to brokers, adding round-trips that slowed recovery at scale [2][3]. KRaft separates process roles, with brokers handling data requests and controllers handling metadata, and removes the ZooKeeper dependency entirely [2][3]. Vendor sources report better scalability and faster failover, but I did not verify those benchmark figures against primary sources.\n\nKafka 4.0.0 (released March 18, 2025) is the first major release that runs entirely without ZooKeeper. KRaft is now the default and only mode, so a separate ZooKeeper ensemble is no longer needed [4][5]. Related removals include Java 8 support (KIP-750) and, for brokers, tools, and Connect, Java 11 support (KIP-1013) [5]. I did not fetch the full release notes, so ZooKeeper-specific configuration and tooling removals beyond this summary are unverified.\n\nExisting ZooKeeper-based clusters must run Kafka 3.x and migrate through a dual-mode process: bring up KRaft controllers, run brokers in migration mode while ZooKeeper is still active, move all brokers to KRaft, then remove ZooKeeper. Kafka 4.0+ does not support that path directly, so 3.x is the upgrade source, and new 4.0+ clusters must start on KRaft [6]. Sources describe the migration as multi-step, involving several rolling restarts, with limitations that can surprise operators and no straightforward rollback once committed [7]. I could not load the official Apache migration documentation, so the exact procedure, per-version limitations, and supported upgrade matrix should be checked there before any production change.",
+   "sources": [
+    {
+     "n": 1,
+     "url": "https://developer.confluent.io/learn/kraft",
+     "quote": "Apache Kafka Raft (KRaft) is the consensus protocol that was introduced in KIP-500 to remove Apache Kafka’s dependency on ZooKeeper for metadata management.",
+     "title": "KRaft: Apache Kafka Without ZooKeeper"
+    },
+    {
+     "n": 2,
+     "url": "https://kafka.apache.org/40/getting-started/zk2kraft",
+     "title": "KRaft vs ZooKeeper | Apache Kafka"
+    },
+    {
+     "n": 3,
+     "url": "https://www.confluent.io/learn/zookeeper-kafka",
+     "title": "ZooKeeper and Apache Kafka® Explained: From Legacy to KRaft"
+    },
+    {
+     "n": 4,
+     "url": "https://kafka.apache.org/blog/2025/03/18/apache-kafka-4.0.0-release-announcement",
+     "quote": "Apache Kafka 4.0 is a significant milestone, marking the first major release to operate entirely without Apache ZooKeeper®. By running in KRaft mode by default, Kafka simplifies deployment and management, eliminating the complexity of maintaining a separate ZooKeeper ensemble.",
+     "title": "Apache Kafka 4.0.0 Release Announcement | Apache Kafka"
+    },
+    {
+     "n": 5,
+     "url": "https://www.confluent.io/blog/latest-apache-kafka-release",
+     "quote": "KIP-750: Drop support for Java 8 in Kafka 4.0 (deprecate in 3.0) and KIP-1013: Drop broker and tools support for Java 11 in Kafka 4.0 (deprecate in 3.7)",
+     "title": "Apache Kafka 4.0 Release: Default KRaft, Queues, Faster Rebalances"
+    },
+    {
+     "n": 6,
+     "url": "https://www.conduktor.io/glossary/zookeeper-to-kraft-migration",
+     "quote": "Important Note for Kafka 4.0+: If you're deploying a new Kafka 4.0+ cluster, you must use KRaft from the start as ZooKeeper support has been removed. The migration approaches below apply to existing clusters running Kafka 3.x that need to transition from ZooKeeper to KRaft.",
+     "title": "ZooKeeper to KRaft Migration | Conduktor"
+    },
+    {
+     "n": 7,
+     "url": "https://www.redpanda.com/blog/migration-apache-zookeeper-kafka-kraft",
+     "quote": "The Kafka community has since outlined a migration path to help users transition their Kafka cluster from ZooKeeper mode to KRaft mode. However, the path is “dark and full of terrors.” (No really, it’s complex and peppered with limitations.)",
+     "title": "ZooKeeper to KRaft migration: a brief overview and a simpler alternative"
+    }
+   ],
+   "coverage": {
+    "scores": [
+     2,
+     2,
+     2
+    ],
+    "score": 1.0,
+    "depth": 1.0
+   },
+   "citationChecks": [
+    {
+     "sentence": "Kafka's KRaft mode replaces ZooKeeper by moving cluster metadata management into Kafka itself, using a Raft-based quorum of controller nodes introduced in KIP-500 [1].",
+     "n": 1,
+     "url": "https://developer.confluent.io/learn/kraft",
+     "verdict": "supported",
+     "reason": "Source states KRaft, introduced in KIP-500, consolidates metadata into Kafka via a Raft-based quorum controller replacing ZooKeeper."
+    },
+    {
+     "sentence": "On failover, the new controller had to reload metadata from ZooKeeper and push it out to brokers, adding round-trips that slowed recovery at scale [2][3].",
+     "n": 2,
+     "url": "https://kafka.apache.org/40/getting-started/zk2kraft",
+     "verdict": "unsupported",
+     "reason": "The source covers config, metric and behavior differences; it never describes controller failover reloading metadata from ZooKeeper or slower recovery."
+    },
+    {
+     "sentence": "KRaft is now the default and only mode, so a separate ZooKeeper ensemble is no longer needed [4][5].",
+     "n": 4,
+     "url": "https://kafka.apache.org/blog/2025/03/18/apache-kafka-4.0.0-release-announcement",
+     "verdict": "supported",
+     "reason": "Source says Kafka 4.0 runs entirely without ZooKeeper, KRaft by default, eliminating need for a separate ZooKeeper ensemble."
+    },
+    {
+     "sentence": "Kafka 4.0+ does not support that path directly, so 3.x is the upgrade source, and new 4.0+ clusters must start on KRaft [6].",
+     "n": 6,
+     "url": "https://www.conduktor.io/glossary/zookeeper-to-kraft-migration",
+     "verdict": "supported",
+     "reason": "Source states ZooKeeper removed in 4.0, migration applies to 3.x clusters, and new 4.0+ clusters must use KRaft."
+    }
+   ]
+  },
+  {
+   "id": "tech-raft",
+   "category": "technical",
+   "question": "How does the Raft consensus algorithm handle leader election and log replication?",
+   "taskUuid": "9a8ba892-b772-434b-90ff-db97825c1c86",
+   "status": "COMPLETED",
+   "latencySec": 18.2,
+   "subQuestions": [
+    "How does Raft's leader election mechanism work, including randomized election timeouts, term numbers, and vote requests?",
+    "How does Raft replicate log entries from the leader to followers, including AppendEntries RPCs and consistency checks?",
+    "How does Raft determine when log entries are committed and applied to the state machine?",
+    "How does Raft handle failures and conflicts during leader election and log replication, such as stale leaders or divergent follower logs?"
+   ],
+   "agents": [
+    {
+     "status": "COMPLETED",
+     "steps": 3,
+     "sources": 4,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 4,
+     "sources": 3,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 3,
+     "sources": 3,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 3,
+     "sources": 0,
+     "error": null
+    }
+   ],
+   "usage": {
+    "calls": 15,
+    "promptTokens": 38254,
+    "completionTokens": 6347,
+    "costMicro": 44601
+   },
+   "reflectGaps": null,
+   "citations": {
+    "sentences": 23,
+    "citedSentences": 12,
+    "density": 0.522,
+    "sources": 6,
+    "utilization": 1.0,
+    "dangling": 0
+   },
+   "tools": {
+    "calls": {
+     "wiki_search": 4,
+     "kb_search": 1,
+     "web_search": 4,
+     "web_fetch": 4
+    },
+    "errors": 0,
+    "citationsDropped": 0
+   },
+   "langMatch": true,
+   "report": "# How Raft Handles Leader Election and Log Replication\n\nRaft is a consensus algorithm that keeps replicated logs consistent across a cluster. It works through **terms** (logical clocks), **randomized election timeouts**, and **log replication via AppendEntries RPCs** [1][2].\n\n## Leader Election\n\nTime is divided into numbered terms, and each term has at most one leader. Followers expect periodic heartbeats from the leader. If a follower receives none within its election timeout, it assumes the leader has failed, increments its term, becomes a candidate, votes for itself, and sends RequestVote RPCs to the other servers. A candidate that collects votes from a majority becomes leader and sends heartbeats to assert its authority [1][2].\n\nEach server grants at most one vote per term. Election timeouts are chosen randomly from a fixed interval (e.g., 150–300 ms) so that split votes are rare, and when one does occur, the candidates time out and retry with new random timeouts [1]. Votes are also restricted: a server refuses a candidate whose log is less up-to-date than its own, which ensures any elected leader already holds all committed entries [1].\n\n## Log Replication\n\nOnly the leader accepts client commands. It appends each entry to its own log and sends AppendEntries RPCs to the followers; empty ones double as heartbeats [4][5]. Each RPC carries the index and term of the entry immediately preceding the new ones. A follower accepts only if its log matches at that point, which enforces the Log Matching Property: if two logs share an entry with the same index and term, they store the same command and are identical in all preceding entries [5]. On rejection, the leader decrements its `nextIndex` for that follower and retries until the logs agree. The follower then discards any conflicting suffix and adopts the leader's entries, so logs converge to the leader's [4][5].\n\n## Commitment and Application\n\nAn entry is committed once the leader has replicated it on a majority of servers, and the leader then advances its `commitIndex` [4]. The leader only commits entries from its current term directly; earlier-term entries become committed indirectly when a current-term entry after them commits [1]. Followers learn the commit point from the `leaderCommit` field in AppendEntries. Each server applies committed entries to its state machine in log order whenever `commitIndex` exceeds `lastApplied` [4][6].\n\n## Handling Failures\n\nEvery RPC carries the sender's term. A server that sees a higher term reverts to follower immediately, so a stale leader cut off by a partition steps down on reconnecting, and its uncommitted entries are overwritten. Because committing requires a majority, a stale leader cannot commit entries the new majority doesn't know about [1].\n\nNote that base Raft tolerates only crash failures, not Byzantine faults, since nodes trust the elected leader [3].\n\n## Sources\n\n1. **In Search of an Understandable Consensus Algorithm (Raft paper)** — https://raft.github.io/raft.pdf\n2. **RAFT | Dgraph Documentation** — https://docs.dgraph.io/design-concepts/raft\n3. **Raft (algorithm)** — Wikipedia — https://en.wikipedia.org/wiki/Raft_(algorithm)\n4. **Learning Raft Consensus Algorithm** — Rob Śliwa, Medium — https://medium.com/@robjsliwa_71070/learning-raft-consensus-algorithm-fd960f6c3605\n5. **In Search of an Understandable Consensus Algorithm – the morning paper** — https://blog.acolyer.org/2015/03/12/in-search-of-an-understandable-consensus-algorithm\n6. **State Machine Replication with Raft** — https://www.mydistributed.systems/2021/04/raft.html",
+   "sources": [
+    {
+     "n": 1,
+     "url": "https://raft.github.io/raft.pdf",
+     "quote": "Raft uses randomized election timeouts to ensure that split votes are rare and that they are resolved quickly. To prevent split votes in the ﬁrst place, election timeouts are chosen randomly from a ﬁxed interval (e.g., 150–300ms).",
+     "title": "In Search of an Understandable Consensus Algorithm (Raft paper)"
+    },
+    {
+     "n": 2,
+     "url": "https://docs.dgraph.io/design-concepts/raft",
+     "quote": "If a follower doesn't receive a Heartbeat for `ElectionTimeout` duration (generally between 150ms to 300ms), the leader may be down, so it converts it's state to candidate (as mentioned in Server States). It then requests for votes by sending a `RequestVote` call to other servers. If it gets votes from the majority, the candidate becomes the leader.",
+     "title": "RAFT | Dgraph Documentation"
+    },
+    {
+     "n": 3,
+     "url": "https://en.wikipedia.org/wiki/Raft_(algorithm)",
+     "quote": "Raft is not Byzantine fault tolerant in the base form; the nodes trust the elected leader, and the algorithm assumes all participants are trustworthy, yielding only crash fault tolerance.",
+     "title": "Raft (algorithm)"
+    },
+    {
+     "n": 4,
+     "url": "https://medium.com/@robjsliwa_71070/learning-raft-consensus-algorithm-fd960f6c3605",
+     "quote": "The leader will updates commitIndex when it knows that a log entry has been replicated on majority of the servers. The followers then apply the log entries up to commitIndex to their state machines.",
+     "title": "Learning Raft Consensus Algorithm | by Rob Śliwa | Medium"
+    },
+    {
+     "n": 5,
+     "url": "https://blog.acolyer.org/2015/03/12/in-search-of-an-understandable-consensus-algorithm",
+     "quote": "Raft maintains the following properties, which together constitute the Log Matching Property: (1) If two entries in different logs have the same index and term, then they store the same command; (2) If two entries in different logs have the same index and term, then the logs are identical in all preced…",
+     "title": "In Search of an Understandable Consensus Algorithm – the morning paper"
+    },
+    {
+     "n": 6,
+     "url": "https://www.mydistributed.systems/2021/04/raft.html",
+     "title": "State Machine Replication with Raft"
+    }
+   ],
+   "coverage": {
+    "scores": [
+     2,
+     2,
+     2
+    ],
+    "score": 1.0,
+    "depth": 1.0
+   },
+   "citationChecks": [
+    {
+     "sentence": "It works through **terms** (logical clocks), **randomized election timeouts**, and **log replication via AppendEntries RPCs** [1][2].",
+     "n": 1,
+     "verdict": "unverifiable"
+    },
+    {
+     "sentence": "Votes are also restricted: a server refuses a candidate whose log is less up-to-date than its own, which ensures any elected leader already holds all committed entries [1].",
+     "n": 1,
+     "verdict": "unverifiable"
+    },
+    {
+     "sentence": "The follower then discards any conflicting suffix and adopts the leader's entries, so logs converge to the leader's [4][5].",
+     "n": 4,
+     "verdict": "unverifiable"
+    },
+    {
+     "sentence": "Each server applies committed entries to its state machine in log order whenever `commitIndex` exceeds `lastApplied` [4][6].",
+     "n": 4,
+     "verdict": "unverifiable"
+    }
+   ]
+  },
+  {
+   "id": "tech-kafka-eos",
+   "category": "technical",
+   "question": "What is the exactly-once semantics guarantee in Apache Kafka and how is it implemented?",
+   "taskUuid": "7f2622ff-3b84-45b3-9fb2-d2af30b9e0ec",
+   "status": "COMPLETED",
+   "latencySec": 27.2,
+   "subQuestions": [
+    "What exactly does Kafka's exactly-once semantics (EOS) guarantee, and how does it differ from at-least-once and at-most-once delivery?",
+    "How do idempotent producers in Kafka use producer IDs and sequence numbers to prevent duplicate writes within a partition?",
+    "How do transactions in Kafka (transactional.id, transaction coordinator, control markers) provide atomic writes across multiple partitions?",
+    "How does the consumer side ensure exactly-once processing with read_committed isolation and offset commits within transactions, and what are the limitations (e.g., external side effects)?"
+   ],
+   "agents": [
+    {
+     "status": "COMPLETED",
+     "steps": 3,
+     "sources": 3,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 4,
+     "sources": 3,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 3,
+     "sources": 2,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 3,
+     "sources": 3,
+     "error": null
+    }
+   ],
+   "usage": {
+    "calls": 15,
+    "promptTokens": 33476,
+    "completionTokens": 6290,
+    "costMicro": 39766
+   },
+   "reflectGaps": null,
+   "citations": {
+    "sentences": 40,
+    "citedSentences": 17,
+    "density": 0.425,
+    "sources": 7,
+    "utilization": 1.0,
+    "dangling": 0
+   },
+   "tools": {
+    "calls": {
+     "wiki_search": 3,
+     "kb_search": 2,
+     "web_search": 5,
+     "web_fetch": 5
+    },
+    "errors": 0,
+    "citationsDropped": 0
+   },
+   "langMatch": true,
+   "report": "# Exactly-Once Semantics in Apache Kafka\n\nKafka's exactly-once semantics (EOS) guarantee that the effect of processing each record is applied exactly once, even across broker failures, producer retries, and network errors. The guarantee is built from two mechanisms: idempotent producers, which prevent duplicate writes, and transactions, which make multi-partition writes atomic [1][2]. Within Kafka, EOS removes both data loss and duplication, though it adds latency and coordination overhead.\n\n## Delivery guarantees compared\n\n- **At-most-once:** the system never retries, so records can be lost but are never duplicated [1]. This happens with `acks=0`, or when offsets are committed before processing.\n- **At-least-once:** the system retries until a write is acknowledged, so records are never lost but may be processed more than once. This is typical with `acks=all` plus retries and offsets committed after processing.\n- **Exactly-once:** each record's effect is applied once. Kafka reaches this by combining idempotence and transactions [1][2].\n\nThe guarantee is strongest for Kafka-to-Kafka pipelines, such as Kafka Streams with `processing.guarantee=exactly_once_v2`. When side effects go to external systems, those systems must also be idempotent or transactional for end-to-end exactly-once behavior.\n\n## Idempotent producers\n\nAn idempotent producer (`enable.idempotence=true`) is assigned a unique producer ID (PID) by the broker. Each message it sends to a partition carries a monotonically increasing sequence number. The broker tracks the PID and last accepted sequence number per partition and rejects any duplicate write caused by a retry [3]. Because sequence numbers are tracked per partition, ordering is also preserved within each partition [4].\n\nDeduplication depends on retries being enabled (the default) and on `acks=all`, so that acknowledged writes are replicated to in-sync replicas. The PID is scoped to a single producer session, so this mechanism alone does not deduplicate across a producer restart that yields a new PID. Transactions address that case [3].\n\n## Transactions\n\nMulti-partition atomicity uses a two-phase commit coordinated by a transaction coordinator [5][6]:\n\n1. **Initialization:** a producer sets a `transactional.id`. This ID is hashed to a partition of the internal `__transaction_state` log, so one broker acts as coordinator for it. On `initTransactions()`, the coordinator assigns a PID and bumps the epoch, which fences zombie producers sharing the same ID [5].\n2. **Writing:** as the producer sends records, each partition is registered with the coordinator as part of the transaction [6].\n3. **Completion:** on `commitTransaction()` or `abortTransaction()`, the coordinator durably logs a prepare state, then writes commit or abort control markers to every participating partition [5][6].\n4. **Visibility:** consumers using `isolation.level=read_committed` buffer records and deliver only those from committed transactions, skipping aborted ones [7].\n\nBecause the final state is recorded in the replicated transaction log before markers are written, the outcome is all-or-nothing across partitions, even after failures [5].\n\n## Consumer side and read-process-write\n\nConsumer-side exactly-once is a read-process-write transaction rather than a consumer feature alone [1][7]:\n\n- The consumer runs with `isolation.level=read_committed`, so it never sees records from open or aborted transactions. The broker stops it at the Last Stable Offset [7].\n- Input offsets are committed in the same producer transaction as the output records, via `sendOffsetsToTransaction()`. Output writes and the offset advance commit or abort together, and auto-commit must be disabled.\n- If the transaction aborts, the output is invisible and the offsets roll back, so reprocessing produces the same result.\n\n## Limitations and costs\n\n- **External side effects:** database writes, HTTP calls, and emails are outside the Kafka transaction. They can repeat on retry or crash, so they need idempotent writes, a transactional outbox, or deduplication keys [1].\n- **Latency and memory:** read_committed consumers buffer records until commit markers arrive. Very short commit intervals reduce throughput [7].\n- **Open transactions:** an unresolved open transaction blocks read_committed consumers at the LSO. On compacted topics, it also stops the log cleaner from advancing beyond the LSO, which can cause unbounded partition growth [7].\n\n**Source caveat:** the official Apache Kafka documentation could not be retrieved for this report. The details above rely on the third-party and vendor sources cited.",
+   "sources": [
+    {
+     "n": 1,
+     "url": "https://www.conduktor.io/glossary/exactly-once-semantics-in-kafka",
+     "quote": "Kafka implements EOS via idempotent producers (sequence-number dedup) and transactions (atomic multi-partition writes).",
+     "title": "Kafka Exactly-Once: Producers + Transactions | Conduktor"
+    },
+    {
+     "n": 2,
+     "url": "https://developer.confluent.io/courses/architecture/transactions",
+     "title": "Kafka Transactional Support: How It Enables Exactly-Once Semantics"
+    },
+    {
+     "n": 3,
+     "url": "https://www.lydtechconsulting.com/blog/kafka-idempotent-producer",
+     "quote": "By configuring the Producer to be idempotent, each Producer is assigned a unique Id (PID) and each message is given a monotonically increasing sequence number. The broker tracks the PID + sequence number combination for each partition, rejecting any duplicate write requests it receives.",
+     "title": "Kafka Idempotent Producer - Lydtech Consulting"
+    },
+    {
+     "n": 4,
+     "url": "https://www.youtube.com/watch?v=0cwRRCBpPPM",
+     "quote": "So even the sequence is same but the differentiating factor is now the partition.",
+     "title": "Apache Kafka Idempotency Explained | Prevent Duplicate Messages | Kafka Idempotent Producer"
+    },
+    {
+     "n": 5,
+     "url": "https://www.confluent.io/blog/transactions-apache-kafka",
+     "title": "Transactions in Apache Kafka | Confluent"
+    },
+    {
+     "n": 6,
+     "url": "https://medium.com/codetodeploy/deep-dive-into-kafka-transactions-and-exactly-once-semantics-5a12fd162ee2",
+     "title": "Deep Dive Into Kafka Transactions And Exactly Once Semantics | by Shivam srivastav | CodeToDeploy | Medium"
+    },
+    {
+     "n": 7,
+     "url": "https://strimzi.io/blog/2023/05/03/kafka-transactions",
+     "quote": "Brokers will prevent consumers with `isolation.level=read_committed` from advancing to offsets which include open transactions. Messages from aborted transactions are filtered out within the consumer, and are never observed by the client application.",
+     "title": "Exactly-once semantics with Kafka transactions (Strimzi blog)"
+    }
+   ],
+   "coverage": {
+    "scores": [
+     2,
+     2,
+     2
+    ],
+    "score": 1.0,
+    "depth": 1.0
+   },
+   "citationChecks": [
+    {
+     "sentence": "The guarantee is built from two mechanisms: idempotent producers, which prevent duplicate writes, and transactions, which make multi-partition writes atomic [1][2].",
+     "n": 1,
+     "url": "https://www.conduktor.io/glossary/exactly-once-semantics-in-kafka",
+     "verdict": "supported",
+     "reason": "Source states EOS uses idempotent producers (dedup of duplicate writes) and transactions (atomic multi-partition writes)."
+    },
+    {
+     "sentence": "Because sequence numbers are tracked per partition, ordering is also preserved within each partition [4].",
+     "n": 4,
+     "verdict": "unverifiable"
+    },
+    {
+     "sentence": "**Writing:** as the producer sends records, each partition is registered with the coordinator as part of the transaction [6].",
+     "n": 6,
+     "verdict": "unverifiable"
+    },
+    {
+     "sentence": "Consumer-side exactly-once is a read-process-write transaction rather than a consumer feature alone [1][7]:",
+     "n": 1,
+     "url": "https://www.conduktor.io/glossary/exactly-once-semantics-in-kafka",
+     "verdict": "supported",
+     "reason": "Source states read-process-write is atomic via transactions: consume, process, produce, commit offsets together; consumers need read_committed, not a standalone feature."
+    }
+   ]
+  },
+  {
+   "id": "tech-hnsw",
+   "category": "technical",
+   "question": "How do vector databases perform approximate nearest neighbor search, for example with HNSW?",
+   "taskUuid": "c3a39537-cf99-4911-8f9a-a28a23ed07be",
+   "status": "COMPLETED",
+   "latencySec": 21.2,
+   "subQuestions": [
+    "What is approximate nearest neighbor (ANN) search, and why is exact nearest neighbor search too expensive for high-dimensional vector databases?",
+    "How does the HNSW (Hierarchical Navigable Small World) index organize vectors into multiple layers and graph connections?",
+    "How does the HNSW search algorithm traverse its layers to find approximate nearest neighbors, and what roles do parameters like M, efConstruction, and efSearch play?",
+    "What are the trade-offs of HNSW compared with other ANN methods (e.g., IVF, product quantization, or tree-based indexes) in terms of recall, latency, memory usage, and index build time?"
+   ],
+   "agents": [
+    {
+     "status": "COMPLETED",
+     "steps": 4,
+     "sources": 3,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 3,
+     "sources": 2,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 3,
+     "sources": 1,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 3,
+     "sources": 4,
+     "error": null
+    }
+   ],
+   "usage": {
+    "calls": 15,
+    "promptTokens": 38943,
+    "completionTokens": 5838,
+    "costMicro": 44781
+   },
+   "reflectGaps": null,
+   "citations": {
+    "sentences": 33,
+    "citedSentences": 11,
+    "density": 0.333,
+    "sources": 6,
+    "utilization": 1.0,
+    "dangling": 0
+   },
+   "tools": {
+    "calls": {
+     "wiki_search": 6,
+     "kb_search": 2,
+     "web_fetch": 4,
+     "web_search": 3
+    },
+    "errors": 0,
+    "citationsDropped": 0
+   },
+   "langMatch": true,
+   "report": "# How Vector Databases Perform Approximate Nearest Neighbor Search with HNSW\n\n## Why exact search does not scale\n\nNearest neighbor (NN) search finds the stored vector closest to a query under a distance function such as Euclidean distance or cosine similarity. The naive approach compares the query against all N vectors, which costs O(N·d) per query. For billions of vectors with hundreds of dimensions, this is prohibitively slow [3]. Tree-based spatial indexes such as k-d trees, which work well in low dimensions, also degrade in high dimensions. As dimensionality grows, the volume of the space increases so quickly that the data becomes sparse, and pruning stops being effective [2]. Approximate nearest neighbor (ANN) search gives up the guarantee of returning the true nearest neighbor in exchange for large gains in speed and memory [1][3].\n\n## How HNSW organizes the data\n\nHNSW (Hierarchical Navigable Small World) stores each vector as a node in a multi-layer proximity graph, with links to nearby vectors. Upper layers contain fewer nodes and act as a coarse map for long-range navigation. The bottom layer contains every node and provides the detailed view [4].\n\n## How a query is answered\n\nA search starts in an upper layer and follows links toward nodes closer to the query. It then repeats the process in lower layers until it finds a set of likely nearest neighbors [4]. The layered structure lets the search skip most of the dataset rather than comparing against every item.\n\nThe parameters that control this process are described below. The qualitative role of each comes from the standard HNSW description (Malkov & Yashunin, 2016) and was not verified against a source in this session:\n\n- **M**: the maximum number of links per node. Higher values improve recall and increase memory use.\n- **efConstruction**: the size of the candidate list during index build. Higher values give a better-connected graph and a slower build.\n- **efSearch**: the size of the candidate list at query time. Higher values improve recall at the cost of latency.\n\n## Trade-offs against other ANN methods\n\nBenchmark figures below come from a single blog post on 1M vectors of 768 dimensions with specific hardware and parameters, so treat them as indicative and validate on your own data [5].\n\n- **Recall and latency:** HNSW (M=32, ef=128) reached 0.982 recall at 2.1 ms per query in that benchmark [5]. The same source reports lower recall for the IVF variants it tested. Among those variants, IVF-PQ gave 0.92–0.95 Recall@10 [5].\n- **Memory:** HNSW stores graph links on top of the raw vectors, so it is typically the most memory-hungry option. In the benchmark it used 6.2 GB [5]. IVF-PQ compresses vectors and reduces memory substantially, at a cost in recall.\n- **Build time:** HNSW built more slowly than IVF-Flat in the benchmark: 14 min versus 8 min [5].\n- **Updates:** HNSW supports incremental inserts without retraining. IVF needs periodic re-clustering as data drifts.\n- **Tree-based methods and LSH:** These struggle with the curse of dimensionality at high dimensions and are rarely competitive for embedding workloads [6].\n\n**Rule of thumb:** Choose HNSW when you need high recall, frequent updates, and enough memory to hold the index. Choose IVF-PQ when memory or scale is the binding constraint and some recall loss is acceptable.",
+   "sources": [
+    {
+     "n": 1,
+     "url": "https://en.wikipedia.org/wiki/Nearest_neighbor_search",
+     "title": "Nearest neighbor search - Wikipedia"
+    },
+    {
+     "n": 2,
+     "url": "https://en.wikipedia.org/wiki/Curse_of_dimensionality",
+     "quote": "The common theme of these problems is that when the dimensionality increases, the volume of the space increases so fast that the available data becomes sparse.",
+     "title": "Curse of dimensionality - Wikipedia"
+    },
+    {
+     "n": 3,
+     "url": "https://www.velodb.io/glossary/what-is-approximate-nearest-neighbor-search",
+     "quote": "The query time complexity of this approach is linear, O(N⋅d), where N is the dataset size and d is the dimension. For industrial datasets with billions of vectors (N∼109) and hundreds of dimensions, this linear complexity is computationally prohibitive, resulting in excessive latency and resource consumption.",
+     "title": "What is Approximate Nearest Neighbor (ANN) Search - VeloDB"
+    },
+    {
+     "n": 4,
+     "url": "https://en.wikipedia.org/wiki/Hierarchical_navigable_small_world",
+     "quote": "HNSW stores vectors in a graph. Each vector is a node, and links connect it to some nearby vectors. The graph has several layers: upper layers contain fewer nodes and act like a rough map, while the bottom layer contains all nodes and gives a more detailed view.",
+     "title": "Hierarchical navigable small world - Wikipedia"
+    },
+    {
+     "n": 5,
+     "url": "https://www.brahimbouine.com/blog/vector-index-hnsw-ivf-benchmarks",
+     "quote": "HNSW (M=32, ef=128) | 0.982 | 1,850 | 2.1ms | 6.2 GB | 14 min",
+     "title": "HNSW vs IVF: Vector Index Benchmarks for Production Similarity Search – Brahim Bouine"
+    },
+    {
+     "n": 6,
+     "url": "https://arxiv.org/html/2603.13591v1",
+     "quote": "While traditional methods like KD-trees (Ram and Sinha, 2019) and LSH (Gionis et al., 1999) struggle with the curse of dimensionality, graph-based ANN search algorithms (Fu et al., 2019; Malkov and Yashunin, 2018) become the dominant approach, offering superior performance.",
+     "title": "d-HNSW: A High-performance Vector Search Engine on Disaggregated Memory"
+    }
+   ],
+   "coverage": {
+    "scores": [
+     2,
+     2,
+     2
+    ],
+    "score": 1.0,
+    "depth": 1.0
+   },
+   "citationChecks": [
+    {
+     "sentence": "For billions of vectors with hundreds of dimensions, this is prohibitively slow [3].",
+     "n": 3,
+     "url": "https://www.velodb.io/glossary/what-is-approximate-nearest-neighbor-search",
+     "verdict": "supported",
+     "reason": "Source states exhaustive ENN search over billions of vectors with hundreds of dimensions is computationally prohibitive, with excessive latency."
+    },
+    {
+     "sentence": "Approximate nearest neighbor (ANN) search gives up the guarantee of returning the true nearest neighbor in exchange for large gains in speed and memory [1][3].",
+     "n": 1,
+     "url": "https://en.wikipedia.org/wiki/Nearest_neighbor_search",
+     "verdict": "partial",
+     "reason": "Source supports ANN relaxing exactness, but never states large speed and memory gains as the tradeoff."
+    },
+    {
+     "sentence": "Benchmark figures below come from a single blog post on 1M vectors of 768 dimensions with specific hardware and parameters, so treat them as indicative and validate on your own data [5].",
+     "n": 5,
+     "url": "https://www.brahimbouine.com/blog/vector-index-hnsw-ivf-benchmarks",
+     "verdict": "partial",
+     "reason": "1M vectors, 768 dims, and specific hardware/parameters match; but the post covers multiple datasets and scales, not solely this one."
+    },
+    {
+     "sentence": "In the benchmark it used 6.2 GB [5].",
+     "n": 5,
+     "url": "https://www.brahimbouine.com/blog/vector-index-hnsw-ivf-benchmarks",
+     "verdict": "supported",
+     "reason": "Source's 1M-vector, 768-dim benchmark lists HNSW (M=32, ef=128) memory as 6.2 GB; the sentence omits which index but matches."
+    }
+   ]
+  },
+  {
+   "id": "tech-redis-zh",
+   "category": "technical",
+   "question": "Redis 的持久化机制 RDB 和 AOF 有什么区别？",
+   "taskUuid": "a46e5d67-d51d-4bb2-90f3-be399f1f5921",
+   "status": "COMPLETED",
+   "latencySec": 30.2,
+   "subQuestions": [
+    "RDB（快照持久化）的工作原理是什么，它如何生成和保存数据快照？",
+    "AOF（追加日志持久化）的工作原理是什么，它如何记录写命令并进行重写（rewrite）？",
+    "RDB 与 AOF 在数据安全性（数据丢失风险）、恢复速度和磁盘占用方面有哪些具体差异？",
+    "在实际生产环境中，应如何选择或组合使用 RDB 与 AOF（例如混合持久化）？"
+   ],
+   "agents": [
+    {
+     "status": "COMPLETED",
+     "steps": 3,
+     "sources": 3,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 5,
+     "sources": 3,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 3,
+     "sources": 3,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 4,
+     "sources": 3,
+     "error": null
+    }
+   ],
+   "usage": {
+    "calls": 17,
+    "promptTokens": 41340,
+    "completionTokens": 6035,
+    "costMicro": 47375
+   },
+   "reflectGaps": null,
+   "citations": {
+    "sentences": 14,
+    "citedSentences": 6,
+    "density": 0.429,
+    "sources": 6,
+    "utilization": 1.0,
+    "dangling": 0
+   },
+   "tools": {
+    "calls": {
+     "wiki_search": 4,
+     "kb_search": 3,
+     "web_search": 4,
+     "web_fetch": 5
+    },
+    "errors": 0,
+    "citationsDropped": 0
+   },
+   "langMatch": true,
+   "report": "Redis 提供两种持久化机制：RDB 定时快照，AOF 记录每条写命令，二者在数据安全性、恢复速度与磁盘占用上各有取舍。\n\n**RDB（快照）**：按配置间隔或手动触发（SAVE 阻塞、BGSAVE 后台执行），把某一时刻的整个数据集写成紧凑的二进制文件。BGSAVE 时主进程 fork 子进程，子进程遍历内存写入临时文件，完成后原子替换旧文件；父子进程共享内存页，只有被修改的页才会复制（写时复制），主进程本身不做磁盘 I/O，因此对性能影响小 [1][2]。RDB 文件适合备份与灾备，重启快，但两次快照之间的数据在崩溃时会丢失。\n\n**AOF（追加日志）**：把每条写命令按协议格式追加到日志，重启时逐条重放重建数据。刷盘由 appendfsync 策略决定：`always` 最安全但吞吐下降，`everysec` 最多丢失约 1 秒数据，`no` 交由操作系统决定。文件会不断增长，因此需要重写（BGREWRITEAOF）：子进程依据 fork 时的数据快照生成用最少命令表示当前数据的新文件，去除冗余写命令，期间的新写入先记入重写缓冲区，完成后追加并替换 [1][3]。Redis 7.0 起采用多部分 AOF（MP-AOF），由 base 基础文件、incr 增量文件和 manifest 清单组成 [4]。\n\n**具体差异**：\n- 数据安全性：RDB 丢失窗口取决于快照间隔，可达分钟级；AOF 在 `everysec` 下约 1 秒 [6]。\n- 恢复速度：RDB 加载快，大数据集尤其明显；AOF 需重放命令，文件越大越慢 [5][6]。\n- 磁盘占用：RDB 文件小、便于归档和异地传输；AOF 文件通常更大，需定期重写，I/O 压力也更高 [6]。\n\n**生产选择**：对数据丢失敏感的场景推荐开启 AOF，并启用混合持久化（`aof-use-rdb-preamble yes`，Redis 7+ 默认开启）：以 RDB 格式作为基线，AOF 记录之后的增量，兼顾快速加载与低丢失。纯缓存场景可只用 RDB 或关闭持久化。无论哪种方案，都应定期将 RDB 备份到异地，并结合主从、哨兵或集群做高可用；AOF 崩溃截断时可用 `redis-check-aof --fix` 修复（修复前先备份）。",
+   "sources": [
+    {
+     "n": 1,
+     "url": "https://redis.io/docs/latest/operate/oss_and_stack/management/persistence/",
+     "quote": "RDB persistence performs point-in-time snapshots of your dataset at specified intervals.",
+     "title": "Redis persistence | Redis 官方文档"
+    },
+    {
+     "n": 2,
+     "url": "https://www.nootcode.com/knowledge/en/redis-rdb",
+     "quote": "Child process traverses memory to generate snapshot → writes to temp file → atomically replaces old file",
+     "title": "How Does Redis RDB Persistence Work? | NootCode Knowledge Hub"
+    },
+    {
+     "n": 3,
+     "url": "https://www.alibabacloud.com/blog/design-and-implementation-of-redis-7-0-multi-part-aof_599199",
+     "quote": "AOFRW will remove redundant write commands in AOF and rewrite and generate a new AOF file equivalently to reduce the size of the AOF file.",
+     "title": "Design and Implementation of Redis 7.0 Multi-Part AOF - Alibaba Cloud Community"
+    },
+    {
+     "n": 4,
+     "url": "https://oneuptime.com/blog/post/2026-03-31-redis-multi-part-aof-70/view",
+     "title": "How to Use Multi-Part AOF in Redis 7.0+"
+    },
+    {
+     "n": 5,
+     "url": "https://redis.io/docs/latest/operate/oss_and_stack/management/persistence",
+     "quote": "RDB allows faster restarts with big datasets compared to AOF.",
+     "title": "Redis persistence | Docs"
+    },
+    {
+     "n": 6,
+     "url": "https://www.jusdb.com/blog/redis-persistence-rdb-aof-comparison",
+     "quote": "AOF logs every write command — near-zero data loss with `appendfsync everysec`, but slower restores and more disk I/O.",
+     "title": "Redis Persistence RDB vs AOF | JusDB Blog"
+    }
+   ],
+   "coverage": {
+    "scores": [
+     2,
+     2,
+     2
+    ],
+    "score": 1.0,
+    "depth": 1.0
+   },
+   "citationChecks": [
+    {
+     "sentence": "BGSAVE 时主进程 fork 子进程，子进程遍历内存写入临时文件，完成后原子替换旧文件；父子进程共享内存页，只有被修改的页才会复制（写时复制），主进程本身不做磁盘 I/O，因此对性能影响小 [1][2]。",
+     "n": 1,
+     "url": "https://redis.io/docs/latest/operate/oss_and_stack/management/persistence/",
+     "verdict": "supported",
+     "reason": "Source states fork, child writes temp file, replaces old, copy-on-write, and parent never does disk I/O, maximizing performance."
+    },
+    {
+     "sentence": "文件会不断增长，因此需要重写（BGREWRITEAOF）：子进程依据 fork 时的数据快照生成用最少命令表示当前数据的新文件，去除冗余写命令，期间的新写入先记入重写缓冲区，完成后追加并替换 [1][3]。",
+     "n": 1,
+     "url": "https://redis.io/docs/latest/operate/oss_and_stack/management/persistence/",
+     "verdict": "partial",
+     "reason": "来源支持增长、最简命令集、后台重写与替换；但未说明依据fork快照，且重写缓冲区追加说法仅适用于7.0前。"
+    },
+    {
+     "sentence": "数据安全性：RDB 丢失窗口取决于快照间隔，可达分钟级；AOF 在 `everysec` 下约 1 秒 [6]。",
+     "n": 6,
+     "url": "https://www.jusdb.com/blog/redis-persistence-rdb-aof-comparison",
+     "verdict": "supported",
+     "reason": "Source states RDB loss equals snapshot interval (minutes) and AOF everysec loses at most ~1 second."
+    },
+    {
+     "sentence": "恢复速度：RDB 加载快，大数据集尤其明显；AOF 需重放命令，文件越大越慢 [5][6]。",
+     "n": 5,
+     "url": "https://redis.io/docs/latest/operate/oss_and_stack/management/persistence",
+     "verdict": "partial",
+     "reason": "Source says RDB restarts faster with big datasets and AOF is replayed, but never says larger AOF means slower."
+    }
+   ]
+  },
+  {
+   "id": "tech-mcp",
+   "category": "technical",
+   "question": "What is the Model Context Protocol (MCP) and how does it work?",
+   "taskUuid": "09def6d6-caef-4a0e-bfd6-d346d58310f7",
+   "status": "COMPLETED",
+   "latencySec": 18.1,
+   "subQuestions": [
+    "What is the Model Context Protocol (MCP) and what problem does it aim to solve?",
+    "What are the core components and roles in MCP's architecture (hosts, clients, servers)?",
+    "How do MCP servers expose tools, resources, and prompts to AI applications, and how are they invoked?",
+    "What transport mechanisms and message formats does MCP use for communication between clients and servers?"
+   ],
+   "agents": [
+    {
+     "status": "COMPLETED",
+     "steps": 3,
+     "sources": 2,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 3,
+     "sources": 2,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 3,
+     "sources": 0,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 3,
+     "sources": 4,
+     "error": null
+    }
+   ],
+   "usage": {
+    "calls": 14,
+    "promptTokens": 35937,
+    "completionTokens": 6460,
+    "costMicro": 42397
+   },
+   "reflectGaps": null,
+   "citations": {
+    "sentences": 37,
+    "citedSentences": 13,
+    "density": 0.351,
+    "sources": 6,
+    "utilization": 1.0,
+    "dangling": 0
+   },
+   "tools": {
+    "calls": {
+     "wiki_search": 4,
+     "web_search": 4,
+     "web_fetch": 7
+    },
+    "errors": 0,
+    "citationsDropped": 0
+   },
+   "langMatch": true,
+   "report": "# What Is the Model Context Protocol (MCP) and How Does It Work?\n\n## Purpose\n\nThe Model Context Protocol (MCP) is an open standard and open-source framework that Anthropic introduced in November 2024. It standardizes how AI systems, such as large language models, connect to and share data with external tools, systems, and data sources [1]. Before MCP, every AI application had to build a custom integration for every tool or data source. Databricks calls this the \"N×M integration problem\": with N applications and M tools, that means N×M separate integrations [2]. MCP replaces this with a single shared protocol, so each application and each tool implements it once.\n\n## Architecture\n\nMCP follows a client-host-server architecture [3]:\n\n- **Host:** The AI application that coordinates everything, such as an IDE or chat app. It creates client instances, manages their permissions and lifecycles, enforces security and user consent, and aggregates context across clients [4].\n- **Client:** Created by the host, each client keeps one isolated, stateful session with one server, so the relationship is 1:1. Clients negotiate protocol capabilities and route messages [4].\n- **Server:** Exposes specialized context and capabilities. Servers can run as local processes or as remote services [4].\n\nA single host can run many clients and therefore connect to many servers at once [3].\n\n## Primitives\n\nServers expose three kinds of capabilities. They differ mainly in who decides when they are used [5]:\n\n- **Tools** are functions the model can decide to call. They are controlled by the model.\n- **Resources** are read-only content the client attaches to context. They are controlled by the application.\n- **Prompts** are server-defined templates the user invokes explicitly, usually as a slash command. They are controlled by the user.\n\nThe wire-level methods are `tools/list` and `tools/call` for tools, `resources/list` and `resources/read` for resources, and `prompts/list` and `prompts/get` for prompts [5]. Servers declare which primitives they support in a `capabilities` object during initialization [5].\n\n## Communication\n\nMCP messages use JSON-RPC 2.0 [6]. There are three message types:\n\n- **Requests** carry a method, optional params, and an id.\n- **Responses** carry the same id and either a result or an error.\n- **Notifications** carry a method and optional params, with no id.\n\nThe transport layer carries these messages. Two transports are standardized [6]:\n\n- **stdio** uses the process's standard input and output. It suits local integrations and command-line tools.\n- **Streamable HTTP** is the networked option.\n\nThe older HTTP+SSE transport is deprecated. Custom transports are allowed if they preserve the message format [6].\n\n## Unverified Detail\n\nOne source says that revision 2026-07-28 removed the initialize handshake and moved per-request protocol version and client capabilities into `_meta`. I could not confirm this against the official specification, so treat it as unverified.\n\n## Sources\n\n[1] Model Context Protocol – Wikipedia. https://en.wikipedia.org/wiki/Model_Context_Protocol\n[2] What is the Model Context Protocol (MCP)? – Databricks. https://www.databricks.com/blog/what-is-model-context-protocol\n[3] Architecture – Model Context Protocol specification (2025-11-25). https://modelcontextprotocol.io/specification/2025-11-25/architecture\n[4] Architecture overview – Model Context Protocol. https://modelcontextprotocol.io/docs/2026-07-28/learn/architecture\n[5] MCP tools, resources, prompts: the three primitives explained. https://archestra.ai/blog/mcp-tools-resources-prompts\n[6] The MCP Protocol: Transports, Primitives, and the Message Lifecycle. https://www.getmaxim.ai/articles/the-mcp-protocol-transports-primitives-and-the-message-lifecycle",
+   "sources": [
+    {
+     "n": 1,
+     "url": "https://en.wikipedia.org/wiki/Model_Context_Protocol",
+     "quote": "The Model Context Protocol (MCP) is an open standard and open-source framework introduced by Anthropic in November 2024 to standardize the way artificial intelligence (AI) systems like large language models (LLMs) integrate and share data with external tools, systems, and data sources.",
+     "title": "Model Context Protocol - Wikipedia"
+    },
+    {
+     "n": 2,
+     "url": "https://www.databricks.com/blog/what-is-model-context-protocol",
+     "quote": "The context protocol addresses a critical challenge in building AI agents: the \"N×M integration problem.\" Without a standardized protocol, each AI application must integrate directly with every external service, creating N×M separate integrations where N represents the number of tools and M represents the number of clients.",
+     "title": "What is the Model Context Protocol (MCP)? | Databricks"
+    },
+    {
+     "n": 3,
+     "url": "https://modelcontextprotocol.io/specification/2025-11-25/architecture",
+     "quote": "The Model Context Protocol (MCP) follows a client-host-server architecture where each host can run multiple client instances.",
+     "title": "Architecture - Model Context Protocol (specification 2025-11-25)"
+    },
+    {
+     "n": 4,
+     "url": "https://modelcontextprotocol.io/docs/2026-07-28/learn/architecture",
+     "title": "Architecture overview - Model Context Protocol"
+    },
+    {
+     "n": 5,
+     "url": "https://modelcontextprotocol.info/docs/concepts/transports",
+     "title": "Transports – Model Context Protocol (MCP)"
+    },
+    {
+     "n": 6,
+     "url": "https://www.getmaxim.ai/articles/the-mcp-protocol-transports-primitives-and-the-message-lifecycle",
+     "title": "The MCP Protocol: Transports, Primitives, and the Message Lifecycle"
+    }
+   ],
+   "coverage": {
+    "scores": [
+     2,
+     2,
+     1
+    ],
+    "score": 1.0,
+    "depth": 0.833
+   },
+   "citationChecks": [
+    {
+     "sentence": "It standardizes how AI systems, such as large language models, connect to and share data with external tools, systems, and data sources [1].",
+     "n": 1,
+     "url": "https://en.wikipedia.org/wiki/Model_Context_Protocol",
+     "verdict": "supported",
+     "reason": "Source states MCP standardizes how AI systems like LLMs integrate and share data with external tools, systems, and data sources, citing [1]."
+    },
+    {
+     "sentence": "It creates client instances, manages their permissions and lifecycles, enforces security and user consent, and aggregates context across clients [4].",
+     "n": 4,
+     "url": "https://modelcontextprotocol.io/docs/2026-07-28/learn/architecture",
+     "verdict": "unsupported",
+     "reason": "Source says host creates one client per server; says nothing of permissions, lifecycles, consent enforcement, or context aggregation."
+    },
+    {
+     "sentence": "A single host can run many clients and therefore connect to many servers at once [3].",
+     "n": 3,
+     "url": "https://modelcontextprotocol.io/specification/2025-11-25/architecture",
+     "verdict": "supported",
+     "reason": "Source states each host runs multiple client instances, each with a 1:1 server connection, implying many simultaneous server connections."
+    },
+    {
+     "sentence": "Servers declare which primitives they support in a `capabilities` object during initialization [5].",
+     "n": 5,
+     "url": "https://modelcontextprotocol.info/docs/concepts/transports",
+     "verdict": "unsupported",
+     "reason": "Source covers transports; capabilities appear only as empty constructor options, with no mention of declaring primitives during initialization."
+    }
+   ]
+  },
+  {
+   "id": "cmp-kafka-rabbit",
+   "category": "comparison",
+   "question": "Kafka vs RabbitMQ: what are the trade-offs for agent workloads?",
+   "taskUuid": "c2a3762f-0178-4b76-919a-0792374f1b55",
+   "status": "COMPLETED",
+   "latencySec": 30.2,
+   "subQuestions": [
+    "How do Kafka and RabbitMQ differ in their core messaging models (log-based streams vs. queue-based brokers), and how does that affect ordering, replay, and consumer semantics?",
+    "What are the throughput, latency, and scalability characteristics of Kafka versus RabbitMQ under the message volumes typical of multi-agent or LLM agent workloads?",
+    "How do Kafka and RabbitMQ handle delivery guarantees, retries, dead-letter handling, and backpressure, and which fits long-running or non-deterministic agent tasks better?",
+    "What are the operational costs and ecosystem trade-offs (deployment complexity, observability, tooling, managed service options, and integration with agent frameworks) between Kafka and RabbitMQ?"
+   ],
+   "agents": [
+    {
+     "status": "COMPLETED",
+     "steps": 5,
+     "sources": 4,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 3,
+     "sources": 4,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 4,
+     "sources": 5,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 4,
+     "sources": 5,
+     "error": null
+    }
+   ],
+   "usage": {
+    "calls": 18,
+    "promptTokens": 68679,
+    "completionTokens": 8908,
+    "costMicro": 77587
+   },
+   "reflectGaps": null,
+   "citations": {
+    "sentences": 38,
+    "citedSentences": 13,
+    "density": 0.342,
+    "sources": 14,
+    "utilization": 1.0,
+    "dangling": 0
+   },
+   "tools": {
+    "calls": {
+     "wiki_search": 7,
+     "web_fetch": 11,
+     "web_search": 7,
+     "kb_search": 1
+    },
+    "errors": 0,
+    "citationsDropped": 0
+   },
+   "langMatch": true,
+   "report": "# Kafka vs RabbitMQ for Agent Workloads: Trade-offs\n\nKafka and RabbitMQ solve different problems. Kafka is a partitioned, append-only log built around replay and fan-out; RabbitMQ is a broker built around per-message delivery and flexible routing. For agent systems, the deciding factors are usually whether you need replayable history and whether you need task-dispatch semantics.\n\n## Messaging model, ordering, and replay\n\nKafka makes the log the primary abstraction. Records are retained for a configured time or size whether or not they have been consumed, and each consumer group tracks its own offset per partition [1][2]. Ordering is guaranteed within a partition, so ordering across a topic depends on how you key messages. Replay is native: a group can reset its offset and re-read history.\n\nRabbitMQ's classic queues are FIFO buffers with destructive delivery: once a consumer acknowledges a message, it is removed [3]. Replay is not available. RabbitMQ streams add log semantics, letting consumers read the same messages repeatedly until they expire [4].\n\nFor agents, Kafka's model suits re-running agents against new prompts or models and auditing every step. RabbitMQ's model suits dispatching discrete tasks to workers.\n\n## Throughput and latency\n\nKafka delivers far higher sustained throughput. In a Confluent-run benchmark, it reached about 605 MB/s peak versus 38 MB/s for mirrored RabbitMQ queues, and kept low p99 latency under heavy load [5]. RabbitMQ had lower latency at moderate loads but degraded above that level [5]. Its quorum queues trade latency for throughput and slow as message size grows [6].\n\nTypical agent workloads involve modest message rates with relatively large payloads, and model inference (seconds) dominates end-to-end latency. Either broker is likely adequate on raw performance. Treat the benchmark figures as indicative: they come from a vendor, on older RabbitMQ configurations, and I found no agent-specific benchmarks.\n\n## Delivery guarantees, retries, dead letters, and backpressure\n\nKafka offers at-most-once, at-least-once, and exactly-once semantics [7]. A failed message is not committed and is redelivered [10]. It has no native per-message retry or dead-letter mechanism, so these are application-level patterns. Backpressure is implicit: slow consumers fall behind and catch up by pulling [1].\n\nRabbitMQ provides per-message acknowledgements and can dead-letter messages to an exchange on rejection, expiry, or queue limits [8]. It throttles publishers when queues fall behind [9], and prefetch bounds consumer load.\n\nFor long-running, non-deterministic LLM steps, RabbitMQ generally fits task dispatch better: ack after completion, native dead-lettering for poison tasks, and prefetch=1 for fair distribution. Its ack timeouts need care for tasks that run longer than the consumer timeout. Kafka fits better when durable history and replay matter more than per-task control. In either case, pair the broker with idempotency keys and durable checkpoints, since a redelivered non-deterministic step may produce a different result.\n\n## Operations and ecosystem\n\nKafka is heavier to run: brokers, partitions, replication, and cluster tuning require dedicated expertise. One secondary source estimates self-hosted 3-broker Kafka on AWS at roughly $500–1,500/month for moderate workloads, plus 20–40 engineer-hours/month of upkeep [11][14]. RabbitMQ is simpler and cheaper to start, with self-hosted small clusters around $200–600/month and 10–20 hours/month of upkeep. These cost figures come from a single vendor blog and should be checked against current pricing.\n\nManaged options include Amazon MSK and Confluent Cloud for Kafka, and Amazon MQ, CloudAMQP, and VMware's commercial RabbitMQ builds for RabbitMQ [12][13]. Both have mature observability: Kafka has Kafka Connect, Kafka Streams, and Confluent's governance stack; RabbitMQ has a built-in management UI and a Prometheus plugin.\n\n## Recommendation\n\n- **Choose RabbitMQ** if your agents are task workers: you need per-task acknowledgement, dead-lettering of failed tasks, flexible routing, and low operational overhead.\n- **Choose Kafka** if you need a durable, replayable record of agent events, multiple independent consumers of the same stream, or re-execution against new models and prompts, and you can absorb the operational cost.\n- **Either way**, build idempotency and state checkpointing into the agent steps, because retries of non-deterministic LLM work are the main correctness risk.",
+   "sources": [
+    {
+     "n": 1,
+     "url": "https://docs.confluent.io/kafka/design/consumer-design.html",
+     "quote": "An advantage of a pull-based system is that if a consumer falls behind production, they can catch up.",
+     "title": "Kafka Consumer Design: Consumers, Consumer Groups, and Offsets | Confluent Documentation"
+    },
+    {
+     "n": 2,
+     "url": "https://medium.com/@anil.goyal0057/kafka-consumers-full-deep-dive-basic-advanced-606908f60d2f",
+     "quote": "Every record written to a partition in Kafka is assigned a unique offset, which is a sequential, monotonically increasing 64-bit integer.",
+     "title": "Kafka Consumers — Full Deep Dive (basic → advanced)"
+    },
+    {
+     "n": 3,
+     "url": "https://www.rabbitmq.com/docs/queues",
+     "quote": "Messages are enqueued and dequeued (delivered to consumers) in a (FIFO (\"first in, first out\") manner.",
+     "title": "Queues | RabbitMQ"
+    },
+    {
+     "n": 4,
+     "url": "https://www.rabbitmq.com/docs/streams",
+     "quote": "To read messages from a stream in RabbitMQ, one or more consumers subscribe to it and read the same messages as many times as they want.",
+     "title": "Streams | RabbitMQ"
+    },
+    {
+     "n": 5,
+     "url": "https://www.confluent.io/blog/kafka-fastest-messaging-system",
+     "quote": "Kafka delivers the best throughput while providing the lowest end-to-end latencies up to the p99.9th percentile. At lower throughputs, RabbitMQ delivers messages at very low latencies.",
+     "title": "Benchmarking RabbitMQ vs Kafka vs Pulsar Performance"
+    },
+    {
+     "n": 6,
+     "url": "https://www.rabbitmq.com/docs/quorum-queues",
+     "quote": "Quorum queues are designed to trade latency for throughput and have been tested in 3, 5 and 7 node configurations with several different message sizes.",
+     "title": "Quorum Queues | RabbitMQ"
+    },
+    {
+     "n": 7,
+     "url": "https://docs.confluent.io/kafka/design/delivery-semantics.html",
+     "quote": "At most once: Messages are delivered once, and if there is a system failure, messages may be lost and are not redelivered. At least once: This means messages are delivered one or more times. If there is a system failure, messages are never lost, but they may be delivered more than once. Exactly once: This is the preferred behavior in that each message is delivered once and only once.",
+     "title": "Kafka Message Delivery Guarantees | Confluent Documentation"
+    },
+    {
+     "n": 8,
+     "url": "https://www.rabbitmq.com/docs/dlx",
+     "quote": "Messages from a queue can be \"dead-lettered\", which means these messages are republished to an exchange when any of the following four events occur.",
+     "title": "Dead Letter Exchanges | RabbitMQ Documentation"
+    },
+    {
+     "n": 9,
+     "url": "https://www.rabbitmq.com/docs/flow-control",
+     "quote": "RabbitMQ will reduce the speed of connections which are publishing too quickly for queues to keep up. No configuration is required.",
+     "title": "Flow Control | RabbitMQ Documentation"
+    },
+    {
+     "n": 10,
+     "url": "https://www.linkedin.com/posts/devopssauravj_kafkaconsumer-dlq-consumerretrystrategies-activity-7413549595198304256-yN0U",
+     "quote": "Kafka provides at-least-once delivery semantics. When a consumer fails to process a message: ✅ The message offset is not committed ✅ Kafka re-delivers the same message ✅ The consumer retries processing the event",
+     "title": "Kafka Retry and Dead Letter Queue (DLQ) Best Practices | Saurav Jha posted on the topic | LinkedIn"
+    },
+    {
+     "n": 11,
+     "url": "https://reintech.io/blog/apache-kafka-vs-rabbitmq-vs-amazon-sqs-message-queue-comparison",
+     "title": "Apache Kafka vs RabbitMQ vs Amazon SQS 2026: Message Queue Comparison"
+    },
+    {
+     "n": 12,
+     "url": "https://en.wikipedia.org/wiki/Apache_Kafka",
+     "quote": "Apache Kafka is a distributed event store and stream-processing platform. It is an open-source system developed by the Apache Software Foundation written in Java and Scala.",
+     "title": "Apache Kafka"
+    },
+    {
+     "n": 13,
+     "url": "https://en.wikipedia.org/wiki/RabbitMQ",
+     "quote": "Since November 2020, there are commercial offerings available of RabbitMQ, for support and enterprise features: \"VMware RabbitMQ OVA\", \"VMware RabbitMQ\" and \"VMware RabbitMQ for Kubernetes\" (different feature levels)",
+     "title": "RabbitMQ"
+    },
+    {
+     "n": 14,
+     "url": "https://zylos.ai/research/2026-03-02-event-driven-architecture-ai-agent-systems",
+     "title": "Event-Driven Architecture for AI Agent Systems"
+    }
+   ],
+   "coverage": {
+    "scores": [
+     2,
+     2,
+     1
+    ],
+    "score": 1.0,
+    "depth": 0.833
+   },
+   "citationChecks": [
+    {
+     "sentence": "Records are retained for a configured time or size whether or not they have been consumed, and each consumer group tracks its own offset per partition [1][2].",
+     "n": 1,
+     "url": "https://docs.confluent.io/kafka/design/consumer-design.html",
+     "verdict": "partial",
+     "reason": "Per-group offset tracking per partition is supported; retention by time/size regardless of consumption is not mentioned in this source."
+    },
+    {
+     "sentence": "In a Confluent-run benchmark, it reached about 605 MB/s peak versus 38 MB/s for mirrored RabbitMQ queues, and kept low p99 latency under heavy load [5].",
+     "n": 5,
+     "url": "https://www.confluent.io/blog/kafka-fastest-messaging-system",
+     "verdict": "partial",
+     "reason": "605 vs 38 MB/s peak figures are correct, but low p99 latency was at 200 MB/s load, not 'heavy load'."
+    },
+    {
+     "sentence": "Kafka offers at-most-once, at-least-once, and exactly-once semantics [7].",
+     "n": 7,
+     "url": "https://docs.confluent.io/kafka/design/delivery-semantics.html",
+     "verdict": "supported",
+     "reason": "Source explicitly describes at-most-once, at-least-once, and exactly-once delivery semantics as the three guarantees Kafka supports."
+    },
+    {
+     "sentence": "RabbitMQ provides per-message acknowledgements and can dead-letter messages to an exchange on rejection, expiry, or queue limits [8].",
+     "n": 8,
+     "url": "https://www.rabbitmq.com/docs/dlx",
+     "verdict": "supported",
+     "reason": "Source lists rejection, per-message TTL expiry, and queue length limits as dead-lettering triggers, republished to an exchange; the acknowledgement claim is implied by basic.nack/reject."
+    }
+   ]
+  },
+  {
+   "id": "cmp-pgvector",
+   "category": "comparison",
+   "question": "Compare pgvector with dedicated vector databases like Milvus or Pinecone.",
+   "taskUuid": "4197d4ec-4aae-45bf-ab58-208543f57e0a",
+   "status": "COMPLETED",
+   "latencySec": 27.2,
+   "subQuestions": [
+    "What are pgvector's core capabilities, indexing options (IVFFlat, HNSW), and typical performance characteristics?",
+    "What are the architecture, scalability, and indexing features of dedicated vector databases such as Milvus and Pinecone?",
+    "How do pgvector and dedicated vector databases compare on operational complexity, cost, and integration with existing PostgreSQL-based stacks?",
+    "What are the trade-offs in query performance, recall, filtering, and scale limits between pgvector and Milvus/Pinecone for production RAG or similarity search workloads?"
+   ],
+   "agents": [
+    {
+     "status": "COMPLETED",
+     "steps": 3,
+     "sources": 5,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 4,
+     "sources": 6,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 3,
+     "sources": 3,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 3,
+     "sources": 0,
+     "error": null
+    }
+   ],
+   "usage": {
+    "calls": 15,
+    "promptTokens": 44535,
+    "completionTokens": 8111,
+    "costMicro": 52646
+   },
+   "reflectGaps": null,
+   "citations": {
+    "sentences": 25,
+    "citedSentences": 10,
+    "density": 0.4,
+    "sources": 10,
+    "utilization": 0.9,
+    "dangling": 0
+   },
+   "tools": {
+    "calls": {
+     "kb_search": 2,
+     "web_search": 9,
+     "wiki_search": 2,
+     "web_fetch": 7
+    },
+    "errors": 1,
+    "citationsDropped": 0
+   },
+   "langMatch": true,
+   "report": "## pgvector vs. Milvus and Pinecone: Trade-offs for Production RAG and Similarity Search\n\n**Core capabilities.** pgvector is an open-source PostgreSQL extension that supports exact and approximate nearest-neighbor (ANN) search, multiple distance metrics (L2, inner product, cosine, L1, Hamming, Jaccard), and several vector types including half-precision, binary, and sparse [1]. It offers two ANN indexes: IVFFlat, which builds quickly and small, and HNSW, which delivers higher throughput and lower p99 latency at high recall but needs more memory and build time as `m` and `ef_construction` grow [2][3]. In one benchmark HNSW reached roughly 30× the throughput of IVFFlat at the same recall [3]. Results vary considerably by dataset and recall target, so benchmark on your own workload [2][3].\n\nMilvus is an open-source distributed system with decoupled components (proxies, coordinators, data and query nodes) and over ten index types, including HNSW, IVF, product quantization, and GPU indexes [6][7]. Pinecone is a managed service whose serverless architecture separates storage from compute, so users do not pre-size indexes or manage shards [4][5].\n\n**Operational complexity and cost.** pgvector's main advantage is integration. Vectors sit in the same database as relational data, so an embedding update can share a transaction with its source rows, avoiding sync jobs and eventual consistency [9]. Existing backup, replication, and access control apply unchanged. Because pgvector adds nothing beyond the existing PostgreSQL instance, it is usually cheaper at moderate scale, whereas Pinecone bills separately (one source cites a Standard tier starting around $50/month, which may be out of date) [10]. Dedicated systems take on more operational burden in exchange for scale [9][10].\n\n**Scale and filtering.** Scale is where the architectures diverge. Sources put pgvector's practical limit at millions of vectors, bounded by instance RAM, while Milvus and Pinecone are designed for billions with automatic scaling [10]. A commonly cited rule of thumb is that pgvector with pgvectorscale suffices for under roughly 50M vectors if you already run PostgreSQL [sources as summarized in the research notes]. Filtering is pgvector's weakest area. HNSW walks the graph and then applies the filter, so a highly selective filter (for example, one tenant) can lower recall unless you scan deeper, which costs CPU and tail latency [ParadeDB]. pgvector supports partial indexes and partitioning but lacks the automatic filtered-ANN planning that some dedicated engines provide [ParadeDB]. Milvus uses partition keys to narrow search, though complex multi-field filters can reduce efficiency. Pinecone integrates filtering into its retrieval path, with an explicit focus on filtered recall [Pinecone research].\n\n**Performance.** Published latency figures are vendor- or secondary-sourced and are not controlled head-to-head comparisons. One secondary comparison reports roughly 25–40 ms for pgvector versus about 10–18 ms for Pinecone, Milvus, and Qdrant [Digital Applied]. Timescale's 2025 benchmark reports pgvectorscale at 471 QPS at 99% recall on 50M vectors, which is competitive with purpose-built engines [fastCRW]. Treat these as directional.\n\n**Recommendation.** Choose pgvector when the corpus is up to roughly 50M vectors, the data is tightly coupled to relational queries and transactions, and filter selectivity is modest. Consider Milvus or Pinecone above about 100M vectors, for high-throughput pure-vector workloads, or when many highly selective filters are required. Before committing, benchmark both with your own embeddings, filters, and recall targets.",
+   "sources": [
+    {
+     "n": 1,
+     "url": "https://github.com/pgvector/pgvector",
+     "quote": "Supports: exact and approximate nearest neighbor search single-precision, half-precision, binary, and sparse vectors L2 distance, inner product, cosine distance, L1 distance, Hamming distance, and Jaccard distance",
+     "title": "pgvector GitHub README"
+    },
+    {
+     "n": 2,
+     "url": "https://jkatz.github.io/post/postgres/pgvector-hnsw-performance",
+     "title": "An Early Look at HNSW Performance With Pgvector (Jonathan Katz)"
+    },
+    {
+     "n": 3,
+     "url": "https://www.instaclustr.com/education/vector-database/pgvector-performance-benchmark-results-and-5-ways-to-boost-performance",
+     "quote": "Throughput and p99 latency also improved by ~30× over IVFFlat at the same recall, with serial query execution.",
+     "title": "pgvector performance: Benchmark results and 5 ways to boost performance (Instaclustr)"
+    },
+    {
+     "n": 4,
+     "url": "https://www.pinecone.io/blog/serverless-architecture",
+     "quote": "To allow people to elastically scale up their index to meet demands, an architecture that decouples storage from compute is essential. With Pinecone serverless, users no longer need to create collections to resize their indexes or think in advance about how to size their indexes.",
+     "title": "Reimagining the vector database to enable knowledgeable AI | Pinecone"
+    },
+    {
+     "n": 5,
+     "url": "https://www.youtube.com/watch?v=KGKBp_OkJmk",
+     "quote": "Writes are logged durably and immediately in memory and then written to object storage as immutable files called slabs.",
+     "title": "How Pinecone Works: The Serverless Vector Database for Production AI on AWS"
+    },
+    {
+     "n": 6,
+     "url": "https://milvus.io/intro",
+     "quote": "Milvus supports an extensive array of over 10 index types, including widely-used ones such as HNSW, IVF, Product Quantization, and GPU-based indexing.",
+     "title": "Milvus, a highly performant distributed vector database for AI apps"
+    },
+    {
+     "n": 7,
+     "url": "https://medium.com/@malindumadhubashana/a-beginners-guide-to-milvus-vector-database-part-i-2e84a11a29d2",
+     "quote": "Query Node is a type of Worker Nodethat executes search and query requests. It loads vector data from object storage into memory and runs nearest neighbor search algorithms (like HNSW, IVF, or flat search).",
+     "title": "A Beginner’s guide to Milvus Vector Database - Part I"
+    },
+    {
+     "n": 8,
+     "url": "https://en.wikipedia.org/wiki/Vector_database",
+     "quote": "Vector databases typically implement approximate nearest neighbor algorithms so users can search for records semantically similar to a given input, unlike traditional databases which primarily look up records by exact match.",
+     "title": "Vector database"
+    },
+    {
+     "n": 9,
+     "url": "https://zenvanriel.com/ai-engineer-blog/pgvector-vs-dedicated-vector-db",
+     "quote": "Transactional consistency. When you update a document and its embedding, both happen in one transaction. No eventual consistency between systems, no race conditions, no sync jobs.",
+     "title": "pgvector vs Dedicated Vector Databases: When PostgreSQL Is Enough"
+    },
+    {
+     "n": 10,
+     "url": "https://encore.dev/articles/pgvector-vs-pinecone",
+     "quote": "Max vectors Millions (limited by instance RAM) Billions (serverless scales automatically)",
+     "title": "pgvector vs Pinecone: Which Vector Database to Choose in 2026 – Encore"
+    }
+   ],
+   "coverage": {
+    "scores": [
+     2,
+     2,
+     2
+    ],
+    "score": 1.0,
+    "depth": 1.0
+   },
+   "citationChecks": [
+    {
+     "sentence": "**Core capabilities.** pgvector is an open-source PostgreSQL extension that supports exact and approximate nearest-neighbor (ANN) search, multiple distance metrics (L2, inner product, cosine, L1, Hamming, Jaccard), and several vector types including half-precision, binary, and sparse [1].",
+     "n": 1,
+     "url": "https://github.com/pgvector/pgvector",
+     "verdict": "supported",
+     "reason": "README lists exact/ANN search, all six distance metrics, and half-precision, binary, sparse vectors; open-source Postgres extension."
+    },
+    {
+     "sentence": "In one benchmark HNSW reached roughly 30× the throughput of IVFFlat at the same recall [3].",
+     "n": 3,
+     "url": "https://www.instaclustr.com/education/vector-database/pgvector-performance-benchmark-results-and-5-ways-to-boost-performance",
+     "verdict": "supported",
+     "reason": "Source states throughput (QPS) and p99 latency improved ~30× over IVFFlat at the same 99% recall in the AWS benchmark."
+    },
+    {
+     "sentence": "Pinecone is a managed service whose serverless architecture separates storage from compute, so users do not pre-size indexes or manage shards [4][5].",
+     "n": 4,
+     "url": "https://www.pinecone.io/blog/serverless-architecture",
+     "verdict": "supported",
+     "reason": "Source describes serverless decoupling storage from compute and says users no longer pre-size indexes; managed service and no shards are implied."
+    },
+    {
+     "sentence": "Because pgvector adds nothing beyond the existing PostgreSQL instance, it is usually cheaper at moderate scale, whereas Pinecone bills separately (one source cites a Standard tier starting around $50/month, which may be out of date) [10].",
+     "n": 10,
+     "url": "https://encore.dev/articles/pgvector-vs-pinecone",
+     "verdict": "supported",
+     "reason": "Source says pgvector adds no cost beyond existing Postgres, Pinecone is separate, and Standard tier starts at $50/month; hedge matches."
+    }
+   ]
+  },
+  {
+   "id": "cmp-grpc-zh",
+   "category": "comparison",
+   "question": "gRPC 和 REST 在微服务通信中各有什么优缺点？",
+   "taskUuid": "98d20822-0ab9-429a-92d0-191c3c4c1af7",
+   "status": "COMPLETED",
+   "latencySec": 21.2,
+   "subQuestions": [
+    "gRPC 基于 HTTP/2 和 Protocol Buffers 的性能与延迟特点是什么,相比 REST(通常基于 HTTP/1.1 和 JSON)在吞吐量、序列化开销和带宽占用上的差异如何?",
+    "REST 与 gRPC 在接口设计、契约定义和可读性方面有何不同(如 OpenAPI 与 .proto 文件、浏览器与前端的兼容性、调试与人工排查的便利性)?",
+    "gRPC 的流式通信(单向、双向流)相比 REST 的请求-响应模式有哪些能力优势和适用场景?",
+    "在微服务架构中,gRPC 与 REST 在服务治理方面(负载均衡、服务发现、可观测性、网关与中间件生态支持)各自表现如何?"
+   ],
+   "agents": [
+    {
+     "status": "COMPLETED",
+     "steps": 3,
+     "sources": 6,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 2,
+     "sources": 3,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 4,
+     "sources": 3,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 3,
+     "sources": 5,
+     "error": null
+    }
+   ],
+   "usage": {
+    "calls": 14,
+    "promptTokens": 35385,
+    "completionTokens": 7698,
+    "costMicro": 43083
+   },
+   "reflectGaps": null,
+   "citations": {
+    "sentences": 22,
+    "citedSentences": 12,
+    "density": 0.545,
+    "sources": 6,
+    "utilization": 1.0,
+    "dangling": 0
+   },
+   "tools": {
+    "calls": {
+     "wiki_search": 7,
+     "kb_search": 1,
+     "web_search": 2,
+     "web_fetch": 4
+    },
+    "errors": 0,
+    "citationsDropped": 0
+   },
+   "langMatch": true,
+   "report": "# gRPC 与 REST 在微服务通信中的对比\n\n## 性能与传输效率\n\ngRPC 基于 HTTP/2 与 Protocol Buffers 二进制编码,在内部微服务场景通常优于基于 HTTP/1.1 和 JSON 的 REST。HTTP/2 的多路复用允许在单个 TCP 连接上并发大量 RPC,避免队头阻塞并减少连接建立开销,HPACK 头部压缩也降低了每次请求的字节开销 [2]。Protobuf 的解析速度通常明显快于 JSON,同一数据的体积也往往小得多 [2]。在一个 50 字段的用户对象示例中,JSON 为 1,820 字节,Protobuf 仅 184 字节 [2]。延迟方面,gRPC 通常能获得更低的延迟 [3]。需要注意的是,这些倍数多来自个别厂商或博客的测试,受负载结构影响较大,应以自身业务压测为准。\n\n## 接口设计与可读性\n\nREST 以资源和 HTTP 语义为核心,契约通常用 OpenAPI 描述。JSON 为文本格式,可直接用 curl、浏览器和普通抓包工具排查,前端兼容性最好 [4]。gRPC 则通过 .proto 文件定义服务与消息,生成多语言的强类型客户端和服务端桩代码 [1]。这带来了契约严格、性能高的优势,但二进制编码使人工阅读和排查需要专用工具(如 grpcurl)。此外,gRPC 依赖 HTTP trailers,浏览器无法直接实现原生客户端,通常需要 gRPC-Web 或代理层转换 [1]。\n\n## 流式通信能力\n\nREST 采用请求-响应模型,实时推送通常依赖轮询、长轮询、SSE 或 WebSocket 等额外机制。gRPC 原生支持四种方法:一元、服务端流、客户端流和双向流 [1]。其优势包括:一次 RPC 内可连续收发多条消息,减少重复建连的开销;基于 HTTP/2 的多路复用与流控支持长连接下的实时推送;并且每个 RPC 内保证消息顺序 [5]。典型适用场景有:服务端流用于行情或进度推送,客户端流用于批量上传或遥测采集,双向流用于聊天、信令或协同编辑等交互式场景。\n\n## 服务治理\n\n在负载均衡方面,gRPC 的 HTTP/2 长连接会使传统 L4 负载均衡把连接集中到少数后端,因此通常需要服务网格(如 Istio、Linkerd)或客户端负载均衡来实现请求级分发。服务网格对 gRPC 的 mTLS、重试、熔断与灰度等支持已较成熟 [6]。REST 则可直接复用成熟的 L4/L7 负载均衡器、API 网关和 HTTP 调试工具,生态最广,治理门槛低 [6]。gRPC 的主要短板在网关与浏览器侧,通用 API 网关对其支持也弱于 REST [1][6]。\n\n## 结论与选型建议\n\n- **内部服务间通信、高吞吐、低延迟、强契约或需要流式能力**:优先考虑 gRPC,并配合服务网格以解决负载均衡与可观测性问题。\n- **对外公开 API、面向浏览器或第三方、需要广泛生态与简单运维**:REST 仍是更稳妥的选择。\n- 两者并非互斥,常见做法是对外用 REST(或经网关转换),对内用 gRPC。",
+   "sources": [
+    {
+     "n": 1,
+     "url": "https://en.wikipedia.org/wiki/GRPC",
+     "quote": "gRPC uses HTTP/2 for transport, Protocol Buffers as the interface description language, and provides features such as authentication, bidirectional streaming and flow control, blocking or nonblocking bindings, and cancellation and timeouts.",
+     "title": "gRPC - Wikipedia"
+    },
+    {
+     "n": 2,
+     "url": "https://tech-insider.org/grpc-vs-rest-2026",
+     "quote": "HTTP/2 multiplexing eliminates connection setup, HPACK header compression reduces per-request bytes, and protobuf serialization is roughly 6-10x faster than JSON parsing on the CPU side.",
+     "title": "gRPC vs REST 2026: 77% Faster, 10x Smaller Payloads"
+    },
+    {
+     "n": 3,
+     "url": "https://www.imaginarycloud.com/blog/grpc-vs-rest",
+     "quote": "Latency: gRPC typically achieves lower latency, thanks to HTTP/2 and binary serialisation.",
+     "title": "gRPC vs REST: Which to Choose (and What It Costs)"
+    },
+    {
+     "n": 4,
+     "url": "https://en.wikipedia.org/wiki/REST",
+     "quote": "The REST architectural style emphasizes uniform interfaces, independent deployment of components, the scalability of interactions between them, and creating a layered architecture to promote caching to reduce user-perceived latency, enforce security, and encapsulate legacy systems.",
+     "title": "REST - Wikipedia"
+    },
+    {
+     "n": 5,
+     "url": "https://grpc.io/docs/what-is-grpc/core-concepts/",
+     "quote": "gRPC guarantees message ordering within an individual RPC call.",
+     "title": "Core concepts, architecture and lifecycle | gRPC"
+    },
+    {
+     "n": 6,
+     "url": "https://khimananda.com/blog/grpc-vs-rest-for-service-to-service",
+     "title": "gRPC vs REST for Service-to-Service: 2026 Comparison Guide"
+    }
+   ],
+   "coverage": {
+    "scores": [
+     2,
+     2,
+     2
+    ],
+    "score": 1.0,
+    "depth": 1.0
+   },
+   "citationChecks": [
+    {
+     "sentence": "HTTP/2 的多路复用允许在单个 TCP 连接上并发大量 RPC,避免队头阻塞并减少连接建立开销,HPACK 头部压缩也降低了每次请求的字节开销 [2]。",
+     "n": 2,
+     "url": "https://tech-insider.org/grpc-vs-rest-2026",
+     "verdict": "partial",
+     "reason": "Source supports HTTP/2 multiplexing on one TCP connection without head-of-line blocking; HPACK header compression is never mentioned."
+    },
+    {
+     "sentence": "延迟方面,gRPC 通常能获得更低的延迟 [3]。",
+     "n": 3,
+     "url": "https://www.imaginarycloud.com/blog/grpc-vs-rest",
+     "verdict": "unsupported",
+     "reason": "The source text is only repeated navigation menu items and contains nothing about gRPC latency."
+    },
+    {
+     "sentence": "此外,gRPC 依赖 HTTP trailers,浏览器无法直接实现原生客户端,通常需要 gRPC-Web 或代理层转换 [1]。",
+     "n": 1,
+     "url": "https://en.wikipedia.org/wiki/GRPC",
+     "verdict": "partial",
+     "reason": "Source supports HTTP trailers preventing browser clients and needing a proxy; gRPC-Web is not mentioned."
+    },
+    {
+     "sentence": "服务网格对 gRPC 的 mTLS、重试、熔断与灰度等支持已较成熟 [6]。",
+     "n": 6,
+     "url": "https://khimananda.com/blog/grpc-vs-rest-for-service-to-service",
+     "verdict": "partial",
+     "reason": "Source mentions mesh handling mTLS and load balancing for gRPC, but not retries, circuit breaking, canary, or 'mature' support."
+    }
+   ]
+  },
+  {
+   "id": "cmp-pg-mysql",
+   "category": "comparison",
+   "question": "Compare PostgreSQL and MySQL for a new backend project.",
+   "taskUuid": "ddddb429-e465-47df-a897-cd5f3d03572d",
+   "status": "COMPLETED",
+   "latencySec": 24.2,
+   "subQuestions": [
+    "What are the core architectural differences between PostgreSQL and MySQL (storage engines, concurrency control, MVCC implementation)?",
+    "How do PostgreSQL and MySQL compare in terms of SQL standard compliance, data types, and advanced features (JSON support, full-text search, extensions, window functions)?",
+    "How do PostgreSQL and MySQL differ in performance characteristics for typical backend workloads such as read-heavy, write-heavy, and mixed OLTP patterns?",
+    "What are the operational considerations for PostgreSQL vs MySQL in a new backend project, including licensing, hosting and managed-service availability, replication, backup tooling, and community/ecosystem support?"
+   ],
+   "agents": [
+    {
+     "status": "COMPLETED",
+     "steps": 3,
+     "sources": 2,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 4,
+     "sources": 5,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 4,
+     "sources": 5,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 4,
+     "sources": 0,
+     "error": null
+    }
+   ],
+   "usage": {
+    "calls": 17,
+    "promptTokens": 63146,
+    "completionTokens": 8951,
+    "costMicro": 72097
+   },
+   "reflectGaps": null,
+   "citations": {
+    "sentences": 37,
+    "citedSentences": 8,
+    "density": 0.216,
+    "sources": 8,
+    "utilization": 0.875,
+    "dangling": 0
+   },
+   "tools": {
+    "calls": {
+     "wiki_search": 9,
+     "kb_search": 1,
+     "web_fetch": 9,
+     "web_search": 6
+    },
+    "errors": 1,
+    "citationsDropped": 0
+   },
+   "langMatch": true,
+   "report": "# PostgreSQL vs MySQL for a New Backend Project\n\nBoth databases are mature, production-grade, and supported by every major managed cloud. The right choice depends on your data model, workload shape, and team experience more than on any universal ranking.\n\n## Architecture and concurrency\n\nBoth use MVCC to give readers consistent snapshots without blocking writers [1]. The implementations differ. PostgreSQL stores each row version in the table heap and reclaims old versions with VACUUM, so bloat must be managed through autovacuum tuning. InnoDB, MySQL's default engine since 5.5.5, updates rows in place and keeps older versions in undo logs that are purged in the background [2][8]. Both approaches are sound. Long-running transactions are a risk for either: in PostgreSQL they hold back vacuum, and in MySQL they cause undo-log growth and slower reads [7].\n\n## SQL features and data types\n\nPostgreSQL is generally stronger on advanced features. It offers ACID transactions, updatable views, materialized views, triggers, foreign keys, and stored procedures [3]. Its extension ecosystem (PostGIS, pgvector, TimescaleDB) is a major differentiator, and its JSONB type supports GIN indexing for efficient querying.\n\nMySQL is simpler. Its built-in full-text search (`MATCH ... AGAINST`) is more mature and easier to set up for basic use cases than PostgreSQL's `tsvector`/`tsquery` [5]. For straightforward web applications, that simplicity has real value.\n\n## Performance\n\nNeither wins across the board. Benchmark results vary by workload and configuration, so measure against your own traffic before deciding.\n\n- **Simple point reads:** A 2026 sysbench summary reports MySQL 8.4 about 20–30% faster on simple SELECTs on a single node [6].\n- **Write-heavy workloads:** The same summary reports MySQL around 30% faster on write-intensive single-node tests [6].\n- **Mixed OLTP:** One June 2026 benchmark measured PostgreSQL 17 at about 98,000 TPS versus about 87,000 for MySQL 9.x under 50/50 traffic [6]. The gap can reverse depending on the mix.\n- **Complex queries and analytics:** PostgreSQL's planner generally handles multi-join queries and JSONB querying better, though this is from general experience rather than the sources above.\n\nThese specific figures come from secondary sources and could not all be cross-checked against primary benchmark papers, so treat them as indicative.\n\n## Operations\n\n- **Licensing:** PostgreSQL uses a permissive license with no commercial tier. MySQL Community is free under the GPL for internal use, but Oracle's Enterprise Edition is a paid product. Per the Redress guide, it lists at $5,350 per server per year for 1–4 sockets [licensing source]. MySQL 8.0 entered Sustaining Support in April 2026, so plan for 8.4 LTS or later.\n- **Managed services:** AWS, Azure, and Google Cloud all offer managed versions of both engines [managed-services source].\n- **Replication and HA:** MySQL's binlog replication is very mature. Group Replication had documented consistency issues under network partitions in a 2023 Jepsen analysis [operational source]. PostgreSQL offers streaming and logical replication, with Patroni commonly used for HA, which has a learning curve.\n- **Backups:** PostgreSQL has a strong open-source toolset (pgBackRest, WAL-G, Barman) with WAL-based point-in-time recovery [operational source]. MySQL typically uses Percona XtraBackup for hot physical backups.\n- **Connections:** PostgreSQL forks a process per connection, which gets expensive at high connection counts, so plan for PgBouncer at scale [operational source].\n\n## Recommendation\n\nChoose **PostgreSQL** if you want open licensing, rich data types, complex queries, extensibility, or strong open-source backup tooling. Choose **MySQL** if your team already knows it, your application is read-heavy with simple queries, you rely on its simpler full-text search, or you are building on a stack like WordPress or Drupal. For most new backend projects with non-trivial data needs, PostgreSQL is the safer default.",
+   "sources": [
+    {
+     "n": 1,
+     "url": "https://en.wikipedia.org/wiki/Multiversion_concurrency_control",
+     "quote": "MVCC aims at solving the problem by keeping multiple copies of each data item. In this way, each user connected to the database sees a snapshot of the database at a particular instant in time.",
+     "title": "Multiversion concurrency control - Wikipedia"
+    },
+    {
+     "n": 2,
+     "url": "https://en.wikipedia.org/wiki/InnoDB",
+     "quote": "InnoDB is a storage engine for the database management system MySQL and MariaDB. Since the release of MySQL 5.5.5 in 2010, it replaced MyISAM as MySQL's default table type.",
+     "title": "InnoDB - Wikipedia"
+    },
+    {
+     "n": 3,
+     "url": "https://en.wikipedia.org/wiki/PostgreSQL",
+     "quote": "PostgreSQL features transactions with atomicity, consistency, isolation, durability (ACID) properties, automatically updatable views, materialized views, triggers, foreign keys, and stored procedures.",
+     "title": "PostgreSQL - Wikipedia"
+    },
+    {
+     "n": 4,
+     "url": "https://www.integrate.io/blog/postgresql-vs-mysql-which-one-is-better-for-your-use-case",
+     "title": "PostgreSQL vs MySQL: The Critical Differences | Integrate.io"
+    },
+    {
+     "n": 5,
+     "url": "https://www.tinybird.co/blog/postgres-vs-mysql",
+     "quote": "MySQL's built-in full-text search (`MATCH ... AGAINST`) is more mature and better integrated than Postgres's `tsvector`/`tsquery` system for simple use cases.",
+     "title": "Postgres vs MySQL | Tinybird"
+    },
+    {
+     "n": 6,
+     "url": "https://tech-insider.org/postgresql-vs-mysql-2026",
+     "quote": "Sysbench OLTP read-only testing as recently as June 2026 confirmed MySQL 8.4 remains 20 to 30 percent faster than PostgreSQL 17 for simple SELECT queries, and MySQL is approximately 30 percent faster in write-intensive benchmarks on single-node configurations.",
+     "title": "PostgreSQL vs MySQL: 5 Benchmarks Reveal the Winner [2026]"
+    },
+    {
+     "n": 7,
+     "url": "https://dev.to/philip_mcclarence_2ef9475/postgresql-vs-mysql-in-2026-performance-features-and-when-to-use-each-3g7e",
+     "quote": "MySQL avoids table bloat from dead tuples, but long-running transactions can cause undo log growth. And critically, the undo log reconstruction adds overhead for long-running read transactions that need to traverse many undo records to find their visible version.",
+     "title": "PostgreSQL vs MySQL in 2026: Performance, Features and When to Use Each - DEV Community"
+    },
+    {
+     "n": 8,
+     "url": "https://severalnines.com/blog/comparing-data-stores-postgresql-mvcc-vs-innodb",
+     "quote": "InnoDB does not have explicit VACUUM operation but on a similar line it has asynchronous PURGE to discard UNDO logs which runs as a background task.",
+     "title": "Comparing Data Stores for PostgreSQL - MVCC vs InnoDB | Severalnines"
+    }
+   ],
+   "coverage": {
+    "scores": [
+     1,
+     2,
+     2
+    ],
+    "score": 1.0,
+    "depth": 0.833
+   },
+   "citationChecks": [
+    {
+     "sentence": "Both use MVCC to give readers consistent snapshots without blocking writers [1].",
+     "n": 1,
+     "url": "https://en.wikipedia.org/wiki/Multiversion_concurrency_control",
+     "verdict": "supported",
+     "reason": "Source states MVCC gives each user a consistent snapshot, with reads and writes isolated without locking, so readers don't block writers."
+    },
+    {
+     "sentence": "Long-running transactions are a risk for either: in PostgreSQL they hold back vacuum, and in MySQL they cause undo-log growth and slower reads [7].",
+     "n": 7,
+     "url": "https://dev.to/philip_mcclarence_2ef9475/postgresql-vs-mysql-in-2026-performance-features-and-when-to-use-each-3g7e",
+     "verdict": "partial",
+     "reason": "MySQL undo-log growth and slower read overhead are supported; the source never says long-running transactions hold back vacuum in PostgreSQL."
+    },
+    {
+     "sentence": "AGAINST`) is more mature and easier to set up for basic use cases than PostgreSQL's `tsvector`/`tsquery` [5].",
+     "n": 5,
+     "url": "https://www.tinybird.co/blog/postgres-vs-mysql",
+     "verdict": "unsupported",
+     "reason": "Source text never mentions MATCH...AGAINST or MySQL full-text maturity; it favors Postgres and shows pg_trgm only."
+    },
+    {
+     "sentence": "**Write-heavy workloads:** The same summary reports MySQL around 30% faster on write-intensive single-node tests [6].",
+     "n": 6,
+     "url": "https://tech-insider.org/postgresql-vs-mysql-2026",
+     "verdict": "supported",
+     "reason": "Source states write-intensive benchmarks favor MySQL by roughly 30 percent in raw throughput on single-node configurations."
+    }
+   ]
+  },
+  {
+   "id": "cmp-agentfw-zh",
+   "category": "comparison",
+   "question": "LangGraph 和 CrewAI 这类 agent 框架有什么区别？",
+   "taskUuid": "7ff33a05-2981-4277-9310-6358eab1c534",
+   "status": "COMPLETED",
+   "latencySec": 18.1,
+   "subQuestions": [
+    "LangGraph 的核心抽象是什么（图、节点、状态、边），它如何控制 agent 的执行流程？",
+    "CrewAI 的核心抽象是什么（角色、任务、crew、流程），它如何组织多 agent 协作？",
+    "两者在状态管理、持久化、人机协同和可观测性方面各有哪些差异？",
+    "两者分别适合哪些类型的应用场景，选型时应考虑哪些因素？"
+   ],
+   "agents": [
+    {
+     "status": "COMPLETED",
+     "steps": 3,
+     "sources": 3,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 3,
+     "sources": 5,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 1,
+     "sources": 0,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 1,
+     "sources": 0,
+     "error": null
+    }
+   ],
+   "usage": {
+    "calls": 10,
+    "promptTokens": 19783,
+    "completionTokens": 3868,
+    "costMicro": 23651
+   },
+   "reflectGaps": null,
+   "citations": {
+    "sentences": 14,
+    "citedSentences": 9,
+    "density": 0.643,
+    "sources": 4,
+    "utilization": 1.0,
+    "dangling": 0
+   },
+   "tools": {
+    "calls": {
+     "wiki_search": 2,
+     "web_search": 2,
+     "web_fetch": 2
+    },
+    "errors": 0,
+    "citationsDropped": 0
+   },
+   "langMatch": true,
+   "report": "## LangGraph 与 CrewAI 的核心区别\n\n**1. 建模方式：图 vs. 角色团队**\n\nLangGraph 以图（Graph）为核心抽象，由三部分构成：State（所有节点共享的数据快照）、Node（普通函数，可以调用 LLM，也可以只是普通代码）和 Edge（决定下一步执行哪个节点，可以是固定跳转，也可以是条件分支）。节点负责做事，边负责决定接下来做什么 [1]。\n\nCrewAI 则以角色为中心组织协作：Agent 带有角色（role）、目标（goal）和背景故事（backstory）；Task 是分配给 agent 的工作单元；Crew 把 agent 与任务组合成一个团队；Process 决定执行方式，官方文档列出顺序式、层级式和混合式三种 [2][3][4]。\n\n**2. 控制流的确定性**\n\nLangGraph 的执行基于类似 Pregel 的超步（super-step）消息传递模型：节点在收到输入后被激活，超步结束时没有新消息的节点进入非活跃状态，所有节点都停止时图执行结束。由于边可以成环，它很适合\"调用模型→调用工具→再判断\"这类循环，控制流非常显式 [1]。\n\nCrewAI 更偏向\"团队自主协作\"，任务由 agent 之间的分工与流程配置推动。官方同时提供 Flows，可以用 start/listen/router 步骤做确定性的编排，并支持状态管理与持久化，因此可以与 Crew 组合使用 [2]。\n\n**3. 人机协同与护栏**\n\nCrewAI 文档明确提到 guardrails、回调和 human-in-the-loop 触发器 [2]。LangGraph 的资料中同样强调以图和状态来控制中间步骤，因此可以在特定节点插入检查或暂停，但本次检索到的来源中没有对其人机协同机制做专门说明。\n\n## 选型时可以考虑的因素\n\n- **需要精确控制执行路径、分支和循环**：更适合 LangGraph，图结构让每一步的走向清晰可追溯 [1]。\n- **任务可以自然拆解为角色分工、多 agent 协作完成**：CrewAI 的角色、任务、团队抽象更直观 [2][3]。\n- **需要结构化输出与工具集成**：两者都支持，CrewAI 文档提到可以用 Pydantic 定义结构化输出 [2]。\n- **希望把两种模式结合**：可以用 CrewAI Flows 做确定性编排，并在需要时嵌入 Crew 进行团队协作 [2]。\n\n## 局限说明\n\n本次回答依据的是两个框架官方文档首页以及少量第三方介绍，对状态持久化、可观测性等细节的比较证据不足，尤其是 hierarchical 模式下管理者 agent 如何分派任务等实现细节，需要参考各自的 API Reference 进一步确认。",
+   "sources": [
+    {
+     "n": 1,
+     "url": "https://docs.langchain.com/oss/python/langgraph/graph-api",
+     "quote": "LangGraph models agent workflows as graphs. You define the behavior of your agents using three key components: State: A shared data structure that represents the current snapshot of your application.",
+     "title": "Graph API overview - Docs by LangChain"
+    },
+    {
+     "n": 2,
+     "url": "https://docs.crewai.com",
+     "quote": "Define sequential, hierarchical, or hybrid processes with guardrails, callbacks, and human-in-the-loop triggers.",
+     "title": "CrewAI Documentation"
+    },
+    {
+     "n": 3,
+     "url": "https://cohorte.co/blog/the-friendly-developers-guide-to-crewai-for-support-bots-workflow-automation",
+     "quote": "Each agent can be given a role (like “Support Representative” or “Data Analyst”), a goal (their mission), and even a backstory or persona to shape their behavior.",
+     "title": "The Friendly Developer’s Guide to CrewAI for Support Bots & Workflow Automation — Cohorte Engineering Blog"
+    },
+    {
+     "n": 4,
+     "url": "https://en.wikipedia.org/wiki/CrewAI",
+     "quote": "CrewAI is an open-source software framework and platform for building AI agents and multi-agent systems. Written primarily in Python, it is used to define artificial-intelligence agents, assign tasks to them, and coordinate their work through agent teams and workflows.",
+     "title": "CrewAI"
+    }
+   ],
+   "coverage": {
+    "scores": [
+     2,
+     2,
+     2
+    ],
+    "score": 1.0,
+    "depth": 1.0
+   },
+   "citationChecks": [
+    {
+     "sentence": "节点负责做事，边负责决定接下来做什么 [1]。",
+     "n": 1,
+     "url": "https://docs.langchain.com/oss/python/langgraph/graph-api",
+     "verdict": "supported",
+     "reason": "Source states verbatim: 'nodes do the work, edges tell what to do next'."
+    },
+    {
+     "sentence": "由于边可以成环，它很适合\"调用模型→调用工具→再判断\"这类循环，控制流非常显式 [1]。",
+     "n": 1,
+     "url": "https://docs.langchain.com/oss/python/langgraph/graph-api",
+     "verdict": "supported",
+     "reason": "Source says graphs support \"complex, looping workflows\" with explicit nodes/edges controlling next steps; the model-tool loop use case is a reasonable implication."
+    },
+    {
+     "sentence": "CrewAI 文档明确提到 guardrails、回调和 human-in-the-loop 触发器 [2]。",
+     "n": 2,
+     "url": "https://docs.crewai.com",
+     "verdict": "supported",
+     "reason": "Source says Tasks & Processes include guardrails, callbacks, and human-in-the-loop triggers; the sentence matches this."
+    },
+    {
+     "sentence": "**任务可以自然拆解为角色分工、多 agent 协作完成**：CrewAI 的角色、任务、团队抽象更直观 [2][3]。",
+     "n": 2,
+     "url": "https://docs.crewai.com",
+     "verdict": "partial",
+     "reason": "Source confirms agents, crews, tasks, multi-agent orchestration, but doesn't state the abstractions are more intuitive or that tasks decompose naturally."
+    }
+   ]
+  },
+  {
+   "id": "ml-rag",
+   "category": "concept",
+   "question": "How does retrieval-augmented generation reduce LLM hallucinations, and what are its limits?",
+   "taskUuid": "710ee789-c5dd-4788-afb9-72b59c1d6a7b",
+   "status": "COMPLETED",
+   "latencySec": 21.1,
+   "subQuestions": [
+    "What is the basic architecture of retrieval-augmented generation (retriever, index, and generator), and how does conditioning on retrieved passages change the model's output?",
+    "What mechanisms by which retrieval reduces hallucinations are supported by empirical evidence, such as grounding answers in verifiable sources and enabling citation?",
+    "Under what conditions does retrieval fail to reduce hallucinations, including poor retrieval quality, irrelevant or conflicting documents, and the model ignoring or misusing retrieved context?",
+    "What are the practical limits of RAG in terms of latency, cost, knowledge staleness, coverage gaps, and the difficulty of evaluating faithfulness to sources?"
+   ],
+   "agents": [
+    {
+     "status": "COMPLETED",
+     "steps": 4,
+     "sources": 5,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 4,
+     "sources": 3,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 3,
+     "sources": 5,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 3,
+     "sources": 3,
+     "error": null
+    }
+   ],
+   "usage": {
+    "calls": 16,
+    "promptTokens": 46856,
+    "completionTokens": 7921,
+    "costMicro": 54777
+   },
+   "reflectGaps": null,
+   "citations": {
+    "sentences": 23,
+    "citedSentences": 8,
+    "density": 0.348,
+    "sources": 10,
+    "utilization": 0.9,
+    "dangling": 0
+   },
+   "tools": {
+    "calls": {
+     "wiki_search": 5,
+     "web_fetch": 5,
+     "web_search": 6,
+     "kb_search": 2
+    },
+    "errors": 1,
+    "citationsDropped": 0
+   },
+   "langMatch": true,
+   "report": "# How Retrieval-Augmented Generation Reduces Hallucinations, and Its Limits\n\nRetrieval-augmented generation (RAG) reduces hallucinations by conditioning a language model on external text rather than relying only on what it memorized during training. A RAG system has three parts: an index of document chunks stored as vector embeddings, a retriever that finds passages semantically close to the query, and a generator that answers using those passages as context [1][2]. Because the model is given verifiable text to draw from, its answers can be grounded in sources and checked against them, and knowledge can be updated without retraining.\n\nThe empirical support is real but partial. In knowledge-grounded dialogue, retrieval augmentation was found to substantially reduce knowledge hallucination in chatbots, as verified by human evaluation [3]. Grounding gives the model verified facts to draw on, but it does not guarantee elimination: a model can still produce output that conflicts with its retrieved context, which is a faithfulness failure rather than a factuality one [4]. The same logic supports citation. RAG lets a system point users to sources they can cross-check, which improves verifiability, though it does not by itself make every cited claim correct.\n\nRetrieval fails to reduce hallucinations in several identifiable ways. First, if the retriever misses the passage that answers the question, the model has nothing grounded to use and falls back on its parametric memory. Second, the knowledge base itself can be the problem: when it holds duplicate, deprecated, or draft versions of documents, the system treats them as equally valid and blends conflicting information into confident but wrong answers [5]. When retrieved chunks contradict each other, the model often does not flag the conflict; it picks one, sometimes blends both, and presents the result as settled [6]. Third, models do not use all retrieved context reliably. The \"lost in the middle\" effect describes content placed in the middle of a long context being used less consistently than content at the start or end [8]. Mitigations discussed in practitioner sources include curating and versioning sources, reranking retrieved chunks, placing key evidence at the edges of the prompt, and adding post-generation claim verification. These findings come largely from practitioner articles, and I could not confirm the magnitude of each effect from primary research.\n\nRAG also has practical limits beyond these failure modes. Retrieval adds a step before generation, so latency grows, and retrieval latency at scale and multi-hop reasoning remain open challenges in the literature [9]. It avoids retraining but adds costs for index maintenance, compute, and, in regulated settings, audit logging of every query and response [10]. Freshness depends on how often the index is updated, and answers are bounded by what the retriever surfaces, so coverage gaps persist. Finally, faithfulness is hard to measure: standard overlap metrics do not directly capture whether a claim is supported by its source, so evaluation often relies on manual review or dedicated checks.\n\nIn short, retrieval meaningfully reduces hallucination when relevant, trustworthy evidence reaches the model and the model uses it faithfully. It does not eliminate hallucination, and its benefits depend heavily on retrieval quality, source hygiene, and how the generator is prompted and verified.",
+   "sources": [
+    {
+     "n": 1,
+     "url": "https://en.wikipedia.org/wiki/Retrieval-augmented_generation",
+     "quote": "With RAG, LLMs first refer to a specified set of documents, then respond to user queries. These documents supplement information from the LLM's pre-existing training data.",
+     "title": "Retrieval-augmented generation"
+    },
+    {
+     "n": 2,
+     "url": "https://en.wikipedia.org/wiki/Vector_database",
+     "quote": "Vector databases typically implement approximate nearest neighbor algorithms so users can search for records semantically similar to a given input, unlike traditional databases which primarily look up records by exact match.",
+     "title": "Vector database"
+    },
+    {
+     "n": 3,
+     "url": "https://ar5iv.labs.arxiv.org/html/2104.07567",
+     "quote": "The models exhibit open-domain conversational capabilities, generalize effectively to scenarios not within the training data, and, as verified by human evaluations, substantially reduce the well-known problem of knowledge hallucination in state-of-the-art chatbots.",
+     "title": "Retrieval Augmentation Reduces Hallucination in Conversation"
+    },
+    {
+     "n": 4,
+     "url": "https://mem0.ai/library/agent-memory/reducing-hallucinations-llms-with-grounded-memory",
+     "quote": "No. Grounding substantially reduces hallucinations by giving the model verified facts to draw from, but it doesn't guarantee elimination. Even with accurate retrieved context, a model can still generate output that conflicts with that context, a faithfulness failure rather than a factuality one.",
+     "title": "Reducing Hallucinations in LLMs with Grounded Memory"
+    },
+    {
+     "n": 5,
+     "url": "https://www.contentful.com/blog/rag-hallucinations-structured-data-fix",
+     "quote": "Retrieval augmented generation fails when knowledge bases contain duplicate versions, deprecated content, or draft documents, as the system treats all data as equally valid and blends conflicting information into confident but wrong answers.",
+     "title": "RAG hallucinations: Why they happen and how to fix them | Contentful"
+    },
+    {
+     "n": 6,
+     "url": "https://pub.towardsai.net/rag-is-not-enough-when-retrieval-augmented-generation-fails-in-production-9dd2a7aa92c1",
+     "quote": "When retrieved chunks contain contradictory information - maybe from different document versions or different authors - the model doesn't flag the contradiction. It picks one, sometimes blends both, and presents the result as settled fact.",
+     "title": "RAG is Not Enough: When Retrieval Augmented Generation Fails in Production | by Pravin Borate | Towards AI"
+    },
+    {
+     "n": 7,
+     "url": "https://medium.com/@cenghanbayram35/lost-in-the-middle-in-llms-86e461dc7212",
+     "title": "Lost in the Middle in LLMS - Cengizhan Bayram (Medium)"
+    },
+    {
+     "n": 8,
+     "url": "https://dev.to/thousand_miles_ai/the-lost-in-the-middle-problem-why-llms-ignore-the-middle-of-your-context-window-3al2",
+     "quote": "Your RAG system retrieved five perfect chunks. The answer was in chunk #3. The LLM read chunk #1 carefully, skimmed chunks #2 through #4, and paid close attention to chunk #5.",
+     "title": "The 'Lost in the Middle' Problem — Why LLMs Ignore the Middle of Your Context Window - DEV Community"
+    },
+    {
+     "n": 9,
+     "url": "https://arxiv.org/html/2507.18910v1",
+     "quote": "Challenges that remained—in retrieval latency at scale, multi-hop reasoning, and tighter faithfulness evaluation—set the agenda for subsequent work.",
+     "title": "A Systematic Review of Key Retrieval-Augmented Generation (RAG) Systems: Progress, Gaps, and Future Directions"
+    },
+    {
+     "n": 10,
+     "url": "https://itea.org/journals/volume-47-2/retrieval-augmented-generation-t-and-e",
+     "quote": "Every query, retrieved chunk set, and generated response is logged to an immutable audit trail, mandatory for Authorization to Operate (ATO) and Security Technical Implementation Guide (STIG) compliance (DoD CIO 2024).",
+     "title": "Retrieval-Augmented Generation for Dept. Test & Evaluation"
+    }
+   ],
+   "coverage": {
+    "scores": [
+     2,
+     2,
+     1
+    ],
+    "score": 1.0,
+    "depth": 0.833
+   },
+   "citationChecks": [
+    {
+     "sentence": "A RAG system has three parts: an index of document chunks stored as vector embeddings, a retriever that finds passages semantically close to the query, and a generator that answers using those passages as context [1][2].",
+     "n": 1,
+     "url": "https://en.wikipedia.org/wiki/Retrieval-augmented_generation",
+     "verdict": "supported",
+     "reason": "Source describes embeddings stored in a vector database, a retriever selecting relevant documents, and an LLM generating output from query plus retrieved documents."
+    },
+    {
+     "sentence": "Grounding gives the model verified facts to draw on, but it does not guarantee elimination: a model can still produce output that conflicts with its retrieved context, which is a faithfulness failure rather than a factuality one [4].",
+     "n": 4,
+     "url": "https://mem0.ai/library/agent-memory/reducing-hallucinations-llms-with-grounded-memory",
+     "verdict": "supported",
+     "reason": "Source states grounding doesn't guarantee zero hallucinations and defines faithfulness hallucinations as output conflicting with provided context, distinct from factuality."
+    },
+    {
+     "sentence": "When retrieved chunks contradict each other, the model often does not flag the conflict; it picks one, sometimes blends both, and presents the result as settled [6].",
+     "n": 6,
+     "verdict": "unverifiable"
+    },
+    {
+     "sentence": "Retrieval adds a step before generation, so latency grows, and retrieval latency at scale and multi-hop reasoning remain open challenges in the literature [9].",
+     "n": 9,
+     "url": "https://arxiv.org/html/2507.18910v1",
+     "verdict": "partial",
+     "reason": "Source mentions benchmarking latency and scalability/integration challenges, but the excerpt doesn't state multi-hop reasoning or retrieval-latency-at-scale as open challenges."
+    }
+   ]
+  },
+  {
+   "id": "ml-specdec",
+   "category": "concept",
+   "question": "What is speculative decoding and why does it speed up LLM inference?",
+   "taskUuid": "3f55d2e4-cee8-4abb-ad18-6469b821830a",
+   "status": "COMPLETED",
+   "latencySec": 15.1,
+   "subQuestions": [
+    "What is speculative decoding in the context of large language model inference?",
+    "How does a draft model propose multiple candidate tokens that the target model then verifies in parallel?",
+    "Why does verifying several tokens in one forward pass cost less than generating them one at a time?",
+    "How does the acceptance/rejection step preserve the target model's output distribution?"
+   ],
+   "agents": [
+    {
+     "status": "COMPLETED",
+     "steps": 3,
+     "sources": 1,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 2,
+     "sources": 3,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 1,
+     "sources": 0,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 4,
+     "sources": 2,
+     "error": null
+    }
+   ],
+   "usage": {
+    "calls": 12,
+    "promptTokens": 22963,
+    "completionTokens": 4071,
+    "costMicro": 27034
+   },
+   "reflectGaps": null,
+   "citations": {
+    "sentences": 21,
+    "citedSentences": 7,
+    "density": 0.333,
+    "sources": 4,
+    "utilization": 1.0,
+    "dangling": 0
+   },
+   "tools": {
+    "calls": {
+     "wiki_search": 3,
+     "kb_search": 1,
+     "web_fetch": 3,
+     "web_search": 1
+    },
+    "errors": 0,
+    "citationsDropped": 0
+   },
+   "langMatch": true,
+   "report": "## Speculative decoding: what it is and why it speeds up inference\n\nSpeculative decoding is an inference-time optimization for autoregressive LLMs that produces multiple tokens per decoding step instead of one. A small, fast draft model proposes a short run of candidate tokens, and the large target model checks all of them in a single forward pass. Accepted tokens are kept, and generation resumes from the first rejected position. The technique is named by analogy to speculative execution in CPUs [1][3].\n\n**Drafting and verification.** Each step has two parts. The draft model generates k candidate tokens sequentially. The target model then processes the prefix plus all k candidates in one forward pass. Because a transformer outputs next-token logits at every input position, that single pass gives the target's predictive distribution at each candidate position. The k draft tokens are therefore checked in parallel, even though drafting itself was sequential [1][2]. Tree-based variants verify several candidate branches at once [2].\n\n**Why one pass costs about the same as one token.** Standard decoding loads the full model weights and KV cache from GPU memory for every token. At small batch sizes this is memory-bandwidth-bound: the compute units sit mostly idle while weights stream in. A verification pass reads the weights once and reuses them across the k positions, so the extra tokens add little latency. The reported speedup is typically around 2–3x [1][3].\n\n**Why the output is unchanged.** Verification uses a modified rejection sampling scheme [1][4]. A draft token x is accepted with probability min(1, p(x)/q(x)), where p is the target's distribution and q is the draft's. On the first rejection, a replacement is sampled from the normalized residual max(0, p − q), and the remaining drafts are discarded. Summing the accept and reject paths gives exactly p(x) for each token, so the output distribution matches the target model's own sampling [4]. The draft model affects only speed, through its acceptance rate, and never the distribution of the output [3][4]. The residual-distribution formula here comes from the standard algorithm as I understand it. The sources confirm the distributional guarantee, but I did not verify this exact formula against a retrieved source.",
+   "sources": [
+    {
+     "n": 1,
+     "url": "https://en.wikipedia.org/wiki/Speculative_decoding",
+     "quote": "Speculative decoding is an inference-time optimization for autoregressive large language models (LLMs) that generates multiple tokens per decoding step instead of one. A smaller draft model proposes a sequence of candidate tokens, and the larger target model verifies them in a single forward pass through a modified rejection sampling scheme.",
+     "title": "Speculative decoding - Wikipedia"
+    },
+    {
+     "n": 2,
+     "url": "https://www.emergentmind.com/topics/speculative-decoding-methods",
+     "quote": "The process begins with a lightweight draft model (or a retrieval mechanism) generating a block or tree of candidate tokens in parallel; the main (target) model subsequently verifies these in a single forward pass.",
+     "title": "Speculative Decoding Methods - Emergent Mind"
+    },
+    {
+     "n": 3,
+     "url": "https://developer.nvidia.com/blog/an-introduction-to-speculative-decoding-for-reducing-latency-in-ai-inference",
+     "quote": "Speculative decoding pairs a large target model with a lightweight draft mechanism to propose and verify multiple tokens per forward pass, cutting latency and boosting throughput while preserving output quality.",
+     "title": "An Introduction to Speculative Decoding for Reducing Latency in AI Inference - NVIDIA Technical Blog"
+    },
+    {
+     "n": 4,
+     "url": "https://arxiv.org/abs/2211.17192",
+     "quote": "using speculative execution and a novel sampling method, we can make exact decoding from the large models faster, by running them in parallel on the outputs of the approximation models, potentially generating several tokens concurrently, and without changing the distribution.",
+     "title": "Fast Inference from Transformers via Speculative Decoding (arXiv:2211.17192)"
+    }
+   ],
+   "coverage": {
+    "scores": [
+     2,
+     2,
+     1
+    ],
+    "score": 1.0,
+    "depth": 0.833
+   },
+   "citationChecks": [
+    {
+     "sentence": "The technique is named by analogy to speculative execution in CPUs [1][3].",
+     "n": 1,
+     "url": "https://en.wikipedia.org/wiki/Speculative_decoding",
+     "verdict": "supported",
+     "reason": "Source states the name is an analogy to CPU speculative execution, citing reference [3]."
+    },
+    {
+     "sentence": "The k draft tokens are therefore checked in parallel, even though drafting itself was sequential [1][2].",
+     "n": 1,
+     "url": "https://en.wikipedia.org/wiki/Speculative_decoding",
+     "verdict": "supported",
+     "reason": "Source says draft generates K tokens, target verifies them in one batched forward pass; sequential drafting is implied, citing refs 1 and 2."
+    },
+    {
+     "sentence": "The reported speedup is typically around 2–3x [1][3].",
+     "n": 1,
+     "url": "https://en.wikipedia.org/wiki/Speculative_decoding",
+     "verdict": "supported",
+     "reason": "Source states latency cut of roughly two to three times, citing [1][2], and Leviathan et al. showed 2–3x; [3] also supports."
+    },
+    {
+     "sentence": "Summing the accept and reject paths gives exactly p(x) for each token, so the output distribution matches the target model's own sampling [4].",
+     "n": 4,
+     "url": "https://arxiv.org/abs/2211.17192",
+     "verdict": "partial",
+     "reason": "Abstract confirms outputs are unchanged/same distribution, but the accept/reject path summation to p(x) is not shown in the abstract."
+    }
+   ]
+  },
+  {
+   "id": "ml-lora-zh",
+   "category": "concept",
+   "question": "什么是 LoRA 微调？它为什么能降低训练成本？",
+   "taskUuid": "8b571c1b-7171-4e48-bf20-c4e8b6c433af",
+   "status": "COMPLETED",
+   "latencySec": 21.2,
+   "subQuestions": [
+    "LoRA（低秩适应）微调的基本原理是什么？它如何在预训练模型的权重上添加低秩分解矩阵？",
+    "全量微调与 LoRA 微调相比，训练时需要更新和存储的参数量分别是多少？",
+    "LoRA 为什么能显著降低显存占用和计算开销，尤其是在优化器状态和梯度方面？",
+    "LoRA 在实际应用中有哪些局限性，例如对任务效果、秩的选择和多任务切换的影响？"
+   ],
+   "agents": [
+    {
+     "status": "COMPLETED",
+     "steps": 3,
+     "sources": 2,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 3,
+     "sources": 2,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 2,
+     "sources": 0,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 3,
+     "sources": 3,
+     "error": null
+    }
+   ],
+   "usage": {
+    "calls": 13,
+    "promptTokens": 28379,
+    "completionTokens": 6059,
+    "costMicro": 34438
+   },
+   "reflectGaps": null,
+   "citations": {
+    "sentences": 16,
+    "citedSentences": 5,
+    "density": 0.312,
+    "sources": 4,
+    "utilization": 1.0,
+    "dangling": 0
+   },
+   "tools": {
+    "calls": {
+     "wiki_search": 5,
+     "kb_search": 1,
+     "web_fetch": 4,
+     "web_search": 1
+    },
+    "errors": 0,
+    "citationsDropped": 0
+   },
+   "langMatch": true,
+   "report": "LoRA（Low-Rank Adaptation，低秩适应）是一种参数高效的微调方法，由微软研究人员于2021年提出，用于大语言模型和其他深度神经网络，使预训练模型能够适配特定任务，同时所需计算资源和可训练参数都远少于传统的全量微调[1]。\n\n其基本思路是：冻结预训练模型的原始权重 W₀，不直接更新它，而是把权重更新量 ΔW 分解为两个低秩矩阵的乘积 ΔW = B·A，其中 B ∈ R^{d×r}、A ∈ R^{r×k}，秩 r 远小于 d 和 k。前向计算变为 h = W₀x + BAx，只训练 A 和 B。训练开始时通常将 B 初始化为零、A 用随机高斯初始化，使 ΔW 初始为零，模型从预训练状态出发。训练完成后可将 BA 合并回 W₀，推理时不增加延迟。这类适配器模块本身参数量很少，只调整其权重、保持模型其余权重冻结的做法，也是参数高效微调的通用思路[2]。\n\n**为什么能降低训练成本**\n\n1. **可训练参数大幅减少**：全量微调需要更新并存储全部参数（例如 GPT-3 为 1750 亿参数）；LoRA 的可训练参数量从 d×k 降为 r(d+k)，通常只占原模型的很小比例。\n2. **梯度与优化器状态随之缩减**：反向传播只需为 A、B 计算梯度，无需为冻结的 W₀ 计算和存储梯度；Adam 等优化器的状态也只针对小矩阵保存，因此显存占用显著下降。\n3. **计算开销较小**：额外的 BA 分支计算量很低，且反向传播中可省去部分权重梯度的计算，训练速度因此提升。\n4. **不增加推理延迟**：训练后可合并权重，推理结构与原模型一致。\n\n**需要注意的局限**\n\n- LoRA 主要节省的是梯度与优化器状态，冻结的模型权重仍需完整加载，超大模型通常还需量化（如 QLoRA）配合；激活显存基本不受直接影响，长序列或大 batch 时仍可能成为瓶颈。\n- 任务效果存在差距：在复杂推理等后训练任务上，LoRA 通常仍落后于全量微调，部分研究通过对关键模块改用全量微调来缩小差距[3]。\n- 秩的选择是精度与开销之间的权衡：秩 r 是表达容量的上限，统一的秩也未必最优，按模块分配秩预算更有效[3]。\n- 多任务场景下，多个 LoRA 适配器合并会产生任务间干扰，连续学习时也可能出现灾难性遗忘；LoRI 等方法通过冻结投影矩阵、对 B 做任务特定稀疏化来缓解这一问题，并可比 LoRA 减少最多约 95% 的参数[4]。\n\n以上关于参数量、显存节省比例的具体数值属于基于公式的推导，性能细节也主要来自近期论文，尚未经过大规模独立验证。",
+   "sources": [
+    {
+     "n": 1,
+     "url": "https://en.wikipedia.org/wiki/LoRA_(machine_learning)",
+     "quote": "LoRA (Low-Rank Adaptation) is a parameter-efficient fine-tuning technique for large language models and other deep neural networks. Introduced in 2021 by researchers at Microsoft, LoRA enables adaptation of pre-trained models to specific tasks while requiring significantly fewer computational resources and trainable parameters than traditional full model fine-tuning.",
+     "title": "LoRA (machine learning) - Wikipedia"
+    },
+    {
+     "n": 2,
+     "url": "https://en.wikipedia.org/wiki/Fine-tuning_(deep_learning)",
+     "quote": "A model may also be augmented with \"adapters\"—lightweight modules inserted into the model's architecture that nudge the embedding space for domain adaptation. These contain far fewer parameters than the original model and can be fine-tuned in a parameter-efficient way by tuning only their weights and leaving the rest of the model's weights frozen.",
+     "title": "Fine-tuning (deep learning) - Wikipedia"
+    },
+    {
+     "n": 3,
+     "url": "https://arxiv.org/html/2605.18822v1",
+     "quote": "they often suffer from a noticeable performance gap compared to full fine-tuning in post-training for complex reasoning tasks.",
+     "title": "Hybrid-LoRA: Bridging Full Fine-Tuning and Low-Rank Adaptation for Post-Training"
+    },
+    {
+     "n": 4,
+     "url": "https://www.alphaxiv.org/abs/2504.07448",
+     "quote": "LoRA still faces significant challenges in multi-task scenarios, particularly regarding parameter overhead and cross-task interference when merging multiple task-specific adapters.",
+     "title": "LoRI: Reducing Cross-Task Interference in Multi-Task Low-Rank Adaptation | alphaXiv"
+    }
+   ],
+   "coverage": {
+    "scores": [
+     2,
+     2,
+     2
+    ],
+    "score": 1.0,
+    "depth": 1.0
+   },
+   "citationChecks": [
+    {
+     "sentence": "LoRA（Low-Rank Adaptation，低秩适应）是一种参数高效的微调方法，由微软研究人员于2021年提出，用于大语言模型和其他深度神经网络，使预训练模型能够适配特定任务，同时所需计算资源和可训练参数都远少于传统的全量微调[1]。",
+     "n": 1,
+     "url": "https://en.wikipedia.org/wiki/LoRA_(machine_learning)",
+     "verdict": "supported",
+     "reason": "Source's lead sentence states all claims: parameter-efficient, introduced 2021 by Microsoft researchers, fewer compute resources and trainable parameters than full fine-tuning."
+    },
+    {
+     "sentence": "这类适配器模块本身参数量很少，只调整其权重、保持模型其余权重冻结的做法，也是参数高效微调的通用思路[2]。",
+     "n": 2,
+     "url": "https://en.wikipedia.org/wiki/Fine-tuning_(deep_learning)",
+     "verdict": "supported",
+     "reason": "Source says adapters have far fewer parameters and are tuned by only their weights with the rest frozen, parameter-efficiently."
+    },
+    {
+     "sentence": "任务效果存在差距：在复杂推理等后训练任务上，LoRA 通常仍落后于全量微调，部分研究通过对关键模块改用全量微调来缩小差距[3]。",
+     "n": 3,
+     "url": "https://arxiv.org/html/2605.18822v1",
+     "verdict": "supported",
+     "reason": "Abstract states LoRA often lags full fine-tuning on complex reasoning post-training; Hybrid-LoRA applies full fine-tuning to selected modules to close the gap."
+    },
+    {
+     "sentence": "秩的选择是精度与开销之间的权衡：秩 r 是表达容量的上限，统一的秩也未必最优，按模块分配秩预算更有效[3]。",
+     "n": 3,
+     "url": "https://arxiv.org/html/2605.18822v1",
+     "verdict": "partial",
+     "reason": "Source supports non-uniform rank allocation across modules (AdaLoRA etc.), but cited [3] text doesn't state rank as expressiveness ceiling or accuracy-overhead tradeoff."
+    }
+   ]
+  },
+  {
+   "id": "ml-react",
+   "category": "concept",
+   "question": "What is the ReAct prompting pattern for LLM agents?",
+   "taskUuid": "b73bd706-1893-42d0-ac14-9bc1a582d764",
+   "status": "COMPLETED",
+   "latencySec": 18.1,
+   "subQuestions": [
+    "What is the ReAct prompting pattern for LLM agents and where does the name come from?",
+    "How does ReAct interleave reasoning traces with actions and observations in an agent loop?",
+    "How does ReAct compare to chain-of-thought prompting and to pure acting approaches?",
+    "What are the typical use cases, benefits, and known limitations of ReAct in practice?"
+   ],
+   "agents": [
+    {
+     "status": "COMPLETED",
+     "steps": 3,
+     "sources": 3,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 2,
+     "sources": 3,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 3,
+     "sources": 3,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 4,
+     "sources": 3,
+     "error": null
+    }
+   ],
+   "usage": {
+    "calls": 14,
+    "promptTokens": 35657,
+    "completionTokens": 5281,
+    "costMicro": 40938
+   },
+   "reflectGaps": null,
+   "citations": {
+    "sentences": 18,
+    "citedSentences": 15,
+    "density": 0.833,
+    "sources": 6,
+    "utilization": 1.0,
+    "dangling": 0
+   },
+   "tools": {
+    "calls": {
+     "wiki_search": 5,
+     "web_search": 4,
+     "web_fetch": 4
+    },
+    "errors": 0,
+    "citationsDropped": 0
+   },
+   "langMatch": true,
+   "report": "# ReAct Prompting Pattern for LLM Agents\n\nReAct (Reasoning + Acting) is a prompting pattern from Yao et al. (2022) in which a language model generates reasoning traces and task-specific actions in an interleaved fashion [1]. The reasoning traces help the model induce, track, and update action plans and handle exceptions, while actions let it query external sources such as a knowledge base or an environment to gather more information [1][2]. The name is a contraction of \"Reasoning\" and \"Acting,\" the two capabilities the paper proposes to combine; the sources I checked do not explain the naming choice beyond this [1].\n\n## The Agent Loop\n\nReAct prompts the model to produce three kinds of steps: thoughts (free-form reasoning that decomposes the task and tracks progress), actions (calls to an external tool or environment, such as a search or a game command), and observations (the environment's response) [2]. Each observation is appended to the context and becomes input for the next thought or action [2]. In a practical harness, the system calls the model, parses any action from its output, executes the tool, appends the observation to the transcript, and repeats until the model emits a final answer [3]. Grounding each step in real feedback is what lets the model's reasoning draw on external information rather than only its internal knowledge [2].\n\n## Benefits Over Chain-of-Thought and Pure Acting\n\nCompared with chain-of-thought (CoT) prompting, which reasons purely internally, ReAct overcomes hallucination and error propagation by consulting an external source, a simple Wikipedia API on HotpotQA and Fever [6]. The paper also reports that its trajectories are more interpretable than baselines without reasoning traces [6]. Compared with action-only approaches, the reasoning helps the model track and revise plans [1]. The paper frames the gain as synergy between the two capabilities [1].\n\nOn interactive benchmarks, ReAct outperformed imitation and reinforcement learning methods by absolute success rates of 34% on ALFWorld and 10% on WebShop [4]. I did not retrieve the paper's full ablation tables, so I cannot give exact figures against the CoT or pure-acting baselines.\n\n## Use Cases and Limitations\n\nReAct suits multi-step question answering and fact verification that need external lookups, interactive decision-making such as web navigation, and tool-using assistants where each next step depends on prior results [5]. Its main costs are extra tokens and latency per iteration, so for predictable tasks plain function calling is usually cheaper and simpler [5]. Performance also depends heavily on the underlying model's reasoning and instruction-following, and the flexibility makes it harder to constrain when and which tools get called [5]. The benchmark results above are not guarantees for production workloads. I could not retrieve the limitations section of the IBM article in full, so the limitations here draw partly on general knowledge of the pattern.",
+   "sources": [
+    {
+     "n": 1,
+     "url": "https://react-lm.github.io",
+     "quote": "ReAct asks, what if these two fundamental capabilities are combined?",
+     "title": "ReAct: Synergizing Reasoning and Acting in Language Models"
+    },
+    {
+     "n": 2,
+     "url": "https://www.alphaxiv.org/abs/2210.03629",
+     "quote": "ReAct lets a language model alternate between saying what it thinks should happen and taking an action that changes, or gathers information from, the environment. The observation from that action then becomes part of the context for the next thought or action.",
+     "title": "ReAct: Synergizing Reasoning and Acting in Language Models"
+    },
+    {
+     "n": 3,
+     "url": "https://en.wikipedia.org/wiki/Agent_harness",
+     "quote": "The relationship can be expressed as agent = model + harness.",
+     "title": "Agent harness"
+    },
+    {
+     "n": 4,
+     "url": "https://collaborate.princeton.edu/en/publications/react-synergizing-reasoning-and-acting-in-language-models",
+     "quote": "On two interactive decision making benchmarks (ALFWorld and WebShop), ReAct outperforms imitation and reinforcement learning methods by an absolute success rate of 34% and 10%",
+     "title": "REACT: SYNERGIZING REASONING AND ACTING IN LANGUAGE MODELS - Princeton University"
+    },
+    {
+     "n": 5,
+     "url": "https://www.ibm.com/think/topics/react-agent",
+     "title": "What is a ReAct Agent? | IBM"
+    },
+    {
+     "n": 6,
+     "url": "https://arxiv.org/abs/2210.03629",
+     "quote": "ReAct overcomes issues of hallucination and error propagation prevalent in chain-of-thought reasoning by interacting with a simple Wikipedia API, and generates human-like task-solving trajectories that are more interpretable than baselines without reasoning traces.",
+     "title": "ReAct: Synergizing Reasoning and Acting in Language Models"
+    }
+   ],
+   "coverage": {
+    "scores": [
+     2,
+     2,
+     2
+    ],
+    "score": 1.0,
+    "depth": 1.0
+   },
+   "citationChecks": [
+    {
+     "sentence": "ReAct (Reasoning + Acting) is a prompting pattern from Yao et al. (2022) in which a language model generates reasoning traces and task-specific actions in an interleaved fashion [1].",
+     "n": 1,
+     "url": "https://react-lm.github.io",
+     "verdict": "supported",
+     "reason": "Source describes ReAct as combining reasoning traces and task-specific actions interleaved, prompting-based, by Yao et al.; the 2022 date is not stated in the source."
+    },
+    {
+     "sentence": "ReAct prompts the model to produce three kinds of steps: thoughts (free-form reasoning that decomposes the task and tracks progress), actions (calls to an external tool or environment, such as a search or a game command), and observations (the environment's response) [2].",
+     "n": 2,
+     "url": "https://www.alphaxiv.org/abs/2210.03629",
+     "verdict": "supported",
+     "reason": "Source describes thoughts (decompose, track progress), actions (calls to tools/environments), and observations (responses), all in one running context."
+    },
+    {
+     "sentence": "Compared with chain-of-thought (CoT) prompting, which reasons purely internally, ReAct overcomes hallucination and error propagation by consulting an external source, a simple Wikipedia API on HotpotQA and Fever [6].",
+     "n": 6,
+     "url": "https://arxiv.org/abs/2210.03629",
+     "verdict": "supported",
+     "reason": "Abstract states ReAct overcomes hallucination and error propagation in chain-of-thought via a simple Wikipedia API on HotpotQA and Fever."
+    },
+    {
+     "sentence": "On interactive benchmarks, ReAct outperformed imitation and reinforcement learning methods by absolute success rates of 34% on ALFWorld and 10% on WebShop [4].",
+     "n": 4,
+     "url": "https://collaborate.princeton.edu/en/publications/react-synergizing-reasoning-and-acting-in-language-models",
+     "verdict": "supported",
+     "reason": "Abstract states ReAct outperforms imitation and RL methods by absolute success rates of 34% (ALFWorld) and 10% (WebShop)."
+    }
+   ]
+  }
+ ]
+}
