@@ -41,10 +41,10 @@ class RateLimiterTest {
     @Test
     void refillsOverTime() throws InterruptedException {
         limiter = new RateLimiter(redisson);
-        String model = "rl-" + UUID.randomUUID();       // capacity=1, 100 令牌/秒
-        assertTrue(limiter.tryAcquire(model, 1, 100));
-        assertFalse(limiter.tryAcquire(model, 1, 100));  // 立即再取:空
-        Thread.sleep(60);                                 // 60ms * 100/s = 6 令牌(封顶 1)
-        assertTrue(limiter.tryAcquire(model, 1, 100));    // 已补充
+        String model = "rl-" + UUID.randomUUID();       // capacity=1, 5 令牌/秒(200ms 补 1 个)
+        assertTrue(limiter.tryAcquire(model, 1, 5));
+        assertFalse(limiter.tryAcquire(model, 1, 5));    // 立即再取:空(两次调用间隔远小于 200ms)
+        Thread.sleep(300);                                // 300ms * 5/s = 1.5 令牌(封顶 1)
+        assertTrue(limiter.tryAcquire(model, 1, 5));      // 已补充
     }
 }

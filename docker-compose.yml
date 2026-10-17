@@ -115,6 +115,8 @@ services:
       LLM_MOCK_DELAYMS: ${LLM_MOCK_DELAY_MS:-1500}
       OPENAI_BASE_URL: ${OPENAI_BASE_URL:-https://api.openai.com/v1}
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_EXTRA_BODY: ${OPENAI_EXTRA_BODY:-}
+      TAVILY_API_KEY: ${TAVILY_API_KEY:-}
     depends_on:
       redis: {condition: service_healthy}
       kafka: {condition: service_healthy}

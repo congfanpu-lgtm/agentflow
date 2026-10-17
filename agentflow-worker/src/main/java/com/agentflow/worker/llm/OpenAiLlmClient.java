@@ -43,6 +43,9 @@ public class OpenAiLlmClient implements LlmClient {
     private String baseUrl;
     @Value("${llm.openai.api-key:${OPENAI_API_KEY:}}")
     private String apiKey;
+    /** 合并进请求体的厂商专有参数(JSON 对象),如 Anthropic 的 {"thinking":{"type":"disabled"}}。 */
+    @Value("${llm.openai.extra-body:${OPENAI_EXTRA_BODY:}}")
+    private String extraBody;
 
     @Override
     public String provider() {
@@ -81,6 +84,9 @@ public class OpenAiLlmClient implements LlmClient {
                     fn.put("name", t.name()).put("description", t.description());
                     fn.set("parameters", OM.readTree(t.parametersSchema()));
                 }
+            }
+            if (extraBody != null && !extraBody.isBlank()) {
+                body.setAll((ObjectNode) OM.readTree(extraBody));
             }
             HttpRequest httpReq = HttpRequest.newBuilder()
                     .uri(URI.create(baseUrl + "/chat/completions"))

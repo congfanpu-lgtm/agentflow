@@ -47,7 +47,7 @@ class WikiSearchToolTest {
     void formatsTitleUrlAndSummary() throws Exception {
         WikiSearchTool tool = new WikiSearchTool("http://127.0.0.1:" + server.getAddress().getPort());
         String out = tool.run(new ObjectMapper().createObjectNode().put("query", "kafka"));
-        assertTrue(out.contains("标题: Apache Kafka"));
+        assertTrue(out.contains("Title: Apache Kafka"));
         assertTrue(out.contains("URL: https://en.wikipedia.org/wiki/Apache_Kafka"));
         assertTrue(out.contains("Kafka is a distributed event store."));
         assertTrue(userAgent.get().startsWith("AgentFlow/"));

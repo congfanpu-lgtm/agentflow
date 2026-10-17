@@ -58,10 +58,10 @@ public class WikiSearchTool implements AgentTool {
             String title = hit.path("title").asText();
             String slug = enc(title.replace(' ', '_'));
             JsonNode s = get(baseUrl + "/api/rest_v1/page/summary/" + slug);
-            sb.append("标题: ").append(title).append('\n')
+            sb.append("Title: ").append(title).append('\n')
                     .append("URL: ").append(s.path("content_urls").path("desktop").path("page")
                             .asText("https://en.wikipedia.org/wiki/" + slug)).append('\n')
-                    .append("摘要: ").append(s.path("extract").asText("")).append("\n\n");
+                    .append("Summary: ").append(s.path("extract").asText("")).append("\n\n");
         }
         return sb.isEmpty() ? "没有找到相关词条:" + q : sb.toString().trim();
     }

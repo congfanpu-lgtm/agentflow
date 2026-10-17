@@ -88,4 +88,15 @@ class OpenAiLlmClientTest {
         client().chat(new ChatRequest("m", List.of(new ChatMessage("user", "hi")), 10));
         assertFalse(new ObjectMapper().readTree(sentBody.get()).has("tools"));
     }
+
+    @Test
+    void mergesExtraBodyIntoRequest() throws Exception {
+        // Anthropic 兼容接口默认会思考,隐藏的思考吃掉 max_tokens → 答案被截断;靠 extra-body 关掉
+        OpenAiLlmClient c = client();
+        ReflectionTestUtils.setField(c, "extraBody", "{\"thinking\":{\"type\":\"disabled\"}}");
+        c.chat(new ChatRequest("m", List.of(new ChatMessage("user", "hi")), 10));
+        JsonNode sent = new ObjectMapper().readTree(sentBody.get());
+        assertEquals("disabled", sent.at("/thinking/type").asText());
+        assertEquals("m", sent.path("model").asText());
+    }
 }

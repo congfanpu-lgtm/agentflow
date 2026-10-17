@@ -17,6 +17,8 @@ import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * 抓取网页正文。手动跟随重定向,每一跳都过 {@link UrlGuard}(防"公网地址 302 到内网")。
@@ -105,6 +107,15 @@ public class WebFetchTool implements AgentTool {
         throw new IllegalStateException("重定向超过 " + MAX_REDIRECTS + " 次");
     }
 
+    /** &#39; / &#x27; → 字符;非法码点(网页里的垃圾实体)原样保留,不让整页解析失败。 */
+    private static String decode(java.util.regex.MatchResult m) {
+        try {
+            return Character.toString(Integer.parseInt(m.group(2), m.group(1).isEmpty() ? 10 : 16));
+        } catch (IllegalArgumentException e) {
+            return m.group();
+        }
+    }
+
     private Duration remaining(long deadline) {
         long left = deadline - System.nanoTime();
         if (left <= 0) {
@@ -113,11 +124,24 @@ public class WebFetchTool implements AgentTool {
         return Duration.ofNanos(left);
     }
 
+    private static final Pattern MAIN = Pattern.compile("(?is)<(main|article)\\b[^>]*>(.*)</\\1>");
+    private static final Pattern NUM_ENTITY = Pattern.compile("&#(x?)([0-9a-fA-F]+);");
+
+    /** 正文提取:有 <main>/<article> 只取它;再去掉导航、页眉页脚等站点框架。正则实现,够用且不加依赖。 */
     static String htmlToText(String html) {
-        return html.replaceAll("(?is)<(script|style|noscript)[^>]*>.*?</\\1>", " ")
+        String s = html.replaceAll("(?is)<(script|style|noscript|svg)[^>]*>.*?</\\1>", " ");
+        Matcher main = MAIN.matcher(s);
+        if (main.find()) {
+            s = main.group(2);
+        }
+        // ponytail: 不处理同名标签嵌套(nav 里套 nav),真实页面少见;要精确再引入 jsoup
+        s = s.replaceAll("(?is)<(nav|header|footer|aside|form)\\b[^>]*>.*?</\\1>", " ")
+                .replaceAll("(?is)<a[^>]*mw-jump-link[^>]*>.*?</a>", " ")
+                .replaceAll("(?i)</?(b|i|em|strong|span|a|code|sup|sub|small|mark|u)\\b[^>]*>", "")   // 行内标签不断词
                 .replaceAll("(?s)<[^>]+>", " ")
                 .replace("&nbsp;", " ").replace("&lt;", "<").replace("&gt;", ">")
-                .replace("&quot;", "\"").replace("&#39;", "'").replace("&amp;", "&")
-                .replaceAll("\\s+", " ").trim();
+                .replace("&quot;", "\"");
+        s = NUM_ENTITY.matcher(s).replaceAll(m -> Matcher.quoteReplacement(decode(m)));
+        return s.replace("&amp;", "&").replaceAll("\\s+", " ").trim();
     }
 }

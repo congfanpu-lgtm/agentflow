@@ -98,6 +98,18 @@ class WebFetchToolTest {
     }
 
     @Test
+    void htmlToTextKeepsMainContentAndDropsChrome() {
+        // 维基百科这类页面:导航/页眉/页脚在 <main> 之外,只取 <main> 才不会混进 "Jump to content Main menu"
+        String html = "<html><body><a class=mw-jump-link>Jump to content</a><nav>Main menu</nav>"
+                + "<header>Site header</header><main id=content><nav>Contents</nav><p>Kafka is a log.</p>"
+                + "<aside>Related</aside></main><footer>Privacy policy</footer></body></html>";
+        assertEquals("Kafka is a log.", WebFetchTool.htmlToText(html));
+        // 没有 <main>/<article> 时:去掉 nav/header/footer/aside/form 后取全文
+        assertEquals("Body text", WebFetchTool.htmlToText(
+                "<nav>Menu</nav><header>H</header><div>Body text</div><form>Search</form><footer>F</footer>"));
+    }
+
+    @Test
     void htmlToTextStripsTagsScriptsAndEntities() {
         assertEquals("a b & c", WebFetchTool.htmlToText("<div>a</div><script>x()</script><b>b</b> &amp; c"));
     }
