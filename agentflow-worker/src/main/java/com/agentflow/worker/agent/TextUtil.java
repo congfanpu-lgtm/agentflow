@@ -56,4 +56,11 @@ public final class TextUtil {
         }
         return s.length() <= max ? s : s.substring(0, max) + "…";
     }
+
+    /** 摘录比对用:小写、统一弯引号、压缩空白。模型抄原文时常改大小写 / 引号 / 空格,这些不算编造。 */
+    public static String normalize(String s) {
+        return s == null ? "" : s.toLowerCase()
+                .replace('\u2018', '\'').replace('\u2019', '\'').replace('\u201C', '"').replace('\u201D', '"')
+                .replaceAll("\\s+", " ").trim();
+    }
 }

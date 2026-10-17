@@ -35,6 +35,26 @@ class SynthesizeProcessorTest {
             """;
 
     @Test
+    void writerSeesEvidenceQuotesAndWhichSourcesEachFindingUsed() throws Exception {
+        when(gateway.chat(any())).thenReturn(new ChatResponse("r [1]", new TokenUsage(5, 5), "m"));
+        JsonNode out = new ObjectMapper().readTree(processor().process("""
+                {"question":"kafka vs rabbitmq","findings":[
+                  {"subQuestion":"a","answer":"A1","sources":[{"title":"K","url":"https://k","quote":"Kafka does 1M msg/s"},
+                                                              {"title":"R","url":"https://r"}]},
+                  {"subQuestion":"b","answer":"B1","sources":[{"title":"K","url":"https://k","quote":"Kafka keeps a log"}]}]}
+                """));
+
+        ArgumentCaptor<ChatRequest> c = ArgumentCaptor.forClass(ChatRequest.class);
+        verify(gateway).chat(c.capture());
+        String user = c.getValue().getMessages().get(1).getContent();
+        assertTrue(user.contains("[1] K https://k\n    证据:\"Kafka does 1M msg/s\"\n    证据:\"Kafka keeps a log\""), user);
+        assertTrue(user.contains("### a\nA1\n依据来源:[1][2]"), user);
+        assertTrue(user.contains("### b\nB1\n依据来源:[1]"), user);
+        assertEquals("Kafka does 1M msg/s", out.at("/sources/0/quote").asText());
+        assertFalse(out.at("/sources/1").has("quote"));
+    }
+
+    @Test
     void numbersDedupedSourcesAndStripsOutOfRangeCitations() throws Exception {
         when(gateway.chat(any())).thenReturn(new ChatResponse("Kafka 吞吐高 [1]。RabbitMQ 路由灵活 [2]。编造 [7]。",
                 new TokenUsage(5, 5), "m"));

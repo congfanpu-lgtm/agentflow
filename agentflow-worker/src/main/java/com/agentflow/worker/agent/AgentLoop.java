@@ -35,7 +35,8 @@ import java.util.stream.Collectors;
  *       已调用过的工具直接复用存档结果,不重复调用。</li>
  *   <li>工具出错不抛:以 "ERROR: ..." 回给模型让它自己纠正;只有 LLM 调用失败才让子任务进入重试。</li>
  *   <li>同一次运行内相同 name+参数的调用走缓存,防止模型原地打转。</li>
- *   <li>最终 sources 只保留本次运行工具真实返回过的 URL(防编造引用),删掉的发 CITATION_DROPPED。</li>
+ *   <li>最终 sources 只保留本次运行工具真实返回过的 URL(防编造引用),删掉的发 CITATION_DROPPED;
+ *       来源附带的原文摘录(quote)必须真的出现在工具结果里,否则去掉摘录,计入 unverifiedQuotes。</li>
  *   <li>最多 {@link #MAX_STEPS} 步,超出则去掉工具强制作答。</li>
  * </ul>
  * ponytail: 上下文靠"单个工具结果截断 2000 字 × 最多 6 步"封顶,没有按 token 预算裁剪历史
@@ -46,7 +47,7 @@ import java.util.stream.Collectors;
 public class AgentLoop {
 
     static final int MAX_STEPS = 6;
-    static final int MAX_TOKENS = 800;
+    static final int MAX_TOKENS = 1600;   // 800 时带摘录的 JSON 常被截断,来源全丢(见评测 v3)
     static final int PREVIEW_CHARS = 300;
     static final String ERROR = "ERROR: ";
     static final String WORKER_ID = hostname();
@@ -76,6 +77,7 @@ public class AgentLoop {
         messages.add(new ChatMessage("user", run.question()));
         Map<String, String> cache = new HashMap<>();
         Set<String> seenUrls = new LinkedHashSet<>();
+        StringBuilder seenText = new StringBuilder();   // 全部工具结果(已截断),核对摘录用
         Usage usage = new Usage();
 
         // 1) 续跑:把已完成的步骤原样放回对话,工具结果进缓存,不重新调用
@@ -89,6 +91,7 @@ public class AgentLoop {
                     cache.put(cacheKey(s.assistant().getToolCalls().get(i)), out);
                 }
                 seenUrls.addAll(TextUtil.urls(out));
+                seenText.append(out).append('\n');
             }
             usage.add(s.usage());
         }
@@ -104,7 +107,7 @@ public class AgentLoop {
             Usage stepUsage = Usage.of(resp, props);
             usage.add(stepUsage);
             if (resp.getToolCalls().isEmpty()) {
-                return finish(run, step, resp.getContent(), seenUrls, usage);
+                return finish(run, step, resp.getContent(), seenUrls, seenText, usage);
             }
             ChatMessage assistant = ChatMessage.assistant(resp.getContent(), resp.getToolCalls());
             List<ChatMessage> results = new ArrayList<>();
@@ -112,6 +115,7 @@ public class AgentLoop {
             for (ToolCall c : resp.getToolCalls()) {
                 String out = execute(c, cache);
                 seenUrls.addAll(TextUtil.urls(out));
+                seenText.append(out).append('\n');
                 results.add(ChatMessage.tool(c.getId(), out));
                 calls.addObject().put("tool", c.getName()).put("args", c.getArgumentsJson())
                         .put("resultPreview", TextUtil.truncate(out, PREVIEW_CHARS));
@@ -130,7 +134,7 @@ public class AgentLoop {
         messages.add(new ChatMessage("user", Prompts.FORCE_ANSWER));
         ChatResponse resp = gateway.chat(request(run.model(), messages, null));
         usage.add(Usage.of(resp, props));
-        return finish(run, MAX_STEPS + 1, resp.getContent(), seenUrls, usage);
+        return finish(run, MAX_STEPS + 1, resp.getContent(), seenUrls, seenText, usage);
     }
 
     private String execute(ToolCall c, Map<String, String> cache) {
@@ -155,7 +159,8 @@ public class AgentLoop {
         return out;
     }
 
-    private ObjectNode finish(AgentRun run, int step, String content, Set<String> seenUrls, Usage usage) {
+    private ObjectNode finish(AgentRun run, int step, String content, Set<String> seenUrls, CharSequence seenText,
+                              Usage usage) {
         String answer = content == null ? "" : content.trim();
         JsonNode sources = OM.createArrayNode();
         try {
@@ -172,10 +177,18 @@ public class AgentLoop {
         }
         ArrayNode kept = OM.createArrayNode();
         ArrayNode dropped = OM.createArrayNode();
+        String haystack = TextUtil.normalize(seenText.toString());
+        int unverifiedQuotes = 0;
         for (JsonNode s : sources) {
             String url = s.path("url").asText("");
             if (seenUrls.contains(url)) {
-                kept.addObject().put("title", s.path("title").asText(url)).put("url", url);
+                ObjectNode src = kept.addObject().put("title", s.path("title").asText(url)).put("url", url);
+                String quote = s.path("quote").asText("").trim();
+                if (!quote.isEmpty() && haystack.contains(TextUtil.normalize(quote))) {
+                    src.put("quote", quote);
+                } else if (!quote.isEmpty()) {
+                    unverifiedQuotes++;
+                }
             } else {
                 dropped.add(url);
             }
@@ -192,6 +205,7 @@ public class AgentLoop {
         out.put("question", run.question());
         out.put("answer", answer);
         out.set("sources", kept);
+        out.put("unverifiedQuotes", unverifiedQuotes);
         out.set("usage", OM.valueToTree(usage));
         out.put("steps", step);
         return out;

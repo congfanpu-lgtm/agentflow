@@ -15,10 +15,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * RESEARCH_AGENT:plan → map → reflect → (追问 map) → reduce。
+ * RESEARCH_AGENT:plan → map →(可选:reflect → 追问 map)→ reduce。
  * 提交时只建 1 个 PLAN;PLAN 成功 → N 个 AGENT(并行);AGENT 全部落定且至少 1 个成功 → 1 个 REFLECT
  * 检查结论是否足以回答原问题;有缺口 → 最多 {@link #MAX_FOLLOW_UPS} 个追问 AGENT;之后 → 1 个 SYNTHESIZE。
- * 反思只做一轮(成本可控、不会无限追问);REFLECT 失败不拖垮任务,直接合成。payload.reflect=false 跳过反思。
+ * 反思只做一轮(成本可控、不会无限追问);REFLECT 失败不拖垮任务,直接合成。
+ * 默认关闭,payload.reflect=true 才开:评测(eval/results/v2-*)里开启后要点深度 95%→95%、
+ * 成本 +85%、p50 延迟 21s→39s,在这套题上不划算。
  * 每个阶段的每个子任务都是普通 Kafka 子任务,复用重试 / DLQ / 超时兜底 / 幂等 / trace。
  */
 @Component
@@ -80,7 +82,7 @@ public class ResearchAgentDecomposer implements TaskDecomposer {
             return List.of();
         }
         SubtaskEntity reflect = subs.stream().filter(s -> REFLECT.equals(s.getKind())).findFirst().orElse(null);
-        if (reflect == null && payload.path("reflect").asBoolean(true)) {
+        if (reflect == null && payload.path("reflect").asBoolean(false)) {
             ObjectNode in = input(payload.path("question").asText(), model);
             in.set("findings", findings);
             return List.of(new SubtaskDef(maxSeq + 1, in.toString(), REFLECT));

@@ -19,7 +19,8 @@
   评审模型复用 .env 里的 OPENAI_BASE_URL / OPENAI_API_KEY / OPENAI_EXTRA_BODY,脚本按字面读取 .env
   (和 docker compose 一致;不要 source,shell 会吃掉 JSON 里的引号)
   python3 eval/run_eval.py --label baseline [--limit 3] [--concurrency 3] [--no-judge]
-  python3 eval/run_eval.py --label noreflect --no-reflect   # 关掉反思阶段做对照
+  python3 eval/run_eval.py --label reflect --reflect   # 打开反思阶段(默认关闭)做对照
+  python3 eval/run_eval.py --render eval/results/x.json   # 指标代码改了:用已有结果重算汇总
   python3 eval/run_eval.py --self-check     # 离线自检纯函数
 结果写到 eval/results/<label>.json 与 <label>.md。
 """
@@ -262,11 +263,11 @@ def fetch_text(url, limit=12000):
 
 # ---------------------------------------------------------------- 单题流程
 
-def run_one(base, q, timeout, judge, samples, reflect=True):
+def run_one(base, q, timeout, judge, samples, reflect=False):
     t0 = time.time()
     rec = {"id": q["id"], "category": q["category"], "question": q["question"]}
     try:
-        payload = {"question": q["question"]} if reflect else {"question": q["question"], "reflect": False}
+        payload = {"question": q["question"], "reflect": reflect}
         uuid = http_json(base + "/api/v1/tasks", {"type": "RESEARCH_AGENT", "payload": payload})["taskUuid"]
     except Exception as e:
         rec.update(status="SUBMIT_ERROR", error=type(e).__name__)
@@ -343,6 +344,9 @@ def summarize(records):
         "coverage": mean(cov),
         "depth": mean([r["coverage"]["depth"] for r in done if "depth" in r.get("coverage", {})]),
         "agentsPerQuestion": mean([len(r.get("agents", [])) for r in done]),
+        # agent 最终答案解析失败(如被截断)时来源全丢,这个比例能直接暴露它
+        "agentsWithoutSources": mean([1.0 if not a.get("sources") else 0.0
+                                      for r in done for a in r.get("agents", []) if a.get("status") == "COMPLETED"]),
         "reflectGapsPerQuestion": mean([r["reflectGaps"] for r in done if r.get("reflectGaps") is not None]),
         "citationChecks": len(verdicts), "citationVerifiable": len(verifiable),
         "citationAccuracyStrict": round(verifiable.count("supported") / len(verifiable), 3) if verifiable else None,
@@ -367,7 +371,7 @@ def to_markdown(label, meta, s, records):
                  pct(s["citationAccuracyStrict"]), pct(s["citationAccuracyLenient"]), s["citationVerifiable"], s["citationChecks"]),
              "| Citation density (sentences with [n]) | %s |" % pct(s["citationDensity"]),
              "| Source utilization | %s |" % pct(s["sourceUtilization"]),
-             "| Sources per report | %s |" % s["sourcesPerReport"],
+             "| Sources per report / agents with no sources | %s / %s |" % (s["sourcesPerReport"], pct(s.get("agentsWithoutSources"))),
              "| Report language matches question | %s |" % pct(s["langMatchRate"]),
              "| Tool errors / citations dropped by guard | %d / %d |" % (s["toolErrors"], s["citationsDroppedByGuard"]),
              "", "| id | status | latency | depth | citations ok/checked | sources | gaps | lang |", "|---|---|---|---|---|---|---|---|"]
@@ -421,13 +425,14 @@ def self_check():
     assert tool_stats(tr) == {"calls": {"web_search": 1, "web_fetch": 1}, "errors": 1, "citationsDropped": 2}
     recs = [{"status": "COMPLETED", "latencySec": 10, "usage": {"costMicro": 50000, "promptTokens": 100, "completionTokens": 50, "calls": 4},
              "citations": {"density": 0.5, "utilization": 1.0, "sources": 3, "dangling": 0}, "langMatch": True,
-             "coverage": {"score": 2 / 3, "depth": 0.5}, "tools": {"errors": 0, "citationsDropped": 1}, "agents": [{}, {}], "reflectGaps": 1,
+             "coverage": {"score": 2 / 3, "depth": 0.5}, "tools": {"errors": 0, "citationsDropped": 1}, "agents": [{"status": "COMPLETED", "sources": 2}, {"status": "COMPLETED", "sources": 0}], "reflectGaps": 1,
              "citationChecks": [{"verdict": "supported"}, {"verdict": "partial"}, {"verdict": "unverifiable"}, {"verdict": "unsupported"}]},
             {"status": "TIMEOUT"}]
     s = summarize(recs)
     assert s["completionRate"] == 0.5 and s["citationVerifiable"] == 3 and s["citationAccuracyStrict"] == 0.333
     assert s["citationAccuracyLenient"] == 0.667 and s["costPerQuestionUsd"] == 0.05 and s["coverage"] == 0.667, s
     assert s["depth"] == 0.5 and s["agentsPerQuestion"] == 2 and s["reflectGapsPerQuestion"] == 1, s
+    assert s["agentsWithoutSources"] == 0.5, s
     assert extract([{"kind": "REFLECT", "output": {"gaps": ["x", "y"]}}])["reflectGaps"] == 2
     assert extract([])["reflectGaps"] is None
     print("self-check OK")
@@ -447,12 +452,22 @@ def main():
                     help="评审模型的厂商参数 JSON,默认同 OPENAI_EXTRA_BODY")
     ap.add_argument("--samples", type=int, default=4, help="每篇报告抽查几句引用")
     ap.add_argument("--no-judge", action="store_true")
-    ap.add_argument("--no-reflect", action="store_true", help="payload.reflect=false:跳过反思阶段(对照组)")
+    ap.add_argument("--reflect", action="store_true", help="payload.reflect=true:打开反思阶段(服务端默认关闭)")
     ap.add_argument("--self-check", action="store_true")
+    ap.add_argument("--render", metavar="RESULT_JSON", help="只用已有结果重新生成汇总和 .md(指标代码改了之后用)")
     ap.add_argument("--env-file", default=os.path.join(HERE, "..", ".env"))
     a = ap.parse_args()
     if a.self_check:
         return self_check()
+    if a.render:
+        d = json.load(open(a.render, encoding="utf-8"))
+        d["summary"] = summarize(d["records"])
+        with open(a.render, "w", encoding="utf-8") as f:
+            json.dump(d, f, ensure_ascii=False, indent=1)
+        md = to_markdown(d["meta"]["label"], {"judge": "?", "model": "?", "date": "?", **d["meta"]}, d["summary"], d["records"])
+        with open(a.render[:-len(".json")] + ".md", "w", encoding="utf-8") as f:
+            f.write(md)
+        return print(md.split("\n\n| id")[0])
     os.environ.update(read_env_file(a.env_file))
 
     qs = json.load(open(a.questions, encoding="utf-8"))
@@ -465,7 +480,7 @@ def main():
     print("running %d questions, concurrency=%d, judge=%s" % (len(qs), a.concurrency, judge and judge.model), flush=True)
 
     def job(q):
-        r = run_one(a.base.rstrip("/"), q, a.timeout, judge, a.samples, reflect=not a.no_reflect)
+        r = run_one(a.base.rstrip("/"), q, a.timeout, judge, a.samples, reflect=a.reflect)
         print("  %-18s %-10s %6ss depth=%s gaps=%s" % (r["id"], r.get("status"), r.get("latencySec"),
                                                         r.get("coverage", {}).get("depth"), r.get("reflectGaps")), flush=True)
         return r
@@ -473,7 +488,7 @@ def main():
     with ThreadPoolExecutor(a.concurrency) as ex:
         records = list(ex.map(job, qs))
     meta = {"label": a.label, "date": time.strftime("%Y-%m-%d %H:%M"), "model": os.environ.get("LLM_MODEL", "?"),
-            "judge": judge.model if judge else "none", "concurrency": a.concurrency, "reflect": not a.no_reflect}
+            "judge": judge.model if judge else "none", "concurrency": a.concurrency, "reflect": a.reflect}
     s = summarize(records)
     out = os.path.join(HERE, "results", a.label)
     os.makedirs(os.path.dirname(out), exist_ok=True)

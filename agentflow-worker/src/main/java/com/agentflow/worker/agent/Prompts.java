@@ -26,8 +26,9 @@ public final class Prompts {
             + "wiki_search(用英文关键词搜索 Wikipedia;适合概念、背景、定义)、web_fetch(抓取某个 URL 的正文)、"
             + "kb_search(检索本地知识库)。"
             + "每次调用工具前先用一句话说明思路。信息足够后停止调用工具,只输出 JSON:"
-            + "{\"answer\":\"200 字以内的结论\",\"sources\":[{\"title\":\"...\",\"url\":\"...\"}]}。"
-            + "sources 只能使用工具结果中出现过的 URL。使用与问题相同的语言作答。";
+            + "{\"answer\":\"200 字以内的结论\",\"sources\":[{\"title\":\"...\",\"url\":\"...\",\"quote\":\"...\"}]}。"
+            + "sources 只能使用工具结果中出现过的 URL;quote 是从该来源的工具结果里逐字复制的一句原文(不超过 200 字),"
+            + "必须能直接支撑你的结论,不要改写、翻译或拼接。使用与问题相同的语言作答。";
 
     public static final String REFLECTOR = REFLECTOR_TAG + " 你是研究审稿人。阅读原问题和各子问题的结论,判断它们合起来"
             + "能否完整、可靠地回答原问题。找出最重要的缺口:原问题问到但没有覆盖的方面、结论之间的矛盾、"
@@ -39,7 +40,8 @@ public final class Prompts {
 
     public static final String SYNTHESIZER = SYNTHESIZER_TAG + " 你是研究报告撰写人。根据各子问题的结论写一篇"
             + "结构清晰的报告(400~800 字),使用与问题相同的语言。引用时在句末标注 [n],n 只能取自给定的来源列表。"
-            + "只输出报告正文。";
+            + "只有当来源的证据原文、或该结论标注的依据来源确实支持这句话时才能引用它;拿不准就不加引用,"
+            + "不要把一个来源安到它没说过的内容上。不要在文末另列来源清单(系统会自动附上)。只输出报告正文。";
 
     public static final String ENGLISH = "Respond in English.";
     public static final String CHINESE = "请用中文作答。";

@@ -112,6 +112,39 @@ class AgentLoopTest {
     }
 
     @Test
+    void quoteKeptOnlyWhenItReallyAppearsInToolOutput() {
+        // 评测里引用准确率只有 56%:写报告的模型没读过原文。让 agent 交来源时附原文摘录,
+        // 摘录必须真的出现在工具结果里(忽略大小写 / 空白差异),编的摘录去掉,来源本身仍保留
+        tool.output = "Title: Kafka\nURL: https://en.wikipedia.org/wiki/Apache_Kafka\n"
+                + "Summary: Apache   Kafka is a distributed EVENT store\u2019s log.";
+        AgentLoop loop = loop();
+        when(gateway.chat(any())).thenReturn(
+                call("c1", "{\"q\":\"kafka\"}"),
+                answer("{\"answer\":\"a\",\"sources\":["
+                        + "{\"title\":\"K\",\"url\":\"https://en.wikipedia.org/wiki/Apache_Kafka\","
+                        + "\"quote\":\"Apache Kafka is a distributed event store's log.\"},"
+                        + "{\"title\":\"K\",\"url\":\"https://en.wikipedia.org/wiki/Apache_Kafka\","
+                        + "\"quote\":\"Kafka was invented at NASA.\"}]}"));
+
+        ObjectNode out = loop.run(run);
+
+        assertEquals("Apache Kafka is a distributed event store's log.", out.at("/sources/0/quote").asText());
+        assertFalse(out.at("/sources/1").has("quote"), "工具结果里没有的摘录要去掉:" + out);
+        assertEquals("https://en.wikipedia.org/wiki/Apache_Kafka", out.at("/sources/1/url").asText());
+        assertEquals(1, out.get("unverifiedQuotes").asInt());
+    }
+
+    @Test
+    void answerBudgetLeavesRoomForSourcesWithQuotes() {
+        // 评测发现:800 token 时模型"先写一段说明再给 JSON",JSON 被截断 → 解析失败 → 来源全丢
+        // (v2 有 20/80、加摘录后 53/77 个 agent 没有来源)
+        AgentLoop loop = loop();
+        when(gateway.chat(any())).thenReturn(answer("{\"answer\":\"a\",\"sources\":[]}"));
+        loop.run(run);
+        assertTrue(requests(1).get(0).getMaxTokens() >= 1500, "agent 每步输出上限太小");
+    }
+
+    @Test
     void toolErrorIsReturnedToModelInsteadOfThrowing() {
         AgentLoop loop = loop();
         tool.fail = new IllegalStateException("boom");

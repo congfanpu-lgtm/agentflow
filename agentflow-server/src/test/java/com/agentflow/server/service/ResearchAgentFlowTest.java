@@ -37,7 +37,7 @@ class ResearchAgentFlowTest {
         t.setTaskUuid(UUID.randomUUID().toString());
         t.setType("RESEARCH_AGENT");
         t.setStatus("RUNNING");
-        t.setPayload("{\"question\":\"kafka vs rabbitmq\"}");
+        t.setPayload("{\"question\":\"kafka vs rabbitmq\",\"reflect\":true}");   // 走完整的反思路径
         t.setSubtaskTotal(1);
         t.setSubtaskDone(0);
         t.setSubtaskFailed(0);

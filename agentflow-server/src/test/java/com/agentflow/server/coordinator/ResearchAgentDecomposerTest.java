@@ -63,9 +63,10 @@ class ResearchAgentDecomposerTest {
         assertTrue(d.nextStage(task(), List.of(sub(0, "PLAN", "FAILED", "{}", null))).isEmpty());
     }
 
-    private static TaskEntity noReflect() {
+    /** 反思默认关闭(评测:深度 95%→95%,成本 +85%,延迟 ×1.9),payload.reflect=true 才开。 */
+    private static TaskEntity reflecting() {
         TaskEntity t = task();
-        t.setPayload("{\"question\":\"kafka vs rabbitmq\",\"reflect\":false}");
+        t.setPayload("{\"question\":\"kafka vs rabbitmq\",\"reflect\":true}");
         return t;
     }
 
@@ -73,7 +74,7 @@ class ResearchAgentDecomposerTest {
 
     @Test
     void settledAgentsProduceOneSynthesizeWithSuccessfulFindingsOnly() throws Exception {
-        List<SubtaskDef> next = d.nextStage(noReflect(), List.of(
+        List<SubtaskDef> next = d.nextStage(task(), List.of(
                 sub(0, "PLAN", "COMPLETED", "{}", "{\"subQuestions\":[\"a\",\"b\"]}"),
                 sub(1, "AGENT", "COMPLETED", "{\"question\":\"a\"}",
                         "{\"answer\":\"A1\",\"sources\":[{\"title\":\"K\",\"url\":\"https://k\"}]}"),
@@ -103,8 +104,8 @@ class ResearchAgentDecomposerTest {
     // ---- 反思补漏:AGENT 全部落定 → REFLECT 找缺口 → 最多 2 个追问 AGENT → SYNTHESIZE
 
     @Test
-    void settledAgentsGoToReflectByDefault() throws Exception {
-        List<SubtaskDef> next = d.nextStage(task(), List.of(
+    void settledAgentsGoToReflectWhenRequested() throws Exception {
+        List<SubtaskDef> next = d.nextStage(reflecting(), List.of(
                 sub(0, "PLAN", "COMPLETED", "{}", "{\"subQuestions\":[\"a\",\"b\"]}"),
                 sub(1, "AGENT", "COMPLETED", "{\"question\":\"a\"}", A1),
                 sub(2, "AGENT", "FAILED", "{\"question\":\"b\"}", null)));
@@ -119,7 +120,7 @@ class ResearchAgentDecomposerTest {
 
     @Test
     void reflectGapsFanOutFollowUpAgents() throws Exception {
-        List<SubtaskDef> next = d.nextStage(task(), List.of(
+        List<SubtaskDef> next = d.nextStage(reflecting(), List.of(
                 sub(0, "PLAN", "COMPLETED", "{}", "{\"subQuestions\":[\"a\"]}"),
                 sub(1, "AGENT", "COMPLETED", "{\"question\":\"a\"}", A1),
                 sub(2, "REFLECT", "COMPLETED", "{}", "{\"gaps\":[\"x\",\"y\",\"z\"]}")));
@@ -134,7 +135,7 @@ class ResearchAgentDecomposerTest {
     void reflectWithoutGapsOrFailedGoesToSynthesize() throws Exception {
         for (SubtaskEntity reflect : List.of(sub(2, "REFLECT", "COMPLETED", "{}", "{\"gaps\":[]}"),
                 sub(2, "REFLECT", "FAILED", "{}", null))) {
-            List<SubtaskDef> next = d.nextStage(task(), List.of(
+            List<SubtaskDef> next = d.nextStage(reflecting(), List.of(
                     sub(0, "PLAN", "COMPLETED", "{}", "{\"subQuestions\":[\"a\"]}"),
                     sub(1, "AGENT", "COMPLETED", "{\"question\":\"a\"}", A1), reflect));
             assertEquals(1, next.size(), "反思失败不应拖垮任务:直接合成");
@@ -146,7 +147,7 @@ class ResearchAgentDecomposerTest {
 
     @Test
     void followUpAgentsSettledGoToSynthesizeWithAllFindings() throws Exception {
-        List<SubtaskDef> next = d.nextStage(task(), List.of(
+        List<SubtaskDef> next = d.nextStage(reflecting(), List.of(
                 sub(0, "PLAN", "COMPLETED", "{}", "{\"subQuestions\":[\"a\"]}"),
                 sub(1, "AGENT", "COMPLETED", "{\"question\":\"a\"}", A1),
                 sub(2, "REFLECT", "COMPLETED", "{}", "{\"gaps\":[\"x\",\"y\"]}"),

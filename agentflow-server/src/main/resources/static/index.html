@@ -54,6 +54,8 @@
   .ask{display:flex;gap:10px;background:var(--panel);border:1px solid var(--border2);border-radius:14px;padding:6px}
   .ask input{border:0;background:transparent;font-size:15px;padding:10px 12px}
   .ask input:focus{box-shadow:none}
+  .ask .deep{flex:none;display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--muted);cursor:pointer;white-space:nowrap;padding:0 4px}
+  .ask .deep input{width:auto;padding:0;margin:0;accent-color:var(--accent)}
   .examples{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:14px 0 6px}
   .chip{background:var(--panel);border:1px solid var(--border);color:var(--fg2);padding:5px 12px;border-radius:999px;font-size:12.5px}
   .chip:hover{border-color:var(--accent);color:var(--fg)}
@@ -62,6 +64,10 @@
 
   .question{font-size:20px;font-weight:700;margin:30px 0 14px;letter-spacing:-.2px}
   /* 提问后:收起首屏介绍,只留输入框,让报告进入第一屏 */
+  .gate{width:100%;max-width:820px;margin:0 auto 16px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;background:var(--panel);
+    border:1px solid var(--warn);border-radius:12px;padding:10px 12px;font-size:13.5px}
+  .gate[hidden]{display:none}
+  .gate input{flex:1;min-width:140px} .gate small{color:var(--fail);width:100%}
   .rs{padding-bottom:110px}.rs.active{padding-top:6px}
   .rs.active .hero{max-width:none;text-align:left}
   .rs.active .hero h1,.rs.active .hero p,.rs.active .examples,.rs.active .how{display:none}
@@ -72,7 +78,8 @@
     background:linear-gradient(to top,var(--bg) 55%,transparent)}
   .rs.active .question{font-size:17px;margin:14px 0 10px}
   /* 空状态:介绍贴着底部输入框,示例问题紧挨输入框,中间不留大片空白 */
-  .rs:not(.active) .hero{min-height:calc(100vh - 65px - 28px - 110px);display:flex;flex-direction:column;justify-content:flex-end}
+  .rs:not(.active){min-height:calc(100dvh - 65px);display:flex;flex-direction:column}
+  .rs:not(.active) .hero{flex:1;display:flex;flex-direction:column;justify-content:flex-end}
   .rs:not(.active) .examples{order:3;margin-bottom:0}
   /* 有报告时输入框和内容区同宽,与左右两栏对齐,不再悬在中间压住两栏 */
   .rs.active .ask{width:min(1192px,calc(100% - 32px))}
@@ -147,6 +154,7 @@
   .sources .sn{flex:none;font-family:var(--mono);color:var(--accent);font-weight:700}
   .sources .st{min-width:0} .sources .st a,.sources .st span{display:block;color:var(--fg);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .sources .dom{color:var(--muted);font-size:11.5px}
+  .sources .qt{color:var(--fg2);font-size:11.5px;margin-top:4px;line-height:1.45;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 
   /* ---------- Ops ---------- */
   .ops{max-width:1240px;margin:0 auto;padding:24px;display:grid;grid-template-columns:1fr 1fr;gap:16px}
@@ -182,7 +190,7 @@
   @media(max-width:640px){
     header{padding:10px 16px}.health span:last-child{display:none}
     .rs{padding:20px 16px 110px}.hero h1{font-size:22px}
-    .pipe{grid-template-columns:1fr}.rs .ask{bottom:10px}.how{flex-direction:column;gap:6px}
+    .pipe{grid-template-columns:1fr}.rs .ask{bottom:10px}.ask .deep .long{display:none}.how{flex-direction:column;gap:6px}
     .report{padding:16px}.ops{padding:16px}
   }
 </style>
@@ -195,13 +203,18 @@
 </header>
 
 <section id="tab-research" class="rs">
+  <div class="gate" id="gate" hidden>
+    <span>🔒 This public demo needs an access code.</span>
+    <input id="code" type="password" autocomplete="off" placeholder="Access code"><button id="codeBtn" class="btn">Unlock</button>
+    <small id="gateMsg"></small>
+  </div>
   <div class="hero">
     <h1>Ask a research question</h1>
     <p>A planner splits it into sub-questions, parallel ReAct agents investigate each one with real tools on a Kafka
-      worker pool, a reviewer sends follow-up agents to fill gaps, and a writer turns the findings into a cited report.</p>
-    <div class="ask"><input id="q" maxlength="500" placeholder="e.g. What are the trade-offs between Kafka and RabbitMQ for agent systems?"><button id="ask" class="btn">Research</button></div>
+      worker pool, an optional reviewer sends follow-up agents to fill gaps, and a writer turns the evidence into a cited report.</p>
+    <div class="ask"><input id="q" maxlength="500" placeholder="e.g. What are the trade-offs between Kafka and RabbitMQ for agent systems?"><label class="deep" title="A reviewer checks the findings for gaps and sends up to 2 follow-up agents (≈2× time and cost)"><input type="checkbox" id="deep"><span>Deep<span class="long"> review</span></span></label><button id="ask" class="btn">Research</button></div>
     <div class="examples" id="examples"></div>
-    <div class="how"><span><b>① Plan</b> split into sub-questions</span><span><b>② Research</b> agents think → call tools → read</span><span><b>③ Review</b> find gaps → follow up</span><span><b>④ Report</b> synthesize with citations</span></div>
+    <div class="how"><span><b>① Plan</b> split the question</span><span><b>② Research</b> agents call real tools</span><span><b>③ Review</b> optional gap check</span><span><b>④ Report</b> cite the evidence</span></div>
   </div>
 
   <div id="rsBody" hidden>
@@ -284,11 +297,29 @@ const $=id=>document.getElementById(id);
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 let pollTimer=null;
 
-async function jget(u){const r=await fetch(u);if(!r.ok)throw new Error(r.status);return r.json();}
+// 公开演示模式下 /api 需要访问码:存在本浏览器里,每个请求带上;401 时显示输入框
+const CODE_KEY="agentflow.accessCode";
+function accessCode(){try{return localStorage.getItem(CODE_KEY)||"";}catch{return "";}}
+async function api(u,opts={}){
+  const r=await fetch(u,{...opts,headers:{...(opts.headers||{}),"X-Access-Code":accessCode()}});
+  if(r.status===401)$("gate").hidden=false;
+  return r;
+}
+async function jget(u){const r=await api(u);if(!r.ok)throw new Error(r.status);return r.json();}
 
 // 健康探活(借 usage 接口)
-(async()=>{try{await jget(`${API}/llm/usage`);$("dot").classList.add("up");$("health").textContent="Online";}
-  catch{$("health").textContent="Offline — start the server first";}})();
+async function health(){
+  try{await jget(`${API}/llm/usage`);$("dot").classList.add("up");$("health").textContent="Online";$("gate").hidden=true;return true;}
+  catch(e){$("health").textContent=e.message==="401"?"Locked — access code needed":"Offline — start the server first";return false;}
+}
+health();
+async function unlock(){
+  const c=$("code").value.trim();if(!c)return;
+  try{localStorage.setItem(CODE_KEY,c);}catch{}
+  if(!(await health()))$("gateMsg").textContent="That code didn't work.";
+}
+$("codeBtn").addEventListener("click",unlock);
+$("code").addEventListener("keydown",e=>{if(e.key==="Enter")unlock();});
 
 // ---------- Ops ----------
 $("type").addEventListener("change",()=>{
@@ -310,7 +341,7 @@ $("submit").addEventListener("click",async()=>{
   if(!lines.length){alert("Enter at least one line");return;}
   $("submit").disabled=true;
   try{
-    const r=await fetch(`${API}/tasks`,{method:"POST",headers:{"Content-Type":"application/json"},
+    const r=await api(`${API}/tasks`,{method:"POST",headers:{"Content-Type":"application/json"},
       body:JSON.stringify({type,payload:payloadFor(type,lines)})});
     const data=await r.json();
     if(!r.ok)throw new Error(data.error||r.status);
@@ -408,8 +439,8 @@ async function ask(){
   if(!question)return;
   $("ask").disabled=true;
   try{
-    const r=await fetch(`${API}/tasks`,{method:"POST",headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({type:"RESEARCH_AGENT",payload:{question}})});
+    const r=await api(`${API}/tasks`,{method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({type:"RESEARCH_AGENT",payload:{question,reflect:$("deep").checked}})});
     const d=await r.json();
     if(!r.ok)throw new Error(d.error||r.status);
     $("qTitle").textContent=question;
@@ -465,7 +496,7 @@ function renderResearch(t,trace){
   const reflectSub=reflectAdv&&subBySeq[reflectAdv.subtasks[0].seq];
   const reflectOut=reflectAdv&&(items.find(i=>i.kind==="REFLECT")||{}).output;
   const reviewed=reflectSub&&["COMPLETED","FAILED"].includes(reflectSub.status);
-  const reviewText=!reflectAdv?(synth?"skipped":"waiting")
+  const reviewText=!reflectAdv?(synth?"off":"waiting")
     :!reviewed?"checking for gaps…"
     :reflectSub.status==="FAILED"?"skipped (review failed)"
     :follow.length?`${follow.length} follow-up${follow.length>1?"s":""}`:(synth?"no gaps found":"…");
@@ -616,6 +647,7 @@ function renderReport(rep,items,trace){
   $("sources").replaceChildren(...srcs.map(s=>{
     const li=el("li");li.id="src-"+s.n;
     const t=el("div","st");t.append(safeLink(s.url,s.title||s.url),el("div","dom",domain(s.url)));
+    if(s.quote){const q=el("div","qt","“"+s.quote+"”");q.title=s.quote;t.append(q);}   // agent 核对过的原文摘录
     li.append(el("span","sn",`[${s.n}]`),t);
     return li;
   }));
