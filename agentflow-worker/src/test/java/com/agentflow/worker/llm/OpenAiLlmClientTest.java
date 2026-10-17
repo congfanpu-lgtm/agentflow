@@ -37,6 +37,14 @@ class OpenAiLlmClientTest {
             ex.getResponseBody().write(resp);
             ex.close();
         });
+        server.createContext("/err/chat/completions", ex -> {
+            ex.getRequestBody().readAllBytes();
+            byte[] resp = ("{\"error\":{\"message\":\"Incorrect API key provided: sk-proj-SECRET123456. "
+                    + "x".repeat(1000) + "\"}}").getBytes(StandardCharsets.UTF_8);
+            ex.sendResponseHeaders(401, resp.length);
+            ex.getResponseBody().write(resp);
+            ex.close();
+        });
         server.start();
     }
 
@@ -98,5 +106,37 @@ class OpenAiLlmClientTest {
         JsonNode sent = new ObjectMapper().readTree(sentBody.get());
         assertEquals("disabled", sent.at("/thinking/type").asText());
         assertEquals("m", sent.path("model").asText());
+    }
+
+    @Test
+    void errorKeepsStatusButNeverProviderBody() {
+        // 错误信息会进 trace / 子任务 errorMsg,控制台无鉴权可见;服务商响应体可能回显 key,一律不进异常链
+        OpenAiLlmClient c = client();
+        ReflectionTestUtils.setField(c, "baseUrl", "http://127.0.0.1:" + server.getAddress().getPort() + "/err");
+        RuntimeException e = assertThrows(RuntimeException.class,
+                () -> c.chat(new ChatRequest("m", List.of(new ChatMessage("user", "hi")), 10)));
+        assertTrue(e.getMessage().contains("HTTP 401"), e.getMessage());
+        for (Throwable t = e; t != null; t = t.getCause()) {
+            assertFalse(String.valueOf(t.getMessage()).contains("SECRET123456"), t.toString());
+        }
+    }
+
+    @Test
+    void redactMasksKeysAndTruncates() {
+        String out = OpenAiLlmClient.redact("bad key sk-proj-SECRET123456 and tvly-dev-ABCDEF99 " + "x".repeat(1000));
+        assertFalse(out.contains("SECRET123456") || out.contains("ABCDEF99"), out);
+        assertTrue(out.contains("sk-***"), out);
+        assertTrue(out.length() <= 320, "应截断:" + out.length());
+    }
+
+    @Test
+    void usesConfiguredMaxTokensParam() throws Exception {
+        // 新 OpenAI 模型拒绝 max_tokens,只认 max_completion_tokens;其他兼容服务仍用 max_tokens(默认)
+        OpenAiLlmClient c = client();
+        ReflectionTestUtils.setField(c, "maxTokensParam", "max_completion_tokens");
+        c.chat(new ChatRequest("m", List.of(new ChatMessage("user", "hi")), 10));
+        JsonNode sent = new ObjectMapper().readTree(sentBody.get());
+        assertEquals(10, sent.path("max_completion_tokens").asInt());
+        assertFalse(sent.has("max_tokens"));
     }
 }

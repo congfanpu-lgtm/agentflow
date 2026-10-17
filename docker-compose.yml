@@ -6,7 +6,7 @@ services:
       MYSQL_ROOT_PASSWORD: agentflow123
       MYSQL_DATABASE: agentflow
     ports:
-      - "3306:3306"
+      - "127.0.0.1:3306:3306"
     volumes:
       - ./docker/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
       - mysql-data:/var/lib/mysql
@@ -19,7 +19,7 @@ services:
     image: redis:7.2-alpine
     container_name: agentflow-redis
     ports:
-      - "6379:6379"
+      - "127.0.0.1:6379:6379"
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
@@ -29,7 +29,7 @@ services:
     image: mongo:7
     container_name: agentflow-mongo
     ports:
-      - "27017:27017"
+      - "127.0.0.1:27017:27017"
     healthcheck:
       test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
       interval: 5s
@@ -39,7 +39,7 @@ services:
     image: apache/kafka:4.0.0        # 官方镜像,原生 KRaft,无需 Zookeeper;arm64 支持
     container_name: agentflow-kafka
     ports:
-      - "9092:9092"
+      - "127.0.0.1:9092:9092"
     environment:
       # 单节点 KRaft:同一进程既是 broker 又是 controller
       KAFKA_NODE_ID: 1
@@ -63,7 +63,7 @@ services:
   pgvector:
     image: pgvector/pgvector:pg16
     container_name: agentflow-pgvector
-    ports: ["5433:5432"]
+    ports: ["127.0.0.1:5433:5432"]
     environment:
       POSTGRES_PASSWORD: agentflow
       POSTGRES_DB: agentflow_rag
@@ -77,7 +77,7 @@ services:
     container_name: agentflow-rag
     environment:
       RAG_DB_URL: postgresql://postgres:agentflow@pgvector:5432/agentflow_rag
-    ports: ["${RAG_PORT:-8000}:8000"]
+    ports: ["127.0.0.1:${RAG_PORT:-8000}:8000"]
     depends_on:
       pgvector: {condition: service_healthy}
     healthcheck:
@@ -88,7 +88,7 @@ services:
   server:
     build: {context: ., dockerfile: docker/java.Dockerfile, args: {MODULE: agentflow-server}}
     container_name: agentflow-server
-    ports: ["8080:8080"]
+    ports: ["${SERVER_BIND:-127.0.0.1}:8080:8080"]
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/agentflow?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:19092
@@ -116,6 +116,7 @@ services:
       OPENAI_BASE_URL: ${OPENAI_BASE_URL:-https://api.openai.com/v1}
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
       OPENAI_EXTRA_BODY: ${OPENAI_EXTRA_BODY:-}
+      OPENAI_MAX_TOKENS_PARAM: ${OPENAI_MAX_TOKENS_PARAM:-max_tokens}
       TAVILY_API_KEY: ${TAVILY_API_KEY:-}
     depends_on:
       redis: {condition: service_healthy}

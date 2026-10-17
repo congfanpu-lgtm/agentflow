@@ -35,6 +35,7 @@ import java.util.List;
 public class OpenAiLlmClient implements LlmClient {
 
     private static final ObjectMapper OM = new ObjectMapper();
+    private static final java.util.regex.Pattern KEY_LIKE = java.util.regex.Pattern.compile("\\b(sk|tvly)-[A-Za-z0-9_-]{6,}");
     private final HttpClient http = HttpClient.newBuilder()
             .version(HttpClient.Version.HTTP_1_1)
             .connectTimeout(Duration.ofSeconds(10)).build();
@@ -46,6 +47,15 @@ public class OpenAiLlmClient implements LlmClient {
     /** 合并进请求体的厂商专有参数(JSON 对象),如 Anthropic 的 {"thinking":{"type":"disabled"}}。 */
     @Value("${llm.openai.extra-body:${OPENAI_EXTRA_BODY:}}")
     private String extraBody;
+    /** 新 OpenAI 模型只认 max_completion_tokens;Anthropic / DeepSeek / Qwen 等仍用默认的 max_tokens。 */
+    @Value("${llm.openai.max-tokens-param:${OPENAI_MAX_TOKENS_PARAM:max_tokens}}")
+    private String maxTokensParam = "max_tokens";
+
+    /** 服务商响应体只进日志,且先截断、给 key 形状的串打码(401 的报错常回显半截 key)。 */
+    static String redact(String s) {
+        String t = s == null ? "" : KEY_LIKE.matcher(s).replaceAll("$1-***");
+        return t.length() > 300 ? t.substring(0, 300) + "…" : t;
+    }
 
     @Override
     public String provider() {
@@ -57,7 +67,7 @@ public class OpenAiLlmClient implements LlmClient {
         try {
             ObjectNode body = OM.createObjectNode();
             body.put("model", request.getModel());
-            body.put("max_tokens", request.getMaxTokens());
+            body.put(maxTokensParam, request.getMaxTokens());
             ArrayNode msgs = body.putArray("messages");
             for (ChatMessage m : request.getMessages()) {
                 ObjectNode o = msgs.addObject().put("role", m.getRole());
@@ -97,7 +107,9 @@ public class OpenAiLlmClient implements LlmClient {
                     .build();
             HttpResponse<String> resp = http.send(httpReq, HttpResponse.BodyHandlers.ofString());
             if (resp.statusCode() / 100 != 2) {
-                throw new IllegalStateException("LLM HTTP " + resp.statusCode() + ": " + resp.body());
+                // 错误信息会进 trace / errorMsg(控制台可见),只带状态码;响应体打码后进日志
+                log.warn("LLM HTTP {} body={}", resp.statusCode(), redact(resp.body()));
+                throw new IllegalStateException("HTTP " + resp.statusCode());
             }
             JsonNode root = OM.readTree(resp.body());
             JsonNode msg = root.path("choices").path(0).path("message");
@@ -114,7 +126,7 @@ public class OpenAiLlmClient implements LlmClient {
             out.setToolCalls(calls);
             return out;
         } catch (Exception e) {
-            throw new RuntimeException("LLM 调用失败 model=" + request.getModel(), e);
+            throw new RuntimeException("LLM 调用失败 model=" + request.getModel() + ": " + e.getMessage(), e);
         }
     }
 }
