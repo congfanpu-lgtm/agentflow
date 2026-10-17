@@ -93,6 +93,7 @@ services:
       DEMO_ACCESS_CODE: ${DEMO_ACCESS_CODE:-}
       DEMO_PER_IP_DAILY: ${DEMO_PER_IP_DAILY:-5}
       DEMO_DAILY_BUDGET_USD: ${DEMO_DAILY_BUDGET_USD:-1.0}
+      DEMO_TASK_COST_ESTIMATE_USD: ${DEMO_TASK_COST_ESTIMATE_USD:-0.05}
       DEMO_TRUST_PROXY_HEADER: ${DEMO_TRUST_PROXY_HEADER:-false}
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/agentflow?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:19092

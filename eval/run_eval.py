@@ -62,6 +62,8 @@ def read_env_file(path):
 def http_json(url, body=None, headers=None, timeout=30):
     data = None if body is None else json.dumps(body).encode()
     h = {"Content-Type": "application/json", **(headers or {})}
+    if os.environ.get("DEMO_ACCESS_CODE") and "X-Access-Code" not in h and "/api/" in url:
+        h["X-Access-Code"] = os.environ["DEMO_ACCESS_CODE"]   # 演示模式下 /api 需要访问码
     req = urllib.request.Request(url, data=data, headers=h)
     with urllib.request.urlopen(req, timeout=timeout) as r:
         return json.load(r)

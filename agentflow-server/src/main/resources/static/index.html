@@ -500,7 +500,7 @@ function renderResearch(t,trace){
     :!reviewed?"checking for gaps…"
     :reflectSub.status==="FAILED"?"skipped (review failed)"
     :follow.length?`${follow.length} follow-up${follow.length>1?"s":""}`:(synth?"no gaps found":"…");
-  setStep($("pReview"),!reflectAdv?(synth?"done":""):reviewed?"done":"run",$("reviewState"),reviewText);
+  setStep($("pReview"),!reflectAdv?"":reviewed?"done":"run",$("reviewState"),reviewText);
   // ④ Report
   const rep=items.map(i=>i.output).find(o=>o&&o.report);
   setStep($("pReport"),rep?"done":terminal?"fail":synth?"run":"",$("taskState"),

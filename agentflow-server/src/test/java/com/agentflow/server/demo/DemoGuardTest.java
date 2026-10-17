@@ -22,7 +22,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /** 公开演示保护:访问码、每 IP 每日次数、每日花费上限、只允许研究任务。 */
-@SpringBootTest(properties = {"demo.access-code=s3cret", "demo.per-ip-daily=2", "demo.daily-budget-usd=1000"})
+@SpringBootTest(properties = {"demo.access-code=s3cret", "demo.per-ip-daily=2", "demo.daily-budget-usd=1000",
+        "demo.task-cost-estimate-usd=0.05"})
 @AutoConfigureMockMvc
 @Transactional
 class DemoGuardTest {
@@ -82,6 +83,60 @@ class DemoGuardTest {
         submit("{\"type\":\"LLM_BATCH\",\"payload\":{\"items\":[\"a\"]}}", "s3cret").andExpect(status().isForbidden());
         submit("{\"type\":\"RESEARCH_AGENT\",\"payload\":{\"question\":\"q\",\"model\":\"big\"}}", "s3cret")
                 .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void encodedOrMatrixPathsCannotSkipTheCode() throws Exception {
+        // 审查发现:过滤器看原始 URI,Spring 按解码后的路径路由 → /%61pi/... 和 /api;x/... 能绕过访问码
+        mvc.perform(post("/%61pi/v1/tasks").contentType(MediaType.APPLICATION_JSON).content(RESEARCH))
+                .andExpect(status().isUnauthorized());
+        mvc.perform(post("/api;x=1/v1/tasks").contentType(MediaType.APPLICATION_JSON).content(RESEARCH))
+                .andExpect(status().isUnauthorized());
+        mvc.perform(get("/index.html")).andExpect(status().isOk());
+    }
+
+    @Test
+    void dlqReplayIsDisabledInDemoMode() throws Exception {
+        // 重放能把任意失败子任务(任意类型、原 model)再跑一遍,绕过配额和预算
+        mvc.perform(post("/api/v1/dlq/replay/1").header("X-Access-Code", "s3cret")).andExpect(status().isForbidden());
+    }
+
+    @Test
+    void burstOfSubmitsIsBoundedBeforeAnyCostIsRecorded() throws Exception {
+        // 花费在 LLM 调用返回后才记账,一波并发提交会全部通过"当天已花"检查:按每任务预估成本预占
+        var tasks = redisson.getAtomicLong("agentflow:demo:tasks:" + LocalDate.now(ZoneOffset.UTC));
+        long add = 20_000;   // 当天已提交 2 万个 × $0.05 = $1000 = 预算
+        tasks.addAndGet(add);
+        try {
+            submit(RESEARCH, "s3cret").andExpect(status().isTooManyRequests())
+                    .andExpect(jsonPath("$.error", containsString("budget")));
+        } finally {
+            tasks.addAndGet(-add);
+        }
+    }
+
+    @Test
+    void rejectedSubmissionDoesNotUseUpTheQuota() throws Exception {
+        String tooLong = "{\"type\":\"RESEARCH_AGENT\",\"payload\":{\"question\":\"" + "x".repeat(600) + "\"}}";
+        submit(tooLong, "s3cret").andExpect(status().isBadRequest());
+        submit(tooLong, "s3cret").andExpect(status().isBadRequest());
+        submit(RESEARCH, "s3cret").andExpect(status().isAccepted());
+    }
+
+    @Test
+    void repeatedWrongCodesAreThrottled() throws Exception {
+        for (int i = 0; i < DemoGuard.MAX_BAD_CODES; i++) {
+            mvc.perform(get("/api/v1/llm/usage").header("X-Access-Code", "guess" + i)
+                    .with(r -> { r.setRemoteAddr(ip); return r; })).andExpect(status().isUnauthorized());
+        }
+        mvc.perform(get("/api/v1/llm/usage").header("X-Access-Code", "s3cret")
+                .with(r -> { r.setRemoteAddr(ip); return r; })).andExpect(status().isTooManyRequests());
+    }
+
+    @Test
+    void ipv6ClientsShareOneQuotaPerSlash64() {
+        assertEquals(DemoGuard.quotaKey("2001:db8:1:2:aaaa::1"), DemoGuard.quotaKey("2001:0db8:0001:0002:ffff:1:2:3"));
+        assertEquals("203.0.113.9", DemoGuard.quotaKey("203.0.113.9"));
     }
 
     @Test

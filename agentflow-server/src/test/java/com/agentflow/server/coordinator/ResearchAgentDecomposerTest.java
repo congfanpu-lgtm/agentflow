@@ -132,6 +132,17 @@ class ResearchAgentDecomposerTest {
     }
 
     @Test
+    void followUpQuestionsAreCappedLikeUserQuestions() throws Exception {
+        String longGap = "x".repeat(2000);
+        List<SubtaskDef> next = d.nextStage(reflecting(), List.of(
+                sub(0, "PLAN", "COMPLETED", "{}", "{\"subQuestions\":[\"a\"]}"),
+                sub(1, "AGENT", "COMPLETED", "{\"question\":\"a\"}", A1),
+                sub(2, "REFLECT", "COMPLETED", "{}", "{\"gaps\":[\"" + longGap + "\"]}")));
+        assertEquals(ResearchAgentDecomposer.MAX_QUESTION_CHARS,
+                om.readTree(next.get(0).inputJson()).get("question").asText().length());
+    }
+
+    @Test
     void reflectWithoutGapsOrFailedGoesToSynthesize() throws Exception {
         for (SubtaskEntity reflect : List.of(sub(2, "REFLECT", "COMPLETED", "{}", "{\"gaps\":[]}"),
                 sub(2, "REFLECT", "FAILED", "{}", null))) {

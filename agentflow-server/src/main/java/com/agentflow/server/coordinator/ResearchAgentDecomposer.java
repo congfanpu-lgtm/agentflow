@@ -94,8 +94,10 @@ public class ResearchAgentDecomposer implements TaskDecomposer {
                 if (defs.size() == MAX_FOLLOW_UPS) {
                     break;
                 }
+                String q = gap.asText().strip();   // 模型写的追问和用户问题一样封顶
+                q = q.length() > MAX_QUESTION_CHARS ? q.substring(0, MAX_QUESTION_CHARS) : q;
                 defs.add(new SubtaskDef(maxSeq + 1 + defs.size(),
-                        input(gap.asText(), model).put("followUp", true).toString(), AGENT));
+                        input(q, model).put("followUp", true).toString(), AGENT));
             }
             if (!defs.isEmpty()) {
                 return defs;

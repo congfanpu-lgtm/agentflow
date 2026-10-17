@@ -135,6 +135,27 @@ class AgentLoopTest {
     }
 
     @Test
+    void quoteMustComeFromTheCitedSourceAndBeSubstantial() {
+        // 审查发现:只核对"出现在某个工具结果里",把 A 的原话挂到 B 的 URL 上也能通过;"the" 这种摘录也能通过
+        tool.output = "Title: Kafka\nURL: https://a.example/kafka\nSnippet: Kafka stores records in an append-only log.\n\n"
+                + "Title: Rabbit\nURL: https://b.example/rabbit\nSnippet: RabbitMQ routes messages through exchanges.";
+        AgentLoop loop = loop();
+        when(gateway.chat(any())).thenReturn(
+                call("c1", "{\"q\":\"mq\"}"),
+                answer("{\"answer\":\"a\",\"sources\":["
+                        + "{\"title\":\"R\",\"url\":\"https://b.example/rabbit\",\"quote\":\"Kafka stores records in an append-only log.\"},"
+                        + "{\"title\":\"K\",\"url\":\"https://a.example/kafka\",\"quote\":\"Kafka\"},"
+                        + "{\"title\":\"K\",\"url\":\"https://a.example/kafka\",\"quote\":\"Kafka stores records in an append-only log.\"}]}"));
+
+        ObjectNode out = loop.run(run);
+
+        assertFalse(out.at("/sources/0").has("quote"), "别的来源的原话不能算作这个来源的证据");
+        assertFalse(out.at("/sources/1").has("quote"), "太短的摘录不算证据");
+        assertEquals("Kafka stores records in an append-only log.", out.at("/sources/2/quote").asText());
+        assertEquals(2, out.get("unverifiedQuotes").asInt());
+    }
+
+    @Test
     void answerBudgetLeavesRoomForSourcesWithQuotes() {
         // 评测发现:800 token 时模型"先写一段说明再给 JSON",JSON 被截断 → 解析失败 → 来源全丢
         // (v2 有 20/80、加摘录后 53/77 个 agent 没有来源)

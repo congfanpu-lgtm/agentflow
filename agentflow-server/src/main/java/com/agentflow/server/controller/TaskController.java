@@ -26,7 +26,13 @@ public class TaskController {
     @PostMapping
     public ResponseEntity<Map<String, String>> submit(@RequestBody SubmitTaskRequest req, HttpServletRequest http) {
         demoGuard.checkSubmit(http, req.getType(), req.getPayload());
-        TaskEntity task = submitService.submit(req.getType(), req.getPayload());
+        TaskEntity task;
+        try {
+            task = submitService.submit(req.getType(), req.getPayload());
+        } catch (IllegalArgumentException e) {
+            demoGuard.refund(http);   // 不合法的提交不占演示额度
+            throw e;
+        }
         return ResponseEntity.status(HttpStatus.ACCEPTED)
                 .body(Map.of("taskUuid", task.getTaskUuid()));
     }
