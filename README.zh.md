@@ -8,8 +8,10 @@
 ## 研究 Agent(RESEARCH_AGENT)
 
 输入一个问题 → 规划 LLM 拆成子问题 → 每个子问题由一个 ReAct agent 在 Kafka worker 池上并行调研
-(原生 tool calling:Wikipedia、网页抓取、本地知识库)→ 合成 LLM 写出带引用的报告。
+(原生 tool calling:网页搜索、Wikipedia、网页抓取、本地知识库)→ 合成 LLM 写出带引用的报告。
 中途杀掉一个 worker,agent 会被另一个 worker 接手,**从最后存档的那一步继续,已调用过的工具不重跑**。
+
+![AgentFlow 演示:运行中途杀掉 worker,agent 在另一个 worker 上续跑](docs/img/demo.gif)
 
     cp .env.example .env                 # 默认 mock(不需要 key、不花钱);填 LLM_PROVIDER=openai + key 即真实模型
     docker compose up -d --build --wait  # 9 个服务一条命令起齐
@@ -211,5 +213,4 @@ router(意图判断是否需要检索)→ retriever(**命中才检索**,不是�
 1. `docker compose up -d --build --wait`,浏览器打开 http://localhost:8080 并缩放到 1280×800;
 2. 用 Kap / LICEcap 开始录屏,点第一个示例问题;
 3. 等第一个 agent 出现 🔧 后,在终端执行 `scripts/chaos-agent.sh`(或 `docker kill agentflow-worker-1`);
-4. 录到页面出现「⚡ … resumed from step N」与最终报告,保存为 `docs/img/demo.gif`(< 8MB),
-   然后取消 README.md 顶部 `<!-- ![demo](docs/img/demo.gif) -->` 的注释。
+4. 录到页面出现「⚡ … resumed from step N」与最终报告,保存为 `docs/img/demo.gif`(< 8MB)。

@@ -5,11 +5,11 @@
 
 **A crash-tolerant multi-agent research system on a Kafka worker pool.** Ask a question → a planner LLM splits it
 into sub-questions → each sub-question is researched in parallel by a ReAct agent (native tool calling:
-Wikipedia, web fetch, local RAG) → a final LLM writes a report with verified citations.
+web search, Wikipedia, web fetch, local RAG) → a final LLM writes a report with verified citations.
 Kill a worker mid-run and the agent resumes on another worker **from its last checkpointed step, without
 re-running tools**.
 
-<!-- ![demo](docs/img/demo.gif) -->
+![AgentFlow demo: a worker is killed mid-run and its agents resume on another worker](docs/img/demo.gif)
 
 ```bash
 cp .env.example .env          # default: mock LLM (no key, no cost). Set LLM_PROVIDER=openai + key for a real model
@@ -242,8 +242,7 @@ tasks are refused once today's estimated LLM spend reaches the budget. The tunne
 machine, so no port is opened; the script refuses to start without an access code or with port 8080
 bound beyond localhost (the per-IP limit trusts `CF-Connecting-IP`, which is only safe behind the tunnel).
 
-> Demo GIF: recording steps are in [`README.zh.md`](README.zh.md#录制-demo-gif); save it as `docs/img/demo.gif`
-> and uncomment the image line at the top of this README.
+> To re-record the demo GIF (`docs/img/demo.gif`), follow [`README.zh.md`](README.zh.md#录制-demo-gif).
 
 ---
 
