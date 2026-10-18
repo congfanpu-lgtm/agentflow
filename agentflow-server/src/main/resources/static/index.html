@@ -94,7 +94,7 @@
   .pipe li.run:after{content:"";position:absolute;left:0;bottom:0;height:2px;width:40%;background:var(--run);animation:slide 1.4s ease-in-out infinite}
   .pipe li.done .n{background:var(--ok);border-color:var(--ok);color:#06210d}
   .pipe li.fail .n{background:var(--fail);border-color:var(--fail);color:#2a0705}
-  .pipe .flag{margin-left:auto;color:var(--warn);font-size:12px;font-weight:600;text-align:right}
+  .pipe .flag{margin-left:auto;flex:none;white-space:nowrap;color:var(--warn);font-size:12px;font-weight:600}
   @keyframes slide{0%{transform:translateX(-100%)}100%{transform:translateX(260%)}}
 
   .grid{display:grid;grid-template-columns:minmax(0,4fr) minmax(0,8fr);gap:18px;align-items:start}
@@ -490,7 +490,8 @@ function renderResearch(t,trace){
   setStep($("pAgents"),!adv?"":agentsOver?(done?"done":"fail"):"run",$("agentsState"),
     !adv?"waiting":`${done}/${agents.length} agents done${failed?` · ${failed} failed`:""}`);
   const resumes=trace.filter(e=>e.stage==="RESUMED").length;
-  $("resumeFlag").textContent=resumes?`⚡ ${resumes} resumed after a worker crash`:"";
+  $("resumeFlag").textContent=resumes?`⚡ ${resumes} resumed`:"";
+  $("resumeFlag").title=resumes?"resumed from a checkpoint after a worker crash":"";
   // ③ Review:反思是否发现缺口(追问 agent 来自第二次 AGENT 扇出)
   const items=t.result||[];
   const reflectSub=reflectAdv&&subBySeq[reflectAdv.subtasks[0].seq];
