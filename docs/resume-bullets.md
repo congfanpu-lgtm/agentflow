@@ -23,7 +23,7 @@
   85 notifications, 0 duplicates**.
 - Added an **intent-driven RAG tool** (Python/FastAPI + pgvector, retrieve only when intent warrants),
   a token-budget **context-trimming** layer, and a **schema-constrained dynamic skill registry** so model
-  output is validated in code rather than trusted; **Recall@3 = 1.0** on a labeled set.
+  output is validated in code rather than trusted (retrieval quality: see the 2026-10 section below).
 
 ## 🇨🇳 中文(国内市场 — 高并发 / 后端 / Agent 工程)
 
@@ -38,7 +38,7 @@
 - 实现 **Run Trace 执行轨迹**(事件溯源 Kafka→MongoDB,**完整率 100%**,可回放审计闭环)与**统一副作用
   Policy**(业务幂等 + afterCommit),实测 **85 任务 → 85 通知、0 重复**。
 - 增加**意图驱动 RAG 工具**(Python/FastAPI + pgvector,命中意图才检索)、**上下文裁剪**(按 token 预算防膨胀)、
-  **schema 约束的动态 Skill 注册**(输出代码层校验而非信任模型);标注集 **Recall@3 = 1.0**。
+  **schema 约束的动态 Skill 注册**(输出代码层校验而非信任模型);检索效果见下方 2026-10 一节。
 
 ---
 
@@ -55,18 +55,23 @@
 | 上下文防膨胀 | 按 token 预算裁剪:优先丢最老历史,历史丢光再截断超长输入(留头尾),裁剪量可观测 |
 | Skill 输出稳定 | 声明 outputSchema,产出过代码层 SchemaValidator,不合规=失败交重试;不是"求"模型听话 |
 | 意图驱动检索 | 检索是有成本的旁路工具,由意图门控,命中才查;不是每步都查 |
+| 为什么混合检索 | BM25 擅长精确词(报错码、专有名词),向量擅长同义改写;RRF 只按名次融合,不需要校准两边分数 |
+| 检索效果怎么证明 | BEIR 公开数据集算 nDCG@10;先复现论文 / 模型卡的基线(差距 <0.02)证明评测本身没写错,再给配对 bootstrap 置信区间 |
+| 评测结果可信吗 | 裁判回到原网页核对引用;每轮约 70 条引用,严格准确率有 ±11 个点的误差,所以只把结构性变化(无来源 25%→12%)当结论 |
 
 ## 诚实边界(面试主动说,加分)
 - 压测用 mock LLM——测的是调度/并发/容错,不是模型;扩展比 2.77×(非满 3×)是单机资源瓶颈非架构瓶颈。
-- 确定性 embedding 只有词面相似,Recall 数字不代表真实语义检索;真实 embedding 是配置开关(留 backlog)。
+- 检索模型 bge-small 只支持英文,纯中文查询效果差;SciFact 上混合检索比纯向量的提升不显著(置信区间跨 0);演示环境的知识库默认是空的。
+- 研究 agent 的引用严格准确率只有 60%(宽松 87%),还有 12% 的 agent 没拿到来源,是已知的主要短板。
 - 多角色是"子任务内角色流水",跨 Agent DAG 依赖边调度尚未做(backlog)。
 
 ---
 
 ## RESEARCH_AGENT(2026-10)
 
-> 只写代码里真实存在、并且实测过的内容。数字来源:`scripts/chaos-agent.sh` / `scripts/e2e-agent.sh` 输出,
-> `mvn -B test`(129 个 Java 测试)。真实模型的效果(报告质量、成本)还没有测,接入 key 实测后再补。
+> 只写代码里真实存在、并且实测过的内容。数字来源:`scripts/chaos-agent.sh` / `scripts/e2e-agent.sh` 输出、
+> `mvn -B test`、`eval/run_eval.py`(真实模型,README「Research-agent evaluation」v4)、
+> `agentflow-rag/retrieval_eval.py`(BEIR,README「Retrieval evaluation」)。
 
 **English**
 - Built a **resumable multi-agent research pipeline** (plan → parallel ReAct agents → cited report) on the Kafka
@@ -78,6 +83,13 @@
   failures still yield a report (`PARTIAL_FAILED`).
 - Hardened the agent against untrusted model/web output: **SSRF guard** re-checked on every redirect, tool errors fed back
   to the model, duplicate-call cache, and **citation verification** that drops URLs no tool actually returned.
+- Built an **LLM-as-judge eval** (20 EN/ZH questions; the judge fetches each sampled cited page to check support) and
+  let it drive design: a reflection stage cost **+85%** for no depth gain, so it ships off; truncated answers were silently
+  dropping sources, and fixing that cut agents with no sources from **25% to 12%**. Final config: citation accuracy
+  60% strict / 87% lenient (±11 pt), **$0.049** and 24 s p50 per question.
+- Replaced hashed embeddings with **hybrid retrieval** (in-memory BM25 + local bge-small ONNX embeddings, fused by RRF):
+  BEIR nDCG@10 **0.21 → 0.73** on SciFact and **0.07 → 0.37** on NFCorpus; BM25 and dense each reproduce published
+  baselines within 0.02, and every gain carries a paired-bootstrap 95% CI.
 
 **中文**
 - 在 Kafka 编排层上实现**可续跑的多 agent 研究流水线**(拆题 → 并行 ReAct agent → 带引用报告),
@@ -87,4 +99,10 @@
   部分 agent 失败仍产出报告(`PARTIAL_FAILED`)。
 - 对模型/网页输出做防护:**SSRF 防护**(每次重定向重新校验)、工具错误回传模型、重复调用缓存、
   **引用校验**(删除工具从未返回过的 URL)。
+- 搭建 **LLM-as-judge 测评**(20 道中英文题,裁判抽查引用并回到原网页核对)并据此取舍:反思阶段成本 **+85%** 而深度
+  无提升,默认关闭;回答被截断导致来源悄悄丢失,修复后无来源 agent 由 **25% 降至 12%**。最终配置:引用准确率
+  严格 60% / 宽松 87%(±11 个点),每题 **$0.049**、p50 24 秒。
+- 检索由哈希向量改为**混合检索**(内存 BM25 + 本地 bge-small ONNX 向量,RRF 融合):BEIR nDCG@10 SciFact
+  **0.21 → 0.73**、NFCorpus **0.07 → 0.37**;BM25 与纯向量两路分别复现公开基线(差距 0.02 以内),每项提升都给出
+  配对 bootstrap 95% 置信区间。
 
