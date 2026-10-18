@@ -1,6 +1,7 @@
-"""Recall@K 检索质量指标(master 指标5)。确定性 embedding 下可复现。
+"""Recall@K 检索质量指标(master 指标5),项目自己的小标注集:前 6 条和文档共享关键词,后 8 条是改写过的问法。
 
 灌入标注集 → 每 query 取 topK → Recall@K = 命中期望 doc / 期望总数,对所有 query 取平均。
+这是回归检查;方法之间的正式对比看 retrieval_eval.py(BEIR 公开数据集)。
 """
 import json
 import os
@@ -15,7 +16,7 @@ DATA = os.path.join(os.path.dirname(__file__), "data", "labeled.json")
 
 
 @pytest.fixture(scope="module")
-def loaded():
+def loaded(db):
     with open(DATA, encoding="utf-8") as f:
         data = json.load(f)
     store.init()
@@ -24,21 +25,21 @@ def loaded():
     store.upsert(docs)
     yield data
     with psycopg.connect(store.DB_URL) as conn, conn.cursor() as cur:
-        cur.execute("DELETE FROM documents WHERE id LIKE 'lbl-%'")
+        cur.execute(f"DELETE FROM {store.TABLE} WHERE id LIKE 'lbl-%'")
         conn.commit()
+    store.init()
+
+
+def _mean_recall(data, mode):
+    total = 0.0
+    for q in data["queries"]:
+        got = {h["id"].removeprefix("lbl-") for h in store.search(q["query"], K, mode)}
+        total += len(got & set(q["expected"])) / len(q["expected"])
+    return total / len(data["queries"])
 
 
 def test_recall_at_k(loaded):
-    data = loaded
-    total_recall = 0.0
-    for q in data["queries"]:
-        hits = store.search(q["query"], K)
-        got = {h["id"].removeprefix("lbl-") for h in hits}
-        expected = set(q["expected"])
-        recall = len(got & expected) / len(expected)
-        total_recall += recall
-        print(f"Recall@{K} q='{q['query'][:40]}...' = {recall:.2f} (hits={sorted(got)})")
-    mean_recall = total_recall / len(data["queries"])
-    print(f"\n==> mean Recall@{K} = {mean_recall:.3f} over {len(data['queries'])} queries")
-    # 确定性 embedding(词面相似)下的实测下限;真实 embedding 可更高(backlog)
-    assert mean_recall >= 0.6
+    recall = {m: _mean_recall(loaded, m) for m in ("bm25", "dense", "hybrid")}
+    print(f"\n==> mean Recall@{K} over {len(loaded['queries'])} queries: "
+          + ", ".join(f"{m}={r:.3f}" for m, r in recall.items()))
+    assert recall["hybrid"] >= 0.9

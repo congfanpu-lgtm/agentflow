@@ -2,5 +2,8 @@ fastapi
 uvicorn[standard]
 psycopg[binary]
 numpy
+# 固定版本:模型文件和词干规则变了,评测数字就不可比
+fastembed==0.9.0
+py-rust-stemmers==0.1.8
 pytest
 httpx

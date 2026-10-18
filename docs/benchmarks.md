@@ -43,3 +43,21 @@ Most of the wall time is the same ~45 s session timeout as above.
 ## 4. Research quality
 
 See the evaluation table in the README and `eval/results/`.
+
+## 5. Retrieval quality (BEIR)
+
+`agentflow-rag/retrieval_eval.py`, test splits, the service's own BM25 / embedding / RRF code; dense search is
+exact cosine (what pgvector `<=>` does without an ANN index). Raw output: `eval/results/retrieval-v1.{md,json}`.
+
+| Method | SciFact nDCG@10 | SciFact Recall@3 | NFCorpus nDCG@10 | NFCorpus Recall@10 |
+|---|---|---|---|---|
+| Hash embedding (before) | 0.211 | 0.204 | 0.074 | 0.037 |
+| BM25 (k1 0.9, b 0.4) | 0.681 | 0.696 | 0.322 | 0.153 |
+| Dense `BAAI/bge-small-en-v1.5` | 0.720 | 0.710 | 0.338 | 0.158 |
+| **Hybrid, RRF k=60 over top 100 each** | **0.733** | **0.720** | **0.365** | **0.174** |
+| *Published: BM25 (BEIR paper, Anserini)* | *0.665* | | *0.325* | |
+| *Published: bge-small model card (MTEB)* | *0.713* | | *0.343* | |
+
+Paired bootstrap 95% CI of the nDCG@10 gain: hybrid − BM25 = [+0.028, +0.076] (SciFact), [+0.030, +0.057]
+(NFCorpus); hybrid − dense = [−0.012, +0.036] (SciFact, not significant), [+0.014, +0.041] (NFCorpus).
+Encoding time on the M5 CPU: 539 s (SciFact), 360 s (NFCorpus).

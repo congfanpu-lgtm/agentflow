@@ -126,10 +126,32 @@ Echo/LLM 并存)。副作用一律回 Harness 经 Policy——处理器不产生
 ## RAG 检索与多角色 Agent(W7)
 
 **独立 Python/FastAPI RAG 微服务(`agentflow-rag/`)**:跨语言架构——Java 主链路 + Python
-embedding 生态。`/rag/ingest` 灌库、`/rag/search` 近邻检索、`/health` 探活;向量存 **pgvector**
-(`documents(id,content,embedding vector(256))`,余弦 `<=>` ANN)。embedding 默认**确定性词哈希投影**
-(离线、可复现、无需 API key,延续 mock-first 哲学),真实 embedding 是 backlog 配置开关。
-自建小标注集测 **Recall@K**(`tests/test_recall.py`,确定性 embedding 下 mean Recall@3=1.0)。
+embedding 生态。`/rag/ingest` 灌库、`/rag/search` 检索、`/health` 探活;向量存 **pgvector**
+(`documents(id,content,embedding vector(384))`,余弦 `<=>` 精确检索)。
+- **语义向量**:本地 ONNX 模型 `BAAI/bge-small-en-v1.5`(fastembed,CPU 即可,无需 API key;构建镜像时下载进去,
+  运行时不联网)。`RAG_EMBED_MODEL=hash` 可切回旧的词哈希向量(离线兜底、评测对照组)。
+- **混合检索(默认)**:BM25 关键词(内存倒排,英文词干 + 中文二元组)和语义向量各取前 100,
+  用 **RRF** 按名次融合;`mode` 参数可单独用 `dense` / `bm25`。
+- **换模型不丢数据**:模型名记在向量列的注释里,模型变了(维度相同也算)启动时在同一事务里按新模型重新编码全部文档。
+- **评测**:`retrieval_eval.py` 用服务自己的排序代码,在两个 BEIR 公开数据集上对比(测试集,nDCG@10):
+
+  | 方法 | SciFact(5.2k 文档 / 300 查询) | NFCorpus(3.6k 文档 / 323 查询) |
+  |---|---|---|
+  | 词哈希向量(改造前) | 0.211 | 0.074 |
+  | BM25 | 0.681 | 0.322 |
+  | 语义向量(bge-small) | 0.720 | 0.338 |
+  | **混合检索(默认)** | **0.733** | **0.365** |
+
+  - 和公开数字核对:BM25 论文值 0.665 / 0.325(BEIR 论文,Anserini),bge-small 官方值 0.713 / 0.343,都在 0.02 以内。
+  - 混合比单路好多少(按查询配对 bootstrap,nDCG@10 提升的 95% 置信区间):比 BM25 +0.028~+0.076(SciFact)、
+    +0.030~+0.057(NFCorpus);比语义向量在 NFCorpus 上 +0.014~+0.041,在 SciFact 上 −0.012~+0.036,不显著。
+  - agent 实际拿到前 3 条:SciFact 的 Recall@3 从 0.20 到 0.72。
+  - 跑评测时发现:fastembed 默认一批 256 篇长文档要 ~9GB 内存而换页,改成 32 篇约 1GB。
+  - 局限:模型只懂英文,纯中文查询对英文文档只能靠 BM25 里的共同词;精确检索无 ANN 索引;BM25 索引在进程内存里
+    (启动时从库重建),适合单副本、小语料。
+  - 复跑:`cd agentflow-rag && .venv/bin/python retrieval_eval.py --out ../eval/results/retrieval-v1`(M5 CPU 约 15 分钟)。
+  - `tests/test_recall.py` 是项目自己的 14 条小标注集(含 8 条改写过的问法),回归检查用:Recall@3 BM25 0.75、
+    语义 0.89、混合 0.96。
 
 **意图驱动检索 + 多角色**:worker 经 `RagClient`(唯一检索入口,与 LLM 经网关同构)调 RAG 服务。
 新任务类型 `RESEARCH_BATCH` 由 `ResearchProcessor` 处理,是一条子任务内的角色流水:
@@ -141,7 +163,7 @@ router(意图判断是否需要检索)→ retriever(**命中才检索**,不是�
 
     docker compose up -d pgvector rag              # RAG 服务(:8000,可用 .env 的 RAG_PORT 改宿主机端口)
 
-提交研究任务(mock LLM + 确定性 embedding,离线可跑):
+提交研究任务(mock LLM + 本地 embedding 模型,离线可跑):
 
     curl -X POST localhost:8080/api/v1/tasks -H 'Content-Type: application/json' \
       -d '{"type":"RESEARCH_BATCH","payload":{"questions":["kafka 如何重分配分区?","hello there"],"model":"mock-small"}}'
@@ -161,7 +183,7 @@ router(意图判断是否需要检索)→ retriever(**命中才检索**,不是�
 | 水平扩展 1→3 worker | 子任务吞吐 3.1→8.6/秒 = **2.77×**(单机资源瓶颈,非架构瓶颈) |
 | 成本控制(幂等拦截) | 崩溃场景 45/165 = **27.3%** 重复投递被幂等拦住,省冗余处理(≈LLM 调用) |
 | 容错(零丢失) | kill -9 一个 worker 于压测中途 → **24/24 任务仍 COMPLETED** |
-| 检索质量 | mean **Recall@3 = 1.0**(W7,确定性 embedding) |
+| 检索质量(BEIR,nDCG@10) | SciFact **0.21 → 0.73**、NFCorpus **0.07 → 0.37**(词哈希 → 混合检索,见上方 RAG 一节) |
 | 副作用幂等 | 85 任务落定 → **85 通知,0 重复** |
 | 可观测 | trace 完整率 **100%**(每任务 SUBMITTED→…→TASK_FINALIZED) |
 
@@ -182,6 +204,7 @@ router(意图判断是否需要检索)→ retriever(**命中才检索**,不是�
 - [x] W3–4 可观测:Run Trace(事件溯源→Mongo 回放)+ 统一副作用 Policy 层
 - [x] W5–6 LLM 网关(Redis+Lua 令牌桶/多模型路由/token 记账)+ 真 Agent(经网关,mock 默认)+ AgentContext + Skill 注册/schema 约束
 - [x] W7 RAG 检索服务(Python/FastAPI + pgvector,确定性 embedding + Recall@K)+ 意图驱动检索 + 多角色处理器
+- [x] 真实检索:BM25 + 本地 embedding 模型混合检索(RRF),在 BEIR 上评测并与公开基线核对
 - [x] W8 压测与容错演练:7 项指标实测(见"压测与指标",水平扩展 2.77×、零丢失、trace 100%)
 
 ## 录制 demo GIF

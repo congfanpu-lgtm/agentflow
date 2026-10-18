@@ -23,6 +23,14 @@
     {"query": "idempotency key ttl to avoid duplicate processing", "expected": ["redis-2"]},
     {"query": "compare and swap status transition in mysql", "expected": ["mysql-1"]},
     {"query": "nearest neighbor cosine search over embeddings", "expected": ["pgvector-1", "pgvector-2"]},
-    {"query": "trace events stored per document indexed by traceId", "expected": ["mongo-1", "mongo-2"]}
+    {"query": "trace events stored per document indexed by traceId", "expected": ["mongo-1", "mongo-2"]},
+    {"query": "what happens to work assignment when a node in the pool crashes", "expected": ["kafka-2"]},
+    {"query": "postpone retrying a failed message when the broker cannot schedule it", "expected": ["kafka-3"]},
+    {"query": "make sure the same job is never handled twice", "expected": ["redis-2"]},
+    {"query": "throttle callers that send too many requests", "expected": ["redis-1"]},
+    {"query": "optimistic concurrency for state machine updates", "expected": ["mysql-1"]},
+    {"query": "cheap way to show how far along a batch job is", "expected": ["mysql-2"]},
+    {"query": "keep the prompt from growing past the model's context window", "expected": ["llm-2"]},
+    {"query": "audit log of everything a run did", "expected": ["mongo-1", "mongo-2"]}
   ]
 }

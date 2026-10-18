@@ -107,7 +107,8 @@ MongoDB (nested-JSON execution traces) · pgvector (ANN vector search).
 
 Plus **AgentContext** (token-budget context trimming to prevent context bloat), **dynamic Skill
 registry** (Spring-collected, schema-constrained output so the model can't free-wheel, multi-hit
-priority ordering), and an **intent-driven RAG tool** (retrieve only when intent warrants it).
+priority ordering), and an **intent-driven RAG tool** (retrieve only when intent warrants it; hybrid
+BM25 + a local embedding model, fused with reciprocal rank fusion — see *Retrieval evaluation*).
 
 ---
 
@@ -124,7 +125,7 @@ the scheduler, not the model — free & deterministic). Reproduce: `scripts/load
 | Cost control (idempotency) | crash scenario: **27.3%** of redeliveries intercepted (no duplicate LLM calls) |
 | Fault tolerance | `docker kill` a worker 3s into a 60-task load → **60/60 COMPLETED**, 300/300 subtasks processed once; P99 47s = Kafka session timeout before the partitions move (`scripts/chaos-load.sh`) |
 | Agent crash recovery (real Claude) | kill the worker mid-agent, 3 runs → **3/3 COMPLETED**, all 6 in-flight agents resumed from step 2 on the other worker, finished steps not re-run (`scripts/chaos-agent.sh`) |
-| Retrieval quality | mean **Recall@3 = 1.0** (deterministic embedding) |
+| Retrieval quality (BEIR, nDCG@10) | SciFact **0.21 → 0.73**, NFCorpus **0.07 → 0.37** (hash embedding → hybrid BM25 + bge-small; see *Retrieval evaluation*) |
 | Side-effect idempotency | 85 finalized tasks → **85 notifications, 0 duplicates** |
 | Observability | Run Trace completeness **100%** |
 
@@ -157,6 +158,40 @@ What the numbers changed:
 - **Truncated answers lost their sources.** An 800-token answer budget truncated the JSON, so sources were silently lost; raising it to 1600 fixed this. The *agents with no sources* metric was added because of this bug.
 
 Re-run: `python3 eval/run_eval.py --label my-run` (judge reads `.env`; `--self-check` runs in CI).
+
+## Retrieval evaluation
+
+The RAG tool first used a bag-of-words hash "embedding" (no model, no key): enough to wire the service
+up, but it has no notion of meaning. It now runs **hybrid retrieval**: BM25 (in-memory inverted index,
+Snowball stemming, CJK bigrams) and a local embedding model (`BAAI/bge-small-en-v1.5`, 33M parameters,
+quantized ONNX on CPU, baked into the image) each return their top 100, fused with **reciprocal rank
+fusion** (k = 60).
+
+`agentflow-rag/retrieval_eval.py` runs the service's own ranking code on two public
+[BEIR](https://github.com/beir-cellar/beir) datasets (test split, nDCG@10):
+
+| Method | SciFact (5.2k docs, 300 queries) | NFCorpus (3.6k docs, 323 queries) |
+|---|---|---|
+| Hash embedding (before) | 0.211 | 0.074 |
+| BM25 | 0.681 | 0.322 |
+| Dense (bge-small) | 0.720 | 0.338 |
+| **Hybrid (default)** | **0.733** | **0.365** |
+
+- **Checked against published numbers.** BM25 scores 0.681 / 0.322 here vs. 0.665 / 0.325 in the BEIR
+  paper (Anserini); bge-small scores 0.720 / 0.338 vs. 0.713 / 0.343 on its model card. Both within 0.02.
+- **Is hybrid really better?** Paired bootstrap, 95% CI of the nDCG@10 gain: over BM25, +0.028…+0.076
+  (SciFact) and +0.030…+0.057 (NFCorpus); over dense, +0.014…+0.041 on NFCorpus but −0.012…+0.036 on
+  SciFact, i.e. not significant there.
+- **What the agent sees.** `kb_search` returns the top 3; Recall@3 on SciFact went 0.20 → 0.72.
+  NFCorpus averages 38 relevant documents per query, so its recall@k is low by construction.
+- **Found while running it:** fastembed's default batch of 256 long documents used ~9 GB and swapped;
+  batches of 32 use ~1 GB.
+- **Limits:** the model is English-only, so a pure-Chinese query against English documents only matches
+  through shared tokens in BM25. Search is exact (no ANN index), and the BM25 index lives in process
+  memory (rebuilt from Postgres on start), which fits one replica and a small corpus.
+
+Re-run: `cd agentflow-rag && .venv/bin/python retrieval_eval.py --out ../eval/results/retrieval-v1`
+(about 15 min on an M5 CPU). Results: [`eval/results/retrieval-v1.md`](eval/results/retrieval-v1.md).
 
 ## Quick start
 
@@ -232,6 +267,7 @@ is the moat.
 - [ ] W9 (optional add-ons): cloud deploy (GCP/AWS free tier), Prometheus metrics, Zookeeper
   leader-election/registration
 - [x] Research agent: real tool-calling ReAct loop, per-step checkpoint & resume, one-command compose, CI
+- [x] Real retrieval: hybrid BM25 + local embedding model (RRF), evaluated on BEIR against published baselines
 - [ ] Future work: durable execution with one Kafka message per agent step (Temporal-style) — today a long loop
   occupies one worker; SSE instead of 1s polling; general web search tool; auth
 - [ ] W10: résumé bullets finalized (see [`docs/resume-bullets.md`](docs/resume-bullets.md))

@@ -214,6 +214,7 @@
 **W7 实盘/评审发现(记录供后续)**:
 - **JDK HttpClient h2c 陷阱**:默认 HTTP/2 对明文 uvicorn 做 h2c 升级会丢 POST body(FastAPI 报 422 body missing)。已在 `RagClient` 固定 `HTTP_1_1`。`OpenAiLlmClient` 走 HTTPS(ALPN 协商 h2)不受影响,但若指向明文自建服务同样要注意。
 - **确定性 embedding 只有词面相似**(bag-of-words 哈希),无深层语义;真实 embedding(sentence-transformers / OpenAI 兼容)列 backlog 配置开关。Recall@3=1.0 是本标注集 + 词面相似下的结果,不代表真实语义检索质量。
+  - **已解决(2026-10-17)**:换成本地模型 bge-small-en-v1.5 + BM25 混合检索(RRF)。BEIR SciFact nDCG@10 0.21 → 0.73,NFCorpus 0.07 → 0.37,详见 README「Retrieval evaluation」。
 - **意图判断为启发式**(问句/关键词正则);更准可用 LLM 判意图,但每条多一次 LLM 调用,成本/延迟权衡,列 backlog。
 - **多角色是"子任务内角色流水"**(router→retriever→summarizer),非跨 Agent 的 DAG 依赖边调度(DAG 调度本就在 backlog);抓取/分析/汇总的独立 Agent 编排留后续。
 - **pgvector 未进 docker-compose.yml**:本机该文件被占用(疑似并行会话),用 `docker run` 起(端口 5433),compose 片段记在 README 供后续合入。
@@ -240,11 +241,13 @@
     符合"按访问模式选存储 + 三问(主链路依赖?ROI?运维成本?)"。至此存储已 polyglot:MySQL(状态机)
     / Kafka(队列)/ Redis(锁/限流/记账)/ MongoDB(trace)/ pgvector(向量),各司其职。
 
-20. **Recall@K 怎么测?确定性 embedding 的取舍?**
-    自建小标注集(doc + query→期望 doc id),灌库后每 query 取 topK,`Recall@K = 命中期望/期望总数`
-    取平均。用确定性词哈希 embedding 是取舍:优点是离线、可复现、无 key、CI 能跑、Recall 数字稳定;
-    缺点是只有词面相似、无深层语义,数字不代表真实语义检索质量——真实 embedding 列 backlog 开关,
-    届时同一套 Recall@K 脚本可直接复测。
+20. **检索质量怎么测?为什么用混合检索?**
+    用 BEIR 公开数据集(SciFact、NFCorpus,带人工标注),跑服务自己的排序代码,看 nDCG@10 和 Recall@K,
+    并和论文 / 模型卡上的公开数字核对(BM25 0.681 vs 论文 0.665;bge-small 0.720 vs 官方 0.713),先证明实现没写错。
+    结论:旧的词哈希向量只有 0.21;BM25 0.68;语义向量 0.72;混合 0.73。混合比 BM25 稳定更好,比语义向量
+    在 NFCorpus 上显著更好、在 SciFact 上不显著(按查询配对 bootstrap 的 95% 置信区间)——所以默认用混合,
+    但不夸大它。为什么混合有用:语义向量擅长改写过的问法,BM25 擅长专有名词、版本号这类必须字面一致的词;
+    RRF 只看名次,两边分数量纲不同也不用校准。项目自己的 14 条小标注集只做回归检查。
 
 ## W8 里程碑交付清单(压测与容错演练,7 项指标实测)
 

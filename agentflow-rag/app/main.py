@@ -1,14 +1,16 @@
 """AgentFlow RAG 检索微服务(Python/FastAPI)。
 
-Agent 的检索工具:/rag/ingest 灌库、/rag/search 近邻检索。跨语言微服务(Java 主链路 + Python
+Agent 的检索工具:/rag/ingest 灌库、/rag/search 检索(默认 BM25 + 语义向量混合)。跨语言微服务(Java 主链路 + Python
 embedding 生态),对应 master 设计的 polyglot 架构与"意图驱动检索工具"。
 """
 from contextlib import asynccontextmanager
+from typing import Literal
 
 from fastapi import FastAPI
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
-from . import store
+from . import embedding, store
+from .rank import CANDIDATES
 
 
 class Doc(BaseModel):
@@ -22,7 +24,8 @@ class IngestRequest(BaseModel):
 
 class SearchRequest(BaseModel):
     query: str
-    topK: int = 3
+    topK: int = Field(3, ge=1, le=CANDIDATES)
+    mode: Literal["hybrid", "dense", "bm25"] = "hybrid"
 
 
 @asynccontextmanager
@@ -36,7 +39,7 @@ app = FastAPI(title="AgentFlow RAG", lifespan=lifespan)
 
 @app.get("/health")
 def health():
-    return {"status": "ok"}
+    return {"status": "ok", "model": embedding.MODEL}
 
 
 @app.post("/rag/ingest")
@@ -47,4 +50,4 @@ def ingest(req: IngestRequest):
 
 @app.post("/rag/search")
 def search(req: SearchRequest):
-    return {"hits": store.search(req.query, req.topK)}
+    return {"hits": store.search(req.query, req.topK, req.mode)}
