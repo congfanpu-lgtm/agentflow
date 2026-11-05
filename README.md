@@ -250,7 +250,7 @@ bound beyond localhost (the per-IP limit trusts `CF-Connecting-IP`, which is onl
 
 Java 17 · Spring Boot 3 · Kafka (KRaft) · Redis/Redisson · MySQL · MongoDB · pgvector ·
 Python 3 / FastAPI (RAG microservice) · JDK HttpClient (LLM/RAG clients, no SDK bloat) ·
-Docker Compose. Tests: **85 Java + 6 Python**, integration tests hit real middleware.
+Docker Compose. Tests: **174 Java + 27 Python**, integration tests hit real middleware.
 
 ## Why not Temporal / LangGraph?
 
