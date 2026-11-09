@@ -128,7 +128,7 @@ public class WebFetchTool implements AgentTool {
     private static final Pattern NUM_ENTITY = Pattern.compile("&#(x?)([0-9a-fA-F]+);");
 
     /** 正文提取:有 <main>/<article> 只取它;再去掉导航、页眉页脚等站点框架。正则实现,够用且不加依赖。 */
-    static String htmlToText(String html) {
+    public static String htmlToText(String html) {
         String s = html.replaceAll("(?is)<(script|style|noscript|svg)[^>]*>.*?</\\1>", " ");
         Matcher main = MAIN.matcher(s);
         if (main.find()) {

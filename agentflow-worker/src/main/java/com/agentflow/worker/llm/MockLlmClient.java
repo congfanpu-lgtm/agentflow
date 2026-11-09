@@ -18,6 +18,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * 默认 LLM 后端:确定性输出、不发网络、无需 API key——压测测调度不烧钱(master 设计文档第 149 行)。
@@ -25,7 +27,8 @@ import java.util.Set;
  *
  * <p>RESEARCH_AGENT 剧本:按系统提示的角色标签({@link Prompts})分流——
  * planner 固定拆 3 个子问题;agent 第 1 步 wiki_search、第 2 步 web_fetch、第 3 步给答案;
- * reflector 固定追问 1 个"最新进展";synthesizer 返回引用 [1] 的报告。其余请求保持原有"摘要"行为。
+ * reflector 固定追问 1 个"最新进展";synthesizer 返回引用 [1] 的报告;
+ * briefer(每日股票简报)把第 1 条条目写成一个事件。其余请求保持原有"摘要"行为。
  * {@code llm.mock.delay-ms} 模拟模型耗时,便于在页面上看清每一步、演示中途杀 worker。
  */
 @Component
@@ -35,6 +38,8 @@ public class MockLlmClient implements LlmClient {
     private static final ObjectMapper OM = new ObjectMapper();
     private static final Set<String> STOP = Set.of("what", "which", "does", "with", "from", "that", "this",
             "between", "about", "versus", "when", "where", "there", "their", "have");
+
+    private static final Pattern FIRST_ITEM = Pattern.compile("(?m)^\\[1] (.+)$");
 
     @Value("${llm.mock.delay-ms:0}")
     private long delayMs;
@@ -59,6 +64,8 @@ public class MockLlmClient implements LlmClient {
             resp = reflect(lastUser(msgs));
         } else if (system.startsWith(Prompts.SYNTHESIZER_TAG)) {
             resp = synthesize(lastUser(msgs));
+        } else if (system.startsWith(Prompts.BRIEFER_TAG)) {
+            resp = brief(lastUser(msgs));
         } else {
             resp = summarize(lastUser(msgs));
         }
@@ -125,6 +132,20 @@ public class MockLlmClient implements LlmClient {
         boolean hasSource = user.contains("\n[1] ");
         return new ChatResponse("MOCK 报告:以下综合了各子问题的结论" + (hasSource ? " [1]" : "") + "。\n\n"
                 + "(mock 模式不调用真实模型;配置 LLM_PROVIDER=openai 后这里是真实报告。)", null, null);
+    }
+
+    /** 每日简报剧本:把第 1 条条目当成一个事件,引文就是它的标题(逐字,能通过 BriefProcessor 的核对)。 */
+    private ChatResponse brief(String user) {
+        ObjectNode out = OM.createObjectNode();
+        ArrayNode events = out.putArray("events");
+        Matcher first = FIRST_ITEM.matcher(user);
+        if (first.find()) {
+            String title = first.group(1).trim();
+            events.addObject().put("title", "MOCK 事件:" + TextUtil.truncate(title, 20))
+                    .put("summary", "MOCK 摘要(mock 模式不调用真实模型):" + title)
+                    .put("importance", 2).put("source", 1).put("quote", title);
+        }
+        return new ChatResponse(out.toString(), null, null);
     }
 
     /**

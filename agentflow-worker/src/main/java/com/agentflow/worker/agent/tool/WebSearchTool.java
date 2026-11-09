@@ -14,6 +14,8 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -76,14 +78,25 @@ public class WebSearchTool implements AgentTool {
         if (q.isEmpty()) {
             throw new IllegalArgumentException("query 不能为空");
         }
-        String range = args.path("time_range").asText("");
-        if (!DDG_RANGE.containsKey(range)) {
-            range = "";
+        StringBuilder sb = new StringBuilder();
+        for (Hit h : search(q, args.path("time_range").asText(""))) {
+            sb.append("Title: ").append(h.title()).append('\n')
+                    .append("URL: ").append(h.url()).append('\n')
+                    .append("Snippet: ").append(h.snippet()).append("\n\n");
         }
-        return tavilyKey.isEmpty() ? duckDuckGo(q, range) : tavily(q, range);
+        return sb.isEmpty() ? "没有找到相关结果:" + q : sb.toString().trim();
     }
 
-    private String tavily(String q, String range) throws Exception {
+    /** 一条搜索结果。 */
+    public record Hit(String title, String url, String snippet) {}
+
+    /** 结构化的搜索结果,给不经过模型工具调用的代码用(每日简报)。range 不认识就不限时间。 */
+    public List<Hit> search(String q, String range) throws Exception {
+        String r = DDG_RANGE.containsKey(range) ? range : "";
+        return tavilyKey.isEmpty() ? duckDuckGo(q, r) : tavily(q, r);
+    }
+
+    private List<Hit> tavily(String q, String range) throws Exception {
         ObjectNode body = OM.createObjectNode().put("query", q).put("max_results", MAX_RESULTS);
         if (!range.isEmpty()) {
             body.put("time_range", range);
@@ -97,14 +110,14 @@ public class WebSearchTool implements AgentTool {
         if (resp.statusCode() / 100 != 2) {
             throw new IllegalStateException("Tavily HTTP " + resp.statusCode());   // 不回显响应体:可能含 key 信息
         }
-        StringBuilder sb = new StringBuilder();
+        List<Hit> hits = new ArrayList<>();
         for (JsonNode r : OM.readTree(resp.body()).path("results")) {
-            append(sb, r.path("title").asText(), r.path("url").asText(), r.path("content").asText());
+            hits.add(new Hit(r.path("title").asText(), r.path("url").asText(), r.path("content").asText()));
         }
-        return result(sb, q);
+        return hits;
     }
 
-    private String duckDuckGo(String q, String range) throws Exception {
+    private List<Hit> duckDuckGo(String q, String range) throws Exception {
         String url = ddgBase + "/html/?q=" + URLEncoder.encode(q, StandardCharsets.UTF_8)
                 + (range.isEmpty() ? "" : "&df=" + DDG_RANGE.get(range));
         HttpRequest req = HttpRequest.newBuilder(URI.create(url)).GET()
@@ -114,10 +127,9 @@ public class WebSearchTool implements AgentTool {
         if (resp.statusCode() / 100 != 2) {
             throw new IllegalStateException("DuckDuckGo HTTP " + resp.statusCode());
         }
-        StringBuilder sb = new StringBuilder();
+        List<Hit> hits = new ArrayList<>();
         Matcher m = DDG_RESULT.matcher(resp.body());
-        int n = 0;
-        while (m.find() && n < MAX_RESULTS) {
+        while (m.find() && hits.size() < MAX_RESULTS) {
             Matcher u = UDDG.matcher(m.group(1).replace("&amp;", "&"));
             if (!u.find()) {
                 continue;   // 广告 / 站内链接
@@ -126,23 +138,12 @@ public class WebSearchTool implements AgentTool {
             if (!real.startsWith("http")) {
                 continue;
             }
-            append(sb, WebFetchTool.htmlToText(m.group(2)), real, WebFetchTool.htmlToText(m.group(3)));
-            n++;
+            hits.add(new Hit(WebFetchTool.htmlToText(m.group(2)), real, WebFetchTool.htmlToText(m.group(3))));
         }
-        if (n == 0) {
+        if (hits.isEmpty()) {
             // 没解析到结果:多半是 DuckDuckGo 拦截了自动化请求(返回验证页),让模型换工具
             throw new IllegalStateException("DuckDuckGo 没有返回结果(可能被限流),可改用 wiki_search");
         }
-        return sb.toString().trim();
-    }
-
-    private static void append(StringBuilder sb, String title, String url, String snippet) {
-        sb.append("Title: ").append(title).append('\n')
-                .append("URL: ").append(url).append('\n')
-                .append("Snippet: ").append(snippet).append("\n\n");
-    }
-
-    private static String result(StringBuilder sb, String q) {
-        return sb.isEmpty() ? "没有找到相关结果:" + q : sb.toString().trim();
+        return hits;
     }
 }

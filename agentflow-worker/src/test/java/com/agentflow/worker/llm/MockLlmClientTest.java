@@ -108,4 +108,15 @@ class MockLlmClientTest {
         assertEquals("retrieval-augmented generation reduce", MockLlmClient.keywords(
                 "how does retrieval-augmented generation reduce hallucinations"));
     }
+
+    @Test
+    void brieferScriptCitesTheFirstItemVerbatim() throws Exception {
+        String user = "公司:Apple Inc. (AAPL)\n日期:2026-11-09\n条目:\n[1] Apple beats on revenue\nURL: https://x.example/1\n正文: ...";
+        ChatResponse r = new MockLlmClient().chat(new ChatRequest("mock-small", List.of(
+                new ChatMessage("system", Prompts.BRIEFER), new ChatMessage("user", user)), 100));
+        var e = OM.readTree(r.getContent()).get("events").get(0);
+        assertEquals(1, e.get("source").asInt());
+        assertEquals("Apple beats on revenue", e.get("quote").asText());
+        assertFalse(e.get("title").asText().isBlank());
+    }
 }
