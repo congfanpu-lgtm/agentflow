@@ -21,6 +21,7 @@ import java.util.UUID;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -38,6 +39,8 @@ class ProductApiTest {
     private KafkaTemplate<String, Object> kafkaTemplate;
     @MockBean
     private WebhookClient webhookClient;   // validate 是静态方法,不受影响;只是不真的往外发
+    @MockBean
+    private BriefService briefService;     // 加股票时会触发一次简报;这里只验证触发了,不真的跑任务
     @Autowired
     private StockEventMapper stockEventMapper;
 
@@ -194,11 +197,20 @@ class ProductApiTest {
         addTicker("brk.b", c).andExpect(status().isOk()).andExpect(jsonPath("$.ticker", is("BRK-B")));
         addTicker("BRK-B", c).andExpect(status().isOk());   // 重复添加不报错
         send(get("/api/v1/me/watchlist"), c).andExpect(jsonPath("$", hasSize(1)));
+        verify(briefService, times(1)).triggerForTicker("BRK-B");   // 新加的股票马上补一份简报,不用等到明天
         for (int i = 0; i < 19; i++) {
             addTicker("ZQ" + (char) ('A' + i), c).andExpect(status().isOk());
         }
         addTicker("ZQZ", c).andExpect(status().isBadRequest()).andExpect(jsonPath("$.error", containsString("20")));
         addTicker("BRK-B", c).andExpect(status().isOk());   // 已经在列表里的,满了也不报错
+    }
+
+    @Test
+    void addingATickerStillWorksWhenTheBriefCannotBeStarted() throws Exception {
+        Cookie c = register(newEmail());
+        when(briefService.triggerForTicker("ZQXF")).thenThrow(new IllegalStateException("kafka down"));
+        addTicker("ZQXF", c).andExpect(status().isOk());
+        send(get("/api/v1/me/watchlist"), c).andExpect(jsonPath("$", hasSize(1)));
     }
 
     @Test

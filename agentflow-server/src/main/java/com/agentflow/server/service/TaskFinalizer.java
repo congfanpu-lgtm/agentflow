@@ -62,6 +62,15 @@ public class TaskFinalizer {
         }
         if (stateMachine.transitionTask(taskId, TaskStatus.RUNNING, terminal)) {
             aggregate(task, terminal, subs);
+            for (TaskDecomposer d : decomposers) {
+                if (Objects.equals(d.type(), task.getType())) {
+                    try {
+                        d.onFinished(task, subs);
+                    } catch (RuntimeException e) {
+                        log.error("任务收尾失败(终态已落定) taskId={}", taskId, e);
+                    }
+                }
+            }
         }
     }
 

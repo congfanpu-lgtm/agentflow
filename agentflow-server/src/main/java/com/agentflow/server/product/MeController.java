@@ -9,6 +9,7 @@ import com.agentflow.server.mapper.WatchlistMapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -38,12 +39,12 @@ import java.util.regex.Pattern;
  * 之后所有查询都带这个 id —— 接口里没有任何"传一个用户 id 进来"的参数,所以看不到也改不了别人的数据。
  * 路径段只用小写字母和连字符:DemoGuard 靠这个形状识别产品接口(见其注释)。
  */
+@Slf4j
 @RestController
 @RequestMapping("/api/v1/me")
 @RequiredArgsConstructor
 public class MeController {
 
-    static final ZoneId MARKET_ZONE = ZoneId.of("America/New_York");
     private static final Pattern TICKER = Pattern.compile("^[A-Z]{1,5}(-[A-Z]{1,2})?$");
     private static final int MAX_TICKERS = 20;
 
@@ -54,6 +55,7 @@ public class MeController {
     private final StockEventMapper stockEventMapper;
     private final TickerDirectory tickerDirectory;
     private final WebhookClient webhookClient;
+    private final BriefService briefService;
 
     public record TickerBody(String ticker) {
     }
@@ -102,6 +104,12 @@ public class MeController {
             watchlistMapper.insert(w);
         } catch (DuplicateKeyException ignored) {
             // 同一请求连点两次:唯一索引兜住,当作已添加
+            return Map.of("ticker", ticker, "companyName", w.getCompanyName());
+        }
+        try {
+            briefService.triggerForTicker(ticker);   // 新加的股票马上补一份简报
+        } catch (RuntimeException e) {
+            log.warn("临时简报发起失败(不影响添加,下一次定时任务会带上) ticker={}", ticker, e);
         }
         return Map.of("ticker", ticker, "companyName", w.getCompanyName());
     }
@@ -120,7 +128,7 @@ public class MeController {
         if (tickers.isEmpty()) {
             return List.of();
         }
-        LocalDate since = LocalDate.now(MARKET_ZONE).minusDays(Math.max(1, Math.min(days, 30)));
+        LocalDate since = LocalDate.now(BriefService.MARKET_ZONE).minusDays(Math.max(1, Math.min(days, 30)));
         List<Map<String, Object>> out = new ArrayList<>();
         for (StockEventEntity e : stockEventMapper.selectList(new QueryWrapper<StockEventEntity>()
                 .in("ticker", tickers).ge("brief_date", since)

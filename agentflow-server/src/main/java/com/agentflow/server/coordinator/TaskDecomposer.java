@@ -25,4 +25,8 @@ public interface TaskDecomposer {
     default TaskStatus terminalStatus(TaskEntity task, List<SubtaskEntity> subs, TaskStatus computed) {
         return computed;
     }
+
+    /** 任务刚进入终态时调用一次(和终态落定在同一个事务里):把结果写进业务表之类的收尾。默认什么都不做。 */
+    default void onFinished(TaskEntity task, List<SubtaskEntity> subs) {
+    }
 }
