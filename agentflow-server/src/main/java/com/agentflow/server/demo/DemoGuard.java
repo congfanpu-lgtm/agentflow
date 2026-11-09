@@ -21,6 +21,7 @@ import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.HexFormat;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 /**
  * 公开演示保护。配置了 DEMO_ACCESS_CODE 才生效,否则什么都不做(本地开发 / CI 不受影响)。
@@ -46,7 +47,13 @@ public class DemoGuard extends OncePerRequestFilter {
     static final String DAILY_TASKS_PREFIX = "agentflow:demo:tasks:";
     static final String IP_PREFIX = "agentflow:demo:ip:";
     static final String BAD_CODE_PREFIX = "agentflow:demo:badcode:";
-    private static final Set<String> PUBLIC_PAGES = Set.of("/", "/index.html", "/favicon.ico");
+    private static final Set<String> PUBLIC_PAGES = Set.of("/", "/index.html", "/app.html", "/favicon.ico");
+    /**
+     * 产品接口(注册登录、登录用户自己的数据)不需要访问码:它们自己校验登录态。
+     * 只放行"原样就是这个形状"的 URI —— 段里只有小写字母和连字符,不含 %、;、. ,
+     * 所以解码前后是同一个路径,/api/v1/me/../tasks 这类写法匹配不上,仍然要访问码。
+     */
+    private static final Pattern PRODUCT_API = Pattern.compile("^/api/v1/(auth|me)(/[a-z-]+)*$");
 
     private final RedissonClient redisson;
     private final byte[] code;
@@ -76,7 +83,8 @@ public class DemoGuard extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest req, HttpServletResponse resp, FilterChain chain)
             throws ServletException, IOException {
-        if (!enabled() || ("GET".equals(req.getMethod()) && PUBLIC_PAGES.contains(req.getRequestURI()))) {
+        if (!enabled() || ("GET".equals(req.getMethod()) && PUBLIC_PAGES.contains(req.getRequestURI()))
+                || PRODUCT_API.matcher(req.getRequestURI()).matches()) {
             chain.doFilter(req, resp);
             return;
         }
@@ -151,6 +159,11 @@ public class DemoGuard extends OncePerRequestFilter {
 
     private static String today() {
         return LocalDate.now(ZoneOffset.UTC).toString();
+    }
+
+    /** 限流用的客户端标识(与演示配额同一口径),供产品接口的注册 / 登录限流复用。 */
+    public String clientKey(HttpServletRequest req) {
+        return quotaKey(clientIp(req, trustProxyHeader));
     }
 
     static String clientIp(HttpServletRequest req, boolean trustProxyHeader) {

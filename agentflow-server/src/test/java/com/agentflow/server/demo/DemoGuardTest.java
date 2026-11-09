@@ -17,6 +17,7 @@ import java.time.LocalDate;
 import java.time.ZoneOffset;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -93,6 +94,21 @@ class DemoGuardTest {
         mvc.perform(post("/api;x=1/v1/tasks").contentType(MediaType.APPLICATION_JSON).content(RESEARCH))
                 .andExpect(status().isUnauthorized());
         mvc.perform(get("/index.html")).andExpect(status().isOk());
+    }
+
+    @Test
+    void productPathsSkipTheCodeButLookalikesDoNot() throws Exception {
+        // 产品接口自己校验登录态,不需要访问码:过了访问码这一关,拿到的是"请先登录"
+        mvc.perform(get("/api/v1/me")).andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.error", is("请先登录")));
+        mvc.perform(get("/api/v1/me/watchlist")).andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.error", is("请先登录")));
+        // 长得像产品路径、实际会被路由到别处的写法,仍然要访问码
+        for (String path : new String[]{"/api/v1/me/../tasks", "/api/v1/me;x=1/watchlist", "/api/v1/%6de",
+                "/api/v1/me/../llm/usage", "/api/v1/meta", "/api/v1/auth/../dlq"}) {
+            mvc.perform(get(java.net.URI.create(path))).andExpect(status().isUnauthorized())
+                    .andExpect(jsonPath("$.error", containsString("access code")));
+        }
     }
 
     @Test
