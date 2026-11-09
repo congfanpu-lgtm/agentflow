@@ -209,7 +209,8 @@ mvn -q -f agentflow-server/pom.xml spring-boot:run     # terminal A  (:8080)
 mvn -q -f agentflow-worker/pom.xml spring-boot:run     # terminal B  (scale: run N)
 ```
 
-Upgrading an existing database: run `docker/mysql/migrations/2026-10-15-subtask-kind.sql` once.
+Upgrading an existing database: run `docker/mysql/migrations/2026-10-15-subtask-kind.sql` and
+`docker/mysql/migrations/2026-11-09-stock-brief.sql` once each.
 
 **Web console** — open `http://localhost:8080/` (single-file dashboard: submit tasks, live progress,
 Run Trace timeline, LLM token accounting). See screenshot below.
@@ -224,7 +225,15 @@ curl -X POST localhost:8080/api/v1/tasks -H 'Content-Type: application/json' \
 # GET /api/v1/llm/usage           -> token accounting per model
 ```
 
-Task types: `RESEARCH_AGENT` (plan → parallel ReAct agents → review & follow-ups → cited report) · `ECHO_BATCH` (echo, for load tests) ·
+**Daily stock brief** — open `http://localhost:8080/app.html`: register, add US tickers (up to 20), and
+the page shows what is new for them over the last 7 days, each item linked to its source. Optionally
+paste a Slack or Feishu bot webhook and pick an hour; new items are pushed once a day at that hour.
+Briefs are generated at 07:00 and 18:00 New York time, and right after a ticker is first added.
+Set `SEC_USER_AGENT` ("name email", required by SEC) to include SEC filings and validate tickers;
+without it the brief uses news search only. It organizes public information and gives no investment advice.
+Design notes: [`docs/product-framework.md`](docs/product-framework.md).
+
+Task types: `DAILY_BRIEF` (one subtask per watched ticker → sourced events; submitted by the scheduler, not over HTTP in demo mode) · `RESEARCH_AGENT` (plan → parallel ReAct agents → review & follow-ups → cited report) · `ECHO_BATCH` (echo, for load tests) ·
 `LLM_BATCH` (LLM summarize via gateway) · `RESEARCH_BATCH` (intent-gated RAG retrieval → summarize).
 
 ### Public demo (Cloudflare Tunnel)
@@ -241,6 +250,8 @@ With `DEMO_ACCESS_CODE` set, every `/api/**` call needs the code (the page asks 
 tasks are refused once today's estimated LLM spend reaches the budget. The tunnel dials out from the
 machine, so no port is opened; the script refuses to start without an access code or with port 8080
 bound beyond localhost (the per-IP limit trusts `CF-Connecting-IP`, which is only safe behind the tunnel).
+The brief page (`/app.html`, `/api/v1/auth/**`, `/api/v1/me/**`) uses its own login instead of the access
+code; when serving it over https set `AUTH_COOKIE_SECURE=true` and `PUBLIC_BASE_URL` to the public address.
 
 > To re-record the demo GIF (`docs/img/demo.gif`), follow [`README.zh.md`](README.zh.md#录制-demo-gif).
 

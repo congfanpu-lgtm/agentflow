@@ -1,0 +1,368 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AgentFlow 简报</title>
+<style>
+  :root{
+    --bg:#0b0e14; --panel:#121722; --panel2:#181f2d; --border:#232b3a; --border2:#2e3849;
+    --fg:#e6edf3; --fg2:#c3ccd8; --muted:#8590a2; --accent:#5b9dff; --accent2:#8b7bff;
+    --ok:#3fb950; --warn:#e3a33b; --fail:#f2615a;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--fg);
+    font:14px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif}
+  a{color:var(--accent);text-decoration:none} a:hover{text-decoration:underline}
+  [hidden]{display:none!important}
+  .muted{color:var(--muted)}
+
+  header{position:sticky;top:0;z-index:5;background:rgba(11,14,20,.88);backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--border);padding:12px 16px;display:flex;align-items:center;gap:12px}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:16px}
+  .logo{width:26px;height:26px;border-radius:8px;background:linear-gradient(135deg,var(--accent),var(--accent2));
+    display:grid;place-items:center;font-size:14px;color:#fff}
+  .who{margin-left:auto;display:flex;align-items:center;gap:10px;color:var(--muted);font-size:12.5px;min-width:0}
+  .who span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+  main{max-width:760px;margin:0 auto;padding:24px 16px 56px}
+  h1{font-size:24px;margin:0 0 6px;letter-spacing:-.2px}
+  h2{font-size:15px;margin:0 0 12px}
+  .panel{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:18px}
+
+  button{font:inherit;cursor:pointer}
+  .btn{background:var(--accent);color:#fff;border:0;border-radius:9px;padding:9px 16px;font-weight:600;white-space:nowrap}
+  .btn:hover{filter:brightness(1.08)} .btn:disabled{opacity:.5;cursor:default}
+  .ghost{background:transparent;border:1px solid var(--border2);color:var(--fg2);border-radius:9px;padding:8px 14px;white-space:nowrap}
+  .ghost:hover{color:var(--fg);border-color:var(--muted)}
+  .ghost.small{padding:4px 10px;font-size:12px;border-radius:7px}
+  input,select{width:100%;background:var(--panel2);border:1px solid var(--border2);color:var(--fg);
+    border-radius:9px;padding:9px 12px;font:inherit}
+  input:focus,select:focus,button:focus-visible{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(91,157,255,.25)}
+  label{display:block;font-size:12.5px;color:var(--fg2);margin:12px 0 5px}
+  .row{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap}
+  .row > .grow{flex:1 1 180px;min-width:0}
+  .msg{min-height:20px;margin-top:10px;font-size:13px;color:var(--muted)}
+  .msg.err{color:var(--fail)} .msg.ok{color:var(--ok)}
+
+  /* 登录 */
+  #auth{max-width:420px;margin:6vh auto 0}
+  #auth p{color:var(--fg2);margin:0 0 16px}
+  #auth ul{color:var(--muted);padding-left:18px;margin:0 0 18px;font-size:13px}
+
+  /* 自选股 */
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+  .chip{display:inline-flex;align-items:center;gap:8px;background:var(--panel2);border:1px solid var(--border2);
+    border-radius:999px;padding:4px 6px 4px 12px;font-size:13px;max-width:100%}
+  .chip b{font-family:var(--mono);font-size:12.5px}
+  .chip span{color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:180px}
+  .chip button{background:transparent;border:0;color:var(--muted);width:22px;height:22px;border-radius:50%;font-size:15px;line-height:1}
+  .chip button:hover{background:var(--border2);color:var(--fg)}
+
+  /* 简报 */
+  .day{font-size:12.5px;color:var(--muted);margin:18px 0 8px;display:flex;align-items:center;gap:10px}
+  .day::after{content:"";flex:1;height:1px;background:var(--border)}
+  .event{border:1px solid var(--border);border-left:3px solid var(--border2);border-radius:10px;padding:12px 14px;margin-bottom:10px;background:var(--panel2)}
+  .event.i3{border-left-color:var(--fail)} .event.i2{border-left-color:var(--warn)}
+  .event .top{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px}
+  .tk{font-family:var(--mono);font-weight:700;font-size:12.5px;color:var(--accent)}
+  .tag{font-size:11.5px;padding:0 8px;border-radius:999px;background:var(--border);color:var(--fg2)}
+  .tag.hot{background:rgba(242,97,90,.16);color:var(--fail)}
+  .event h3{font-size:15px;margin:0 0 4px;line-height:1.45;overflow-wrap:anywhere}
+  .event p{margin:0;color:var(--fg2);overflow-wrap:anywhere}
+  .event blockquote{margin:8px 0 0;padding:4px 10px;border-left:2px solid var(--border2);color:var(--muted);font-size:12.5px;overflow-wrap:anywhere}
+  .event .src{margin-top:8px;font-size:12.5px;overflow-wrap:anywhere}
+  .empty{color:var(--muted);text-align:center;padding:26px 8px}
+  footer{color:var(--muted);font-size:12px;text-align:center;margin-top:26px}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand"><div class="logo" aria-hidden="true">A</div>AgentFlow 简报</div>
+  <div class="who" id="who" hidden><span id="whoEmail"></span><button class="ghost small" id="logout" type="button">退出</button></div>
+</header>
+
+<main>
+  <!-- 未登录 -->
+  <section id="auth" hidden>
+    <h1>你的美股每日简报</h1>
+    <p>选好你关注的股票,每天自动整理它们的公司公告和新闻。</p>
+    <ul>
+      <li>每条都带出处链接,可以点进去核对原文</li>
+      <li>在这个页面看,或者推送到你自己的 Slack / 飞书</li>
+      <li>只整理发生了什么,不给买卖建议</li>
+    </ul>
+    <form class="panel" id="authForm">
+      <label for="email">邮箱</label>
+      <input id="email" type="email" autocomplete="email" required>
+      <label for="password">密码(至少 8 位)</label>
+      <input id="password" type="password" autocomplete="current-password" minlength="8" maxlength="128" required>
+      <div class="row" style="margin-top:16px">
+        <button class="btn" type="submit" id="loginBtn">登录</button>
+        <button class="ghost" type="button" id="registerBtn">注册新账号</button>
+      </div>
+      <div class="msg" id="authMsg" role="status" aria-live="polite"></div>
+    </form>
+  </section>
+
+  <!-- 已登录 -->
+  <div id="app" hidden>
+    <section class="panel">
+      <h2>我的自选股</h2>
+      <div class="chips" id="chips"></div>
+      <form class="row" id="addForm">
+        <div class="grow">
+          <label for="ticker" style="margin-top:0">添加美股代码(最多 20 只)</label>
+          <input id="ticker" placeholder="例如 AAPL、NVDA、BRK.B" maxlength="8" autocomplete="off" autocapitalize="characters" required>
+        </div>
+        <button class="btn" type="submit">添加</button>
+      </form>
+      <div class="msg" id="watchMsg" role="status" aria-live="polite"></div>
+    </section>
+
+    <section class="panel">
+      <div class="row" style="align-items:center;justify-content:space-between">
+        <h2 style="margin:0">最近 7 天</h2>
+        <button class="ghost small" type="button" id="refresh">刷新</button>
+      </div>
+      <div id="events" aria-live="polite"></div>
+    </section>
+
+    <section class="panel">
+      <h2>推送到 Slack / 飞书(可选)</h2>
+      <div class="muted" style="font-size:13px">不设置也可以,简报一直能在这个页面看。设置后每天到点把新内容发到你的群里。</div>
+      <form id="settingsForm">
+        <label for="webhook">机器人 Webhook 地址 <span class="muted" id="webhookNow"></span></label>
+        <input id="webhook" type="url" autocomplete="off" placeholder="https://hooks.slack.com/services/… 或 https://open.feishu.cn/open-apis/bot/v2/hook/…">
+        <div class="row">
+          <div class="grow">
+            <label for="pushHour">每天几点推送</label>
+            <select id="pushHour"></select>
+          </div>
+          <div class="grow">
+            <label for="timezone">时区</label>
+            <select id="timezone"></select>
+          </div>
+        </div>
+        <div class="row" style="margin-top:16px">
+          <button class="btn" type="submit">保存</button>
+          <button class="ghost" type="button" id="testBtn">发一条测试消息</button>
+          <button class="ghost" type="button" id="clearBtn">停止推送</button>
+        </div>
+        <div class="msg" id="settingsMsg" role="status" aria-live="polite"></div>
+      </form>
+    </section>
+  </div>
+
+  <footer>内容由 AI 根据公开的公司公告和新闻整理,可能有错漏,请以原文为准。<br>仅为信息整理,不构成投资建议。</footer>
+</main>
+
+<script>
+'use strict';
+const $ = id => document.getElementById(id);
+
+// 所有来自服务器的文字都走 textContent,不拼 HTML:标题、摘要里即使混进了标签也只会显示成普通文字
+function el(tag, attrs, ...children) {
+  const n = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs || {})) {
+    if (k === 'class') n.className = v; else if (k === 'text') n.textContent = v; else n.setAttribute(k, v);
+  }
+  for (const c of children) if (c) n.append(c);
+  return n;
+}
+
+async function api(method, path, body) {
+  const r = await fetch('/api/v1' + path, {
+    method, credentials: 'same-origin',
+    headers: body ? {'Content-Type': 'application/json'} : {},
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  let data = null;
+  try { data = await r.json(); } catch (e) { /* 没有响应体 */ }
+  if (!r.ok) {
+    const err = new Error((data && data.error) || ('请求失败(' + r.status + ')'));
+    err.status = r.status;
+    throw err;
+  }
+  return data;
+}
+
+function say(id, text, kind) {
+  const m = $(id);
+  m.textContent = text || '';
+  m.className = 'msg' + (kind ? ' ' + kind : '');
+}
+
+// 登录过期时回到登录页;其他错误显示在对应区域
+function fail(id, e) {
+  if (e.status === 401) { showAuth(); return; }
+  say(id, e.message, 'err');
+}
+
+function showAuth() {
+  $('app').hidden = true; $('who').hidden = true; $('auth').hidden = false;
+  pollUntil = 0;
+}
+
+// ---------- 登录 / 注册 ----------
+async function authenticate(action) {
+  const form = $('authForm');
+  if (!form.reportValidity()) return;
+  say('authMsg', action === 'register' ? '正在注册…' : '正在登录…');
+  try {
+    await api('POST', '/auth/' + action, {email: $('email').value, password: $('password').value});
+    $('password').value = '';
+    say('authMsg', '');
+    await start();
+  } catch (e) {
+    say('authMsg', e.message, 'err');
+  }
+}
+$('authForm').addEventListener('submit', e => { e.preventDefault(); authenticate('login'); });
+$('registerBtn').addEventListener('click', () => authenticate('register'));
+$('logout').addEventListener('click', async () => {
+  try { await api('POST', '/auth/logout'); } catch (e) { /* 反正要回登录页 */ }
+  showAuth();
+});
+
+// ---------- 自选股 ----------
+async function loadWatchlist() {
+  const list = await api('GET', '/me/watchlist');
+  const chips = $('chips');
+  chips.replaceChildren();
+  if (!list.length) chips.append(el('span', {class: 'muted', text: '还没有关注任何股票,先在下面加一只。'}));
+  for (const w of list) {
+    const remove = el('button', {type: 'button', 'aria-label': '取消关注 ' + w.ticker, text: '×'});
+    remove.addEventListener('click', async () => {
+      try {
+        await api('DELETE', '/me/watchlist?ticker=' + encodeURIComponent(w.ticker));
+        say('watchMsg', '已取消关注 ' + w.ticker);
+        await Promise.all([loadWatchlist(), loadEvents()]);
+      } catch (e) { fail('watchMsg', e); }
+    });
+    chips.append(el('span', {class: 'chip'}, el('b', {text: w.ticker}),
+      w.companyName && w.companyName !== w.ticker ? el('span', {text: w.companyName}) : null, remove));
+  }
+  return list;
+}
+
+$('addForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const input = $('ticker');
+  try {
+    const added = await api('POST', '/me/watchlist', {ticker: input.value});
+    input.value = '';
+    say('watchMsg', '已关注 ' + added.ticker + '。正在整理它的第一份简报,大约一分钟后出现在下面。', 'ok');
+    await loadWatchlist();
+    pollUntil = Date.now() + 3 * 60 * 1000;   // 接下来 3 分钟自动刷新,等第一份简报
+  } catch (e) { fail('watchMsg', e); }
+});
+
+// ---------- 简报 ----------
+let pollUntil = 0;
+const IMPORTANCE = {3: '重要', 2: '值得看', 1: '一般'};
+
+function eventCard(ev) {
+  const top = el('div', {class: 'top'}, el('span', {class: 'tk', text: ev.ticker}),
+    el('span', {class: 'tag' + (ev.importance >= 3 ? ' hot' : ''), text: IMPORTANCE[ev.importance] || '一般'}),
+    ev.form ? el('span', {class: 'tag', text: 'SEC ' + ev.form}) : null,
+    ev.eventDate ? el('span', {class: 'muted', text: ev.eventDate}) : null);
+  const card = el('article', {class: 'event i' + ev.importance}, top,
+    el('h3', {text: ev.title}), el('p', {text: ev.summary}),
+    ev.quote ? el('blockquote', {text: '原文:' + ev.quote}) : null);
+  // 只给 http(s) 链接;别的协议(javascript: 之类)一律当文字显示
+  if (/^https?:\/\//i.test(ev.url || '')) {
+    let host = '';
+    try { host = new URL(ev.url).hostname; } catch (e) { /* 留空 */ }
+    const a = el('a', {href: ev.url, target: '_blank', rel: 'noopener noreferrer', text: ev.sourceTitle || host || '查看原文'});
+    card.append(el('div', {class: 'src'}, '出处:', a, host && ev.sourceTitle ? el('span', {class: 'muted', text: ' · ' + host}) : null));
+  }
+  return card;
+}
+
+async function loadEvents() {
+  const events = await api('GET', '/me/events?days=7');
+  const box = $('events');
+  box.replaceChildren();
+  if (!events.length) {
+    box.append(el('div', {class: 'empty',
+      text: '还没有简报。新关注的股票大约一分钟后会有第一份;之后每天美东时间早 7 点、晚 6 点更新。没有重要动态的日子不会有内容。'}));
+    return;
+  }
+  let day = null;
+  for (const ev of events) {
+    if (ev.date !== day) { day = ev.date; box.append(el('div', {class: 'day', text: day})); }
+    box.append(eventCard(ev));
+  }
+}
+$('refresh').addEventListener('click', () => loadEvents().catch(e => fail('watchMsg', e)));
+setInterval(() => { if (Date.now() < pollUntil) loadEvents().catch(() => {}); }, 5000);
+
+// ---------- 推送设置 ----------
+const ZONES = ['Asia/Shanghai', 'Asia/Hong_Kong', 'Asia/Singapore', 'Asia/Tokyo', 'America/New_York',
+  'America/Chicago', 'America/Los_Angeles', 'Europe/London', 'Australia/Sydney'];
+
+function fillSettings(me) {
+  const hour = $('pushHour');
+  hour.replaceChildren();
+  for (let h = 0; h < 24; h++) hour.append(el('option', {value: String(h), text: String(h).padStart(2, '0') + ':00'}));
+  hour.value = String(me.pushHour);
+
+  let browserZone = '';
+  try { browserZone = Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch (e) { /* 老浏览器 */ }
+  const zone = $('timezone');
+  zone.replaceChildren();
+  for (const z of [...new Set([me.timezone, browserZone, ...ZONES].filter(Boolean))]) {
+    zone.append(el('option', {value: z, text: z === browserZone ? z + '(你现在所在的时区)' : z}));
+  }
+  zone.value = me.timezone;
+
+  $('webhookNow').textContent = me.webhook ? '当前:' + me.webhook + '(留空 = 不改)' : '当前:未设置';
+  $('webhook').value = '';
+  $('testBtn').disabled = $('clearBtn').disabled = !me.webhook;
+}
+
+async function saveSettings(extra, done) {
+  const body = Object.assign({pushHour: Number($('pushHour').value), timezone: $('timezone').value}, extra);
+  try {
+    await api('PUT', '/me/settings', body);
+    fillSettings(await api('GET', '/me'));
+    say('settingsMsg', done, 'ok');
+  } catch (e) { fail('settingsMsg', e); }
+}
+$('settingsForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const url = $('webhook').value.trim();
+  saveSettings(url ? {webhookUrl: url} : {}, '已保存。');
+});
+$('clearBtn').addEventListener('click', () => saveSettings({webhookUrl: ''}, '已停止推送,简报仍可在这个页面看。'));
+$('testBtn').addEventListener('click', async () => {
+  say('settingsMsg', '正在发送…');
+  try {
+    await api('POST', '/me/webhook-test');
+    say('settingsMsg', '已发送,去群里看看有没有收到。', 'ok');
+  } catch (e) { fail('settingsMsg', e); }
+});
+
+// ---------- 启动 ----------
+async function start() {
+  let me;
+  try {
+    me = await api('GET', '/me');
+  } catch (e) {
+    showAuth();
+    if (e.status !== 401) say('authMsg', e.message, 'err');
+    return;
+  }
+  $('auth').hidden = true; $('app').hidden = false; $('who').hidden = false;
+  $('whoEmail').textContent = me.email;
+  fillSettings(me);
+  try {
+    await Promise.all([loadWatchlist(), loadEvents()]);
+  } catch (e) { fail('watchMsg', e); }
+}
+start();
+</script>
+</body>
+</html>

@@ -94,6 +94,7 @@ class DemoGuardTest {
         mvc.perform(post("/api;x=1/v1/tasks").contentType(MediaType.APPLICATION_JSON).content(RESEARCH))
                 .andExpect(status().isUnauthorized());
         mvc.perform(get("/index.html")).andExpect(status().isOk());
+        mvc.perform(get("/app.html")).andExpect(status().isOk());   // 产品页面本身公开,数据接口靠登录保护
     }
 
     @Test

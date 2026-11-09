@@ -59,6 +59,22 @@
 server `static/` 直供):提交任务(ECHO/LLM/RESEARCH)、实时进度条、Run Trace 执行轨迹时间线、
 LLM token 记账,轮询刷新。用于 demo 演示。
 
+## 每日股票简报(/app.html)
+
+面向个人投资者的页面:server 起来后打开 `http://localhost:8080/app.html`。
+
+- 注册登录 → 添加美股代码(最多 20 只)→ 页面显示这些股票最近 7 天的新动态,每条都带原文链接。
+- 可选:填 Slack 或飞书机器人的 webhook 地址和推送时间,每天到点把新内容推过去;同一条内容对同一个人只推一次。
+- 简报每天生成两次(纽约时间 07:00、18:00);新关注的股票会立刻单独整理一次。
+- 背后是 `DAILY_BRIEF` 任务:每只被关注的股票一个子任务,同一只股票只处理一次,结果给所有关注它的用户。
+- `.env` 里填 `SEC_USER_AGENT`(格式「名字 邮箱」,SEC 的要求)后才会读 SEC 公告并校验股票代码;不填只用新闻搜索。
+- 老数据库升级:执行一次 `docker/mysql/migrations/2026-11-09-stock-brief.sql`。
+- 只整理公开信息,不给买卖建议。
+
+可调参数(server):`agentflow.brief.cron` / `agentflow.brief.zone`(生成时间)、`agentflow.brief.max-tickers`(每次最多处理多少只,默认 100)、
+`agentflow.brief.max-on-demand`(每天最多多少次「新关注立刻整理」,默认 300)、`agentflow.public-base-url`(推送里的页面链接)。
+产品设计见 [`docs/product-framework.md`](docs/product-framework.md)。
+
 ## 多 Worker 水平扩展
 
 主 topic 3 分区,最多 3 个 Worker 并行(同消费组自动 rebalance):
