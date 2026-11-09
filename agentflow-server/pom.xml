@@ -71,6 +71,7 @@
           <argLine>-javaagent:${net.bytebuddy:byte-buddy-agent:jar}</argLine>
           <systemPropertyVariables>
             <agentflow.timeout.scheduler-enabled>false</agentflow.timeout.scheduler-enabled>
+            <agentflow.brief.scheduler-enabled>false</agentflow.brief.scheduler-enabled>
           </systemPropertyVariables>
         </configuration>
       </plugin>
