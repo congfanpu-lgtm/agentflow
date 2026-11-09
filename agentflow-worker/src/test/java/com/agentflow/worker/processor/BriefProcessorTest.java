@@ -178,4 +178,16 @@ class BriefProcessorTest {
         assertThrows(IllegalArgumentException.class, () -> processor().process("{\"ticker\":\"AAPL\"}"));
         assertThrows(IllegalArgumentException.class, () -> processor().process("{\"ticker\":\"AAPL\",\"date\":\"昨天\"}"));
     }
+
+
+    @Test
+    void dropsEventsWhoseTextCarriesALink() throws Exception {
+        // 标题和摘要是模型自己写的,会原样推到用户的 Slack / 飞书:里面不能带链接(被网页内容诱导时最常见的夹带)
+        JsonNode out = run(INPUT, "{\"events\":["
+                + "{\"title\":\"限时福利 https://evil.example/buy\",\"summary\":\"x\",\"source\":1},"
+                + "{\"title\":\"Apple 换 CFO\",\"summary\":\"详情见 WWW.evil.example\",\"source\":2}]}");
+        assertEquals(0, out.get("events").size(), out.toString());
+        out = run(INPUT, "{\"events\":[{\"title\":\"Apple 换 CFO\",\"summary\":\"Amazon.com 前高管接任\",\"source\":2}]}");
+        assertEquals(1, out.get("events").size(), "公司名里的 .com 不算链接");
+    }
 }

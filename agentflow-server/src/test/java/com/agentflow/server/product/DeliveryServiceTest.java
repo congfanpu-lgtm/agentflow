@@ -6,6 +6,7 @@ import com.agentflow.server.entity.WatchlistEntity;
 import com.agentflow.server.mapper.StockEventMapper;
 import com.agentflow.server.mapper.UserMapper;
 import com.agentflow.server.mapper.WatchlistMapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -155,5 +156,18 @@ class DeliveryServiceTest {
 
         delivery.deliverDue(EIGHT_IN_SHANGHAI);
         verify(webhook, times(1)).send(eq(a), any());   // 没放进消息的那 2 条也算推过,不会明天再冒出来
+    }
+
+
+    @Test
+    void anEventThatMissedOnePushIsStillSentTheNextDay() {
+        // 昨天那次推送失败(或服务器正好停机):事件到今天已经 40 小时了,仍然要补发,不能悄悄丢掉
+        String a = user(8, "Asia/Shanghai", true, "ZQXA");
+        event("ZQXA", "Alpha 发布财报", 3);
+        stockEventMapper.update(null, new UpdateWrapper<StockEventEntity>().eq("ticker", "ZQXA")
+                .setSql("created_at = NOW() - INTERVAL 40 HOUR"));
+
+        delivery.deliverDue(EIGHT_IN_SHANGHAI);
+        assertTrue(lastMessageTo(a, 1).contains("Alpha 发布财报"));
     }
 }

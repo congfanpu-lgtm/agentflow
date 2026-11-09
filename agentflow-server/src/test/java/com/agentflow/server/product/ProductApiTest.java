@@ -255,4 +255,17 @@ class ProductApiTest {
         org.mockito.Mockito.verify(webhookClient, org.mockito.Mockito.times(5))
                 .send(org.mockito.ArgumentMatchers.eq(SLACK), org.mockito.ArgumentMatchers.anyString());
     }
+
+
+    @Test
+    void newTickersAreLimitedPerUserPerDay() throws Exception {
+        // 反复加了又删会一直触发"新关注立刻整理",那是全站共用的额度:一个账号不能把它耗光
+        Cookie c = register(newEmail());
+        for (int i = 0; i < 30; i++) {
+            addTicker("ZQA", c).andExpect(status().isOk());
+            send(delete("/api/v1/me/watchlist").param("ticker", "ZQA"), c).andExpect(status().isOk());
+        }
+        addTicker("ZQA", c).andExpect(status().isTooManyRequests());
+        verify(briefService, times(30)).triggerForTicker("ZQA");
+    }
 }

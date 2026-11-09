@@ -77,7 +77,8 @@ public class DailyBriefDecomposer implements TaskDecomposer {
             q.in("ticker", only);
         }
         List<Map<String, Object>> watched = watchlistMapper.selectMaps(
-                q.groupBy("ticker").orderByDesc("watchers").orderByAsc("ticker").last("LIMIT " + maxTickers));
+                // 关注人数相同的按日期轮换(不是按字母):超过上限时,排在后面的股票不会永远轮不到。date 是解析过的 LocalDate
+                q.groupBy("ticker").last("ORDER BY watchers DESC, CRC32(CONCAT(ticker, '" + date + "')), ticker LIMIT " + maxTickers));
         if (watched.isEmpty()) {
             throw new IllegalArgumentException("没有需要生成简报的股票");
         }

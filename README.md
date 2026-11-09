@@ -252,6 +252,9 @@ machine, so no port is opened; the script refuses to start without an access cod
 bound beyond localhost (the per-IP limit trusts `CF-Connecting-IP`, which is only safe behind the tunnel).
 The brief page (`/app.html`, `/api/v1/auth/**`, `/api/v1/me/**`) uses its own login instead of the access
 code; when serving it over https set `AUTH_COOKIE_SECURE=true` and `PUBLIC_BASE_URL` to the public address.
+Always set `DEMO_ACCESS_CODE` before exposing the server: without it the engine API (`/api/v1/tasks`, …) is open.
+Set `TAVILY_API_KEY` too — the DuckDuckGo fallback gets rate-limited once many tickers are briefed. Brief LLM spend
+counts toward the same daily figure as `DEMO_DAILY_BUDGET_USD` (reaching it pauses the console only; briefs are capped by count).
 
 > To re-record the demo GIF (`docs/img/demo.gif`), follow [`README.zh.md`](README.zh.md#录制-demo-gif).
 

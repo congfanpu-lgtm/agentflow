@@ -100,6 +100,10 @@ public class MeController {
         w.setUserId(userId);
         w.setTicker(ticker);
         w.setCompanyName(truncate(company.name(), 200));
+        // 每次新关注都可能触发一次"立刻整理"(全站共用的额度):一个账号反复加删不能把它耗光
+        if (!throttle.allow("watch-add:" + userId, 30, Duration.ofDays(1))) {
+            throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS, "今天添加的次数太多了,请明天再试");
+        }
         try {
             watchlistMapper.insert(w);
         } catch (DuplicateKeyException ignored) {

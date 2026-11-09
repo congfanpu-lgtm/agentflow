@@ -25,6 +25,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 /**
  * 每日简报的一个子任务:一只股票。取 SEC 公告 + 当天新闻 → 去掉已经报道过的链接 → 模型挑出实质性事件。
@@ -143,14 +144,19 @@ public class BriefProcessor implements SubtaskProcessor {
         return sb.toString();
     }
 
-    /** 只留下站得住的事件:编号指向真实条目、每个条目最多一个事件、有标题和摘要。 */
+    // 标题和摘要会原样推到用户的聊天软件,链接只能是我们自己给的出处。
+    // ponytail: 只拦带协议头或 www. 的写法;裸域名(evil.com)拦不住,因为 Amazon.com 这类公司名是正常内容
+    private static final Pattern LINK = Pattern.compile("://|www\\.", Pattern.CASE_INSENSITIVE);
+
+    /** 只留下站得住的事件:编号指向真实条目、每个条目最多一个事件、有标题和摘要、文字里不夹带链接。 */
     private static void addChecked(ArrayNode events, JsonNode proposed, List<Item> items) {
         Set<Integer> used = new HashSet<>();
         for (JsonNode e : proposed) {
             int idx = e.path("source").isInt() ? e.path("source").asInt() : 0;
             String title = e.path("title").asText("").trim();
             String summary = e.path("summary").asText("").trim();
-            if (idx < 1 || idx > items.size() || title.isEmpty() || summary.isEmpty() || !used.add(idx)) {
+            if (idx < 1 || idx > items.size() || title.isEmpty() || summary.isEmpty()
+                    || LINK.matcher(title).find() || LINK.matcher(summary).find() || !used.add(idx)) {
                 continue;
             }
             Item it = items.get(idx - 1);

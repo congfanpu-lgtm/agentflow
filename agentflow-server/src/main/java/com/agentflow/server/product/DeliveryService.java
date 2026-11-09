@@ -73,10 +73,11 @@ public class DeliveryService {
         if (tickers.isEmpty()) {
             return false;
         }
-        // 只看最近 36 小时:一天推一次,多留半天余量给"昨天没发出去"的重试
+        // 只看最近 72 小时:一天推一次,失败要等到第二天同一时刻才重试,那时上次推送之后的事件最老已有 48 小时;
+        // 留到 72 小时可以扛住连续两天失败。更老的不再推(新填 webhook 的用户也不会被旧消息刷屏),网页上仍然能看到
         List<StockEventEntity> fresh = new ArrayList<>();
         for (StockEventEntity e : stockEventMapper.selectList(new QueryWrapper<StockEventEntity>()
-                .in("ticker", tickers).apply("created_at >= NOW() - INTERVAL 36 HOUR")
+                .in("ticker", tickers).apply("created_at >= NOW() - INTERVAL 72 HOUR")
                 .orderByDesc("importance", "id").last("LIMIT 50"))) {
             if (pushLogMapper.claim(u.getId(), e.getId()) == 1) {
                 fresh.add(e);

@@ -70,6 +70,10 @@ LLM token 记账,轮询刷新。用于 demo 演示。
 - `.env` 里填 `SEC_USER_AGENT`(格式「名字 邮箱」,SEC 的要求)后才会读 SEC 公告并校验股票代码;不填只用新闻搜索。
 - 老数据库升级:执行一次 `docker/mysql/migrations/2026-11-09-stock-brief.sql`。
 - 只整理公开信息,不给买卖建议。
+- 对公网开放前:**必须设置 `DEMO_ACCESS_CODE`**(否则 `/api/v1/tasks` 等引擎接口谁都能调),https 下设 `AUTH_COOKIE_SECURE=true`;
+  建议填 `TAVILY_API_KEY`——不填时新闻搜索走 DuckDuckGo,股票一多很容易被限流,没配 SEC 的话那只股票当次就没有简报。
+- 简报的模型花费和演示控制台记在同一个每日预算里(`DEMO_DAILY_BUDGET_USD`):超了只会让控制台暂停接新任务,简报本身按数量封顶
+  (每次最多 `max-tickers` 只,每天两次,外加 `max-on-demand` 次)。接真实模型时按需调大预算。
 
 可调参数(server):`agentflow.brief.cron` / `agentflow.brief.zone`(生成时间)、`agentflow.brief.max-tickers`(每次最多处理多少只,默认 100)、
 `agentflow.brief.max-on-demand`(每天最多多少次「新关注立刻整理」,默认 300)、`agentflow.public-base-url`(推送里的页面链接)。

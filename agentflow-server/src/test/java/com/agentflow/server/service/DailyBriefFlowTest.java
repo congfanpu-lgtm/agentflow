@@ -19,10 +19,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -186,5 +189,26 @@ class DailyBriefFlowTest {
                 null));
         assertEquals("PARTIAL_FAILED", taskMapper.selectById(ids[0]).getStatus());
         assertEquals(1, events("ZQXB").size());
+    }
+
+
+    @Test
+    void tickersPastTheCapTakeTurnsAcrossDays() throws Exception {
+        // 关注人数相同的股票超过上限时,不能永远是字母靠前的那只:按日期轮换,谁都轮得到
+        watch(9_000_001L, "ZQXA", "Alpha Corp");
+        watch(9_000_002L, "ZQXB", "Beta Inc");
+        ReflectionTestUtils.setField(decomposer, "maxTickers", 1);
+        try {
+            Set<String> picked = new HashSet<>();
+            for (int d = 1; d <= 30; d++) {
+                List<SubtaskDef> defs = decomposer.decompose(payload(
+                        "{\"tickers\":[\"ZQXA\",\"ZQXB\"],\"date\":\"" + LocalDate.of(2026, 11, d) + "\"}"));
+                assertEquals(1, defs.size());
+                picked.add(OM.readTree(defs.get(0).inputJson()).get("ticker").asText());
+            }
+            assertEquals(Set.of("ZQXA", "ZQXB"), picked);
+        } finally {
+            ReflectionTestUtils.setField(decomposer, "maxTickers", 100);
+        }
     }
 }
