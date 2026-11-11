@@ -40,7 +40,18 @@ class PlanProcessorTest {
         JsonNode out = run("```json\n{\"subQuestions\":[\" a \",\"a\",\"b\",\"\",\"c\",\"d\",\"e\"]}\n```");
         assertEquals(List.of("a", "b", "c", "d"),
                 new ObjectMapper().convertValue(out.get("subQuestions"), List.class));
+        assertEquals("report", out.get("kind").asText());
+        assertEquals(2, out.at("/usage/calls").asInt(), "分流 + 拆题");
+    }
+
+    @Test
+    void answerQuestionsAreNotSplit() throws Exception {
+        // 答案类往往一环扣一环:整题交给一个 agent,不调用拆题
+        JsonNode out = run("{\"kind\":\"answer\"}");
+        assertEquals("answer", out.get("kind").asText());
+        assertEquals(List.of("kafka vs rabbitmq"), new ObjectMapper().convertValue(out.get("subQuestions"), List.class));
         assertEquals(1, out.at("/usage/calls").asInt());
+        verify(gateway, times(1)).chat(any());
     }
 
     @Test
@@ -60,8 +71,9 @@ class PlanProcessorTest {
         // 真实模型(Claude)拿到裸问题会直接作答而不是拆题:用户消息里必须明确"不要回答,只输出 JSON"
         run("{\"subQuestions\":[\"a\"]}");
         ArgumentCaptor<ChatRequest> req = ArgumentCaptor.forClass(ChatRequest.class);
-        verify(gateway).chat(req.capture());
-        List<ChatMessage> msgs = req.getValue().getMessages();
+        verify(gateway, times(2)).chat(req.capture());   // 第 1 次是分流,第 2 次才是拆题
+        assertTrue(req.getAllValues().get(0).getMessages().get(0).getContent().startsWith(com.agentflow.worker.agent.Prompts.ROUTER_TAG));
+        List<ChatMessage> msgs = req.getAllValues().get(1).getMessages();
         assertEquals("kafka vs rabbitmq", msgs.get(1).getContent());
         assertTrue(msgs.get(0).getContent().contains("Today is " + java.time.LocalDate.now(java.time.ZoneOffset.UTC).toString()), "规划提示词应注入当前日期");
         assertTrue(msgs.get(0).getContent().endsWith(com.agentflow.worker.agent.Prompts.ENGLISH), "英文问题要明确要求英文作答");   // 首条 user 仍是原问题(mock 依赖)

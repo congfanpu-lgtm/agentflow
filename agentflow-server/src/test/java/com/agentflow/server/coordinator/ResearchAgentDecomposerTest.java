@@ -63,11 +63,9 @@ class ResearchAgentDecomposerTest {
         assertTrue(d.nextStage(task(), List.of(sub(0, "PLAN", "FAILED", "{}", null))).isEmpty());
     }
 
-    /** 反思默认关闭(评测:深度 95%→95%,成本 +85%,延迟 ×1.9),payload.reflect=true 才开。 */
+    /** 反思默认关闭(评测:深度 95%→95%,成本 +85%,延迟 ×1.9);payload.rounds=1 打开一轮。 */
     private static TaskEntity reflecting() {
-        TaskEntity t = task();
-        t.setPayload("{\"question\":\"kafka vs rabbitmq\",\"reflect\":true}");
-        return t;
+        return rounds(1);
     }
 
     private static final String A1 = "{\"answer\":\"A1\",\"sources\":[{\"title\":\"K\",\"url\":\"https://k\"}]}";
@@ -101,7 +99,7 @@ class ResearchAgentDecomposerTest {
     }
 
 
-    // ---- 反思补漏:AGENT 全部落定 → REFLECT 找缺口 → 最多 2 个追问 AGENT → SYNTHESIZE
+    // ---- 反思补漏:AGENT 全部落定 → REFLECT 找缺口 → 最多 4 个追问 AGENT → SYNTHESIZE
 
     @Test
     void settledAgentsGoToReflectWhenRequested() throws Exception {
@@ -123,8 +121,8 @@ class ResearchAgentDecomposerTest {
         List<SubtaskDef> next = d.nextStage(reflecting(), List.of(
                 sub(0, "PLAN", "COMPLETED", "{}", "{\"subQuestions\":[\"a\"]}"),
                 sub(1, "AGENT", "COMPLETED", "{\"question\":\"a\"}", A1),
-                sub(2, "REFLECT", "COMPLETED", "{}", "{\"gaps\":[\"x\",\"y\",\"z\"]}")));
-        assertEquals(List.of(3, 4), next.stream().map(SubtaskDef::seq).toList(), "最多 2 个追问");
+                sub(2, "REFLECT", "COMPLETED", "{}", "{\"gaps\":[\"x\",\"y\",\"z\",\"u\",\"v\"]}")));
+        assertEquals(List.of(3, 4, 5, 6), next.stream().map(SubtaskDef::seq).toList(), "最多 4 个追问");
         assertTrue(next.stream().allMatch(x -> "AGENT".equals(x.kind())));
         var in = om.readTree(next.get(0).inputJson());
         assertEquals("x", in.get("question").asText());
@@ -171,5 +169,64 @@ class ResearchAgentDecomposerTest {
         var f = om.readTree(next.get(0).inputJson()).get("findings");
         assertEquals(2, f.size());
         assertEquals("x", f.at("/1/subQuestion").asText());
+    }
+
+    // ---- 多轮:追问 agent 落定后再反思,直到没有缺口或用完 payload.rounds
+
+    private static TaskEntity rounds(int n) {
+        TaskEntity t = task();
+        t.setPayload("{\"question\":\"kafka vs rabbitmq\",\"rounds\":" + n + "}");
+        return t;
+    }
+
+    private static final List<SubtaskEntity> ONE_ROUND_DONE = List.of(
+            sub(0, "PLAN", "COMPLETED", "{}", "{\"subQuestions\":[\"a\"]}"),
+            sub(1, "AGENT", "COMPLETED", "{\"question\":\"a\"}", A1),
+            sub(2, "REFLECT", "COMPLETED", "{}", "{\"gaps\":[\"x\"]}"),
+            sub(3, "AGENT", "COMPLETED", "{\"question\":\"x\",\"followUp\":true}", "{\"answer\":\"X1\",\"sources\":[]}"));
+
+    @Test
+    void followUpsSettledReflectAgainWhileRoundsRemain() throws Exception {
+        List<SubtaskDef> next = d.nextStage(rounds(2), ONE_ROUND_DONE);
+        assertEquals(1, next.size());
+        assertEquals("REFLECT", next.get(0).kind());
+        assertEquals(4, next.get(0).seq());
+        assertEquals(2, om.readTree(next.get(0).inputJson()).get("findings").size(), "第二轮反思要看到追问的结论");
+
+        assertEquals("SYNTHESIZE", d.nextStage(rounds(1), ONE_ROUND_DONE).get(0).kind(), "轮数用完直接合成");
+    }
+
+    @Test
+    void laterReflectFansOutFromTheLatestGapsAndSkipsAskedQuestions() throws Exception {
+        List<SubtaskEntity> subs = new java.util.ArrayList<>(ONE_ROUND_DONE);
+        subs.add(sub(4, "REFLECT", "COMPLETED", "{}", "{\"gaps\":[\"x\",\"y\"]}"));
+        List<SubtaskDef> next = d.nextStage(rounds(2), subs);
+        assertEquals(1, next.size(), "x 已经查过,只派 y");
+        assertEquals(5, next.get(0).seq());
+        assertEquals("y", om.readTree(next.get(0).inputJson()).get("question").asText());
+
+        subs.set(4, sub(4, "REFLECT", "COMPLETED", "{}", "{\"gaps\":[\"x\",\"a\"]}"));
+        assertEquals("SYNTHESIZE", d.nextStage(rounds(2), subs).get(0).kind(), "追问全是查过的:不空转,直接合成");
+    }
+
+    // ---- 分流:PLAN 输出的 kind 原样传给合成;反思不看 kind,只看 payload.rounds
+
+    @Test
+    void planKindIsPassedToSynthesizeAndDoesNotTurnReflectionOn() throws Exception {
+        List<SubtaskDef> next = d.nextStage(task(), List.of(
+                sub(0, "PLAN", "COMPLETED", "{}", "{\"kind\":\"answer\",\"subQuestions\":[\"kafka vs rabbitmq\"]}"),
+                sub(1, "AGENT", "COMPLETED", "{\"question\":\"kafka vs rabbitmq\"}", A1)));
+        assertEquals("SYNTHESIZE", next.get(0).kind(), "答案类默认也不反思(评测:多花一倍 token,提升在误差内)");
+        assertEquals("answer", om.readTree(next.get(0).inputJson()).get("kind").asText(), "合成据此先给答案");
+    }
+
+    @Test
+    void roundsDefaultToZeroAndAreClamped() throws Exception {
+        assertEquals(0, ResearchAgentDecomposer.rounds(om.readTree("{}")));
+        assertEquals(ResearchAgentDecomposer.MAX_ROUNDS, ResearchAgentDecomposer.rounds(om.readTree("{\"rounds\":99}")));
+        assertEquals(0, ResearchAgentDecomposer.rounds(om.readTree("{\"rounds\":-1}")));
+        assertEquals(1, ResearchAgentDecomposer.rounds(om.readTree("{\"reflect\":true}")), "页面 Deep review 开关传的是 reflect");
+        assertEquals(0, ResearchAgentDecomposer.rounds(om.readTree("{\"reflect\":false}")));
+        assertEquals(3, ResearchAgentDecomposer.rounds(om.readTree("{\"reflect\":true,\"rounds\":3}")), "rounds 优先");
     }
 }

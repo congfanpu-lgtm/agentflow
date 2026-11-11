@@ -93,8 +93,9 @@ public class SynthesizeProcessor implements SubtaskProcessor {
             user.append("\n\n");
         }
 
+        String role = "answer".equals(in.path("kind").asText()) ? Prompts.SYNTHESIZER + Prompts.ANSWER_FIRST : Prompts.SYNTHESIZER;
         ChatResponse resp = gateway.chat(new ChatRequest(model, List.of(
-                new ChatMessage("system", Prompts.system(Prompts.SYNTHESIZER, question)), new ChatMessage("user", user.toString())), 4000));
+                new ChatMessage("system", Prompts.system(role, question)), new ChatMessage("user", user.toString())), 4000));
         String report = stripInvalidCitations(resp.getContent(), sources.size());
         if (report.isBlank()) {
             throw new IllegalStateException("合成报告为空");

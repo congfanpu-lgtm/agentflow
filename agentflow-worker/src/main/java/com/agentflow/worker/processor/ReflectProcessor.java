@@ -20,14 +20,14 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * RESEARCH_AGENT 反思阶段:审阅各 agent 的结论,找出回答原问题还缺什么,输出最多 2 个追问
- * (服务端据此再派 agent,只做一轮)。输出解析失败按"无缺口"处理:反思是增益环节,不为格式问题烧重试。
+ * RESEARCH_AGENT 反思阶段:审阅各 agent 的结论,找出回答原问题还缺什么,输出最多 4 个追问
+ * (服务端据此再派 agent,可以多轮)。输出解析失败按"无缺口"处理:反思是增益环节,不为格式问题烧重试。
  */
 @Component
 @RequiredArgsConstructor
 public class ReflectProcessor implements SubtaskProcessor {
 
-    static final int MAX_GAPS = 2;
+    static final int MAX_GAPS = 4;
     private static final ObjectMapper OM = new ObjectMapper();
 
     private final LlmGateway gateway;
@@ -48,9 +48,11 @@ public class ReflectProcessor implements SubtaskProcessor {
             user.append("### ").append(f.path("subQuestion").asText()).append('\n')
                     .append(f.path("answer").asText()).append("\n来源数:").append(f.path("sources").size()).append("\n\n");
         }
+        // 追问会原样交给下一个 agent 当问题:语言跑偏(英文问题写出中文追问)会带偏检索和后续结论,所以在末尾再钉一次
+        user.append(Prompts.language(question));
         ChatResponse resp = gateway.chat(new ChatRequest(model, List.of(
                 new ChatMessage("system", Prompts.system(Prompts.REFLECTOR, question)),
-                new ChatMessage("user", user.toString())), 400));
+                new ChatMessage("user", user.toString())), 600));
 
         Set<String> gaps = new LinkedHashSet<>();
         String reason = "";

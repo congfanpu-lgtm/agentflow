@@ -212,7 +212,7 @@
     <h1>Ask a research question</h1>
     <p>A planner splits it into sub-questions, parallel ReAct agents investigate each one with real tools on a Kafka
       worker pool, an optional reviewer sends follow-up agents to fill gaps, and a writer turns the evidence into a cited report.</p>
-    <div class="ask"><input id="q" maxlength="500" placeholder="e.g. What are the trade-offs between Kafka and RabbitMQ for agent systems?"><label class="deep" title="A reviewer checks the findings for gaps and sends up to 2 follow-up agents (≈2× time and cost)"><input type="checkbox" id="deep"><span>Deep<span class="long"> review</span></span></label><button id="ask" class="btn">Research</button></div>
+    <div class="ask"><input id="q" maxlength="500" placeholder="e.g. What are the trade-offs between Kafka and RabbitMQ for agent systems?"><label class="deep" title="A reviewer checks whether the findings answer the question and sends up to 4 follow-up agents if not (≈2× time and cost)"><input type="checkbox" id="deep"><span>Deep<span class="long"> review</span></span></label><button id="ask" class="btn">Research</button></div>
     <div class="examples" id="examples"></div>
     <div class="how"><span><b>① Plan</b> split the question</span><span><b>② Research</b> agents call real tools</span><span><b>③ Review</b> optional gap check</span><span><b>④ Report</b> cite the evidence</span></div>
   </div>

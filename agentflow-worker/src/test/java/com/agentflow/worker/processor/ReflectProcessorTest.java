@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-/** 反思:读各 agent 结论,找出回答原问题还缺什么,给出最多 2 个追问。 */
+/** 反思:读各 agent 结论,找出回答原问题还缺什么,给出最多 4 个追问。 */
 class ReflectProcessorTest {
 
     private static final ObjectMapper OM = new ObjectMapper();
@@ -48,10 +48,10 @@ class ReflectProcessorTest {
     }
 
     @Test
-    void dedupesTrimsAndCapsGapsAtTwo() throws Exception {
-        JsonNode out = run("```json\n{\"gaps\":[\" ordering guarantees? \",\"ordering guarantees?\",\"\",\"ops cost?\",\"x\"],"
+    void dedupesTrimsAndCapsGaps() throws Exception {
+        JsonNode out = run("```json\n{\"gaps\":[\" ordering guarantees? \",\"ordering guarantees?\",\"\",\"ops cost?\",\"x\",\"y\",\"z\"],"
                 + "\"reason\":\"no ordering info\"}\n```");
-        assertEquals(List.of("ordering guarantees?", "ops cost?"), gaps(out));
+        assertEquals(List.of("ordering guarantees?", "ops cost?", "x", "y"), gaps(out));
         assertEquals("no ordering info", out.get("reason").asText());
         assertEquals(1, out.at("/usage/calls").asInt());
     }
@@ -77,5 +77,6 @@ class ReflectProcessorTest {
         assertTrue(msgs.get(0).getContent().endsWith(Prompts.ENGLISH));
         String user = msgs.get(1).getContent();
         assertTrue(user.contains("kafka vs rabbitmq") && user.contains("### routing?\nRabbitMQ routes flexibly"), user);
+        assertTrue(user.endsWith(Prompts.ENGLISH), "追问的语言在 user 消息末尾再钉一次");
     }
 }

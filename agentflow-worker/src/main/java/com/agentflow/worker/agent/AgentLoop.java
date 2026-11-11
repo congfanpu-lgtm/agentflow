@@ -40,14 +40,14 @@ import java.util.stream.Collectors;
  *       {@link #MIN_QUOTE_CHARS} 字,否则去掉摘录,计入 unverifiedQuotes。</li>
  *   <li>最多 {@link #MAX_STEPS} 步,超出则去掉工具强制作答。</li>
  * </ul>
- * ponytail: 上下文靠"单个工具结果截断 2000 字 × 最多 6 步"封顶,没有按 token 预算裁剪历史
+ * ponytail: 上下文靠"单个工具结果截断 2000 字 × 最多 10 步"封顶,没有按 token 预算裁剪历史
  * (tool_call 与结果必须成对,不能像 AgentContext 那样逐条丢);步数调大时再加摘要压缩。
  */
 @Slf4j
 @Component
 public class AgentLoop {
 
-    static final int MAX_STEPS = 6;
+    static final int MAX_STEPS = 10;   // 6 → 10:不拆的链式问题要一个 agent 连查几环(FRAMES 试跑里最多用到 9 步)
     static final int MAX_TOKENS = 1600;   // 800 时带摘录的 JSON 常被截断,来源全丢(见评测 v3)
     static final int PREVIEW_CHARS = 300;
     static final String ERROR = "ERROR: ";
