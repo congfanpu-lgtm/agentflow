@@ -1,0 +1,1811 @@
+{
+ "meta": {
+  "label": "dev",
+  "date": "2026-11-10 21:53",
+  "model": "claude-haiku-5-5",
+  "judge": "claude-sonnet-5-5",
+  "seed": 20261110,
+  "offset": 0,
+  "n": 30,
+  "payload": {}
+ },
+ "summary": {
+  "n": 30,
+  "agentCorrect": 19,
+  "completed": 30,
+  "tokensPerQuestion": 22820,
+  "latencyP50": 12.7,
+  "roundsPerQuestion": 0.0,
+  "agents": 30,
+  "avgSteps": 4.3,
+  "agentsNoSource": 1,
+  "goldSeen": 46,
+  "goldTotal": 90,
+  "closedBookCorrect": 16
+ },
+ "records": [
+  {
+   "taskUuid": "6cc3717f-d1fe-46ca-9095-6cc254bc0655",
+   "status": "COMPLETED",
+   "latencySec": 30.7,
+   "subQuestions": [
+    "Concerning just the winners between 2019 and 2024, which Pulitzer Prize-winning author was born in Maryland?"
+   ],
+   "agents": [
+    {
+     "status": "COMPLETED",
+     "steps": 8,
+     "sources": 2,
+     "error": null
+    }
+   ],
+   "usage": {
+    "calls": 10,
+    "promptTokens": 65086,
+    "completionTokens": 2824,
+    "costMicro": 67910
+   },
+   "report": "I could not verify a Pulitzer Prize winner born in Maryland among the 2019–2024 winners. The only Maryland-born Pulitzer winner identified is Upton Sinclair, who was born in Baltimore but won in 1943, outside the requested window. Jayne Anne Phillips, the 2024 Fiction winner, was born in West Virginia, not Maryland.\n\nThe research did not verify birthplaces for most other 2019–2024 winners across the biography, history, poetry, and drama categories, so a Maryland-born winner in those categories cannot be ruled out. Checking each winner's birthplace individually would settle the question.",
+   "sources": [
+    {
+     "n": 1,
+     "url": "https://www.history.com/this-day-in-history/september-20/upton-sinclair-is-born",
+     "title": "Upton Sinclair is born | September 20, 1878 | HISTORY"
+    },
+    {
+     "n": 2,
+     "url": "https://en.wikipedia.org/wiki/Jayne_Anne_Phillips",
+     "quote": "Jayne Anne Phillips (born July 19, 1952) is an American novelist and short story writer who was born in the small town of Buckhannon, West Virginia.",
+     "title": "Jayne Anne Phillips"
+    }
+   ],
+   "rounds": 0,
+   "followUps": [],
+   "id": "frames-504",
+   "category": "Multiple constraints | Temporal reasoning",
+   "question": "Concerning just the winners between 2019 and 2024, which Pulitzer Prize-winning author was born in Maryland?",
+   "gold": "Barbara Kingsolver",
+   "goldLinks": [
+    "barbara kingsolver",
+    "colson whitehead",
+    "hernan diaz (writer)",
+    "jayne anne phillips",
+    "joshua cohen (writer)",
+    "louise erdrich",
+    "pulitzer prize for fiction",
+    "richard powers"
+   ],
+   "goldSeen": [
+    "jayne anne phillips",
+    "pulitzer prize for fiction"
+   ],
+   "toolCalls": 17,
+   "agentVerdict": "incorrect",
+   "agentReason": "Response fails to identify Barbara Kingsolver (Maryland-born, 2023 Fiction winner) and says it could not determine the answer.",
+   "closedBook": "Barbara Kingsolver",
+   "closedVerdict": "correct",
+   "closedReason": "Response 'Barbara Kingsolver' exactly matches the ground truth answer."
+  },
+  {
+   "taskUuid": "1c6f64ff-ba35-4708-bc31-1b2d17c0d32e",
+   "status": "COMPLETED",
+   "latencySec": 30.7,
+   "subQuestions": [
+    "Lauryn Hill has one older brother named Malaney. The year he was born, a famous baseball player who played his final season with the Philadelphia Athletics died in March. That player was elected to the Baseball Hall of Fame. 6 years later after his election, the only person to be inducted to the Baseball Hall of Fame had how many total career wins?"
+   ],
+   "agents": [
+    {
+     "status": "COMPLETED",
+     "steps": 11,
+     "sources": 2,
+     "error": null
+    }
+   ],
+   "usage": {
+    "calls": 13,
+    "promptTokens": 92018,
+    "completionTokens": 2745,
+    "costMicro": 94763
+   },
+   "report": "**Answer: I cannot determine the final number from verified sources.**\n\nThe chain resolves partway, but the last step is unconfirmed:\n\n1. **Malaney Hill's birth year:** 1972. The sub-question conclusion gives this, but the Lauryn Hill source [1] was not shown with the sentence that supports it, so I treat it as unverified.\n2. **Baseball player:** Zack Wheat, who died March 11, 1972, and whose final season was with the Philadelphia Athletics in 1927 [2]. The source confirms the Athletics detail. The death date and Hall of Fame election come from the sub-question conclusion, not from the cited material.\n3. **Election year:** 1959, per the sub-question conclusion. This gives a target year of 1965 (1959 + 6).\n4. **Remaining step:** I did not verify who was the only person inducted into the Hall of Fame in 1965, or that person's career wins. Without that, no number can be given.\n\nThe question's wording suggests a single inductee in that year, which would be a useful check, but I have no source for that. To finish, one would need to confirm the 1965 Hall of Fame class and then look up the career win total of the inductee in that class.",
+   "sources": [
+    {
+     "n": 1,
+     "url": "https://en.wikipedia.org/wiki/Lauryn_Hill",
+     "title": "Lauryn Hill - Wikipedia"
+    },
+    {
+     "n": 2,
+     "url": "https://en.wikipedia.org/wiki/Zack_Wheat",
+     "quote": "After 18 seasons in Brooklyn, he played his final season with the Philadelphia Athletics.",
+     "title": "Zack Wheat - Wikipedia"
+    }
+   ],
+   "rounds": 0,
+   "followUps": [],
+   "id": "frames-331",
+   "category": "Numerical reasoning | Tabular reasoning | Multiple constraints | Post processing | Temporal reasoning",
+   "question": "Lauryn Hill has one older brother named Malaney. The year he was born, a famous baseball player who played his final season with the Philadelphia Athletics died in March. That player was elected to the Baseball Hall of Fame. 6 years later after his election, the only person to be inducted to the Baseball Hall of Fame had how many total career wins? ",
+   "gold": "365",
+   "goldLinks": [
+    "1972",
+    "lauryn hill",
+    "list of members of the baseball hall of fame",
+    "pud galvin",
+    "zack wheat"
+   ],
+   "goldSeen": [
+    "lauryn hill",
+    "zack wheat"
+   ],
+   "toolCalls": 13,
+   "agentVerdict": "incorrect",
+   "agentReason": "Response explicitly declines to give a final number; ground truth is 365.",
+   "closedBook": "I could not reliably complete this chain. The clue points to a baseball figure whose final season was with the Philadelphia Athletics and who died in March of the year Malaney Hill was born (around 1972), but I could not confidently identify that player or the subsequent Hall of Fame induction six years later, so I cannot determine the career wins figure.",
+   "closedVerdict": "incorrect",
+   "closedReason": "Response gives no final answer and says it cannot determine the career wins; ground truth is 365."
+  },
+  {
+   "taskUuid": "7dcfedc7-5740-4122-aa7f-da004e31f98d",
+   "status": "COMPLETED",
+   "latencySec": 12.7,
+   "subQuestions": [
+    "How old was Akira Toriyama when Pokemon Diamond and Pearl was released in America?"
+   ],
+   "agents": [
+    {
+     "status": "COMPLETED",
+     "steps": 3,
+     "sources": 2,
+     "error": null
+    }
+   ],
+   "usage": {
+    "calls": 5,
+    "promptTokens": 9042,
+    "completionTokens": 925,
+    "costMicro": 9967
+   },
+   "report": "**Answer: Akira Toriyama was 52 years old** when Pokémon Diamond and Pearl were released in America on April 22, 2007.\n\nNintendo of America announced that the North American release of the games was slated for April 22, 2007 [1]. Toriyama was born on April 5, 1955 [2]. Counting from that birthday, he turned 52 on April 5, 2007, so he was 52 on the release date, about two weeks after his birthday.",
+   "sources": [
+    {
+     "n": 1,
+     "url": "https://en.wikipedia.org/wiki/Pok%C3%A9mon_Diamond_and_Pearl",
+     "quote": "On December 20, 2006, Nintendo of America announced that the North American release of the games was slated for April 22, 2007, and that those who pre-ordered their copies of the games would receive special DS styluses",
+     "title": "Pokémon Diamond and Pearl - Wikipedia"
+    },
+    {
+     "n": 2,
+     "url": "https://en.wikipedia.org/wiki/Akira_Toriyama",
+     "quote": "Akira Toriyama (Japanese: 鳥山明, Hepburn: Toriyama Akira; April 5, 1955 – March 1, 2024) was a Japanese manga artist and character designer.",
+     "title": "Akira Toriyama - Wikipedia"
+    }
+   ],
+   "rounds": 0,
+   "followUps": [],
+   "id": "frames-463",
+   "category": "Numerical reasoning | Temporal reasoning",
+   "question": "How old was Akira Toriyama when Pokemon Diamond and Pearl was released in America?",
+   "gold": "Akira Toriyama was 52.",
+   "goldLinks": [
+    "akira toriyama",
+    "pokémon diamond and pearl"
+   ],
+   "goldSeen": [
+    "akira toriyama",
+    "pokémon diamond and pearl"
+   ],
+   "toolCalls": 3,
+   "agentVerdict": "correct",
+   "agentReason": "Response states Toriyama was 52, matching the ground truth.",
+   "closedBook": "52",
+   "closedVerdict": "correct",
+   "closedReason": "Response '52' matches ground truth age of 52."
+  },
+  {
+   "taskUuid": "f242483c-d723-4a85-9139-d767b14f6939",
+   "status": "COMPLETED",
+   "latencySec": 15.2,
+   "subQuestions": [
+    "As of August 3, 2024, excluding white, what colour features on the flag of the city that houses the racecourse where Danon The Kid made his racing debut?"
+   ],
+   "agents": [
+    {
+     "status": "COMPLETED",
+     "steps": 5,
+     "sources": 3,
+     "error": null
+    }
+   ],
+   "usage": {
+    "calls": 7,
+    "promptTokens": 19608,
+    "completionTokens": 1203,
+    "costMicro": 20811
+   },
+   "report": "**Answer: Red.** Excluding white, the only colour on the flag of Takarazuka (the city that houses Hanshin Racecourse) is red.\n\nDanon The Kid made his racecourse debut at Hanshin Racecourse on 28 June, in a race for newcomers over 1800 metres on good ground, ridden by Yuichi Kitamura [1]. Hanshin Racecourse is located in Takarazuka, Hyōgo, Japan [2]. The flag of Takarazuka is white with a red city emblem at its centre, a stylised form of the katakana タカラ (Takara) [3].",
+   "sources": [
+    {
+     "n": 1,
+     "url": "https://en.wikipedia.org/wiki/Danon_The_Kid",
+     "quote": "Danon The Kid made his racecourse debut at Hanshin Racecourse on 28 June when he was ridden by Yuichi Kitamura in a race for newcomers over 1800 metres on good ground",
+     "title": "Danon The Kid - Wikipedia"
+    },
+    {
+     "n": 2,
+     "url": "https://en.wikipedia.org/wiki/Hanshin_Racecourse",
+     "quote": "Hanshin Racecourse (阪神競馬場, Hanshin-keibajō) is located in Takarazuka, Hyogo, Japan.",
+     "title": "Hanshin Racecourse - Wikipedia"
+    },
+    {
+     "n": 3,
+     "url": "https://www.crwflags.com/fotw/flags/jp-28-tz.html",
+     "title": "Takarazuka City (Hyōgo prefecture - Japan) - FOTW"
+    }
+   ],
+   "rounds": 0,
+   "followUps": [],
+   "id": "frames-356",
+   "category": "Multiple constraints",
+   "question": "As of August 3, 2024, excluding white, what colour features on the flag of the city that houses the racecourse where Danon The Kid made his racing debut?",
+   "gold": "Red",
+   "goldLinks": [
+    "danon the kid",
+    "hanshin racecourse",
+    "takarazuka, hyōgo"
+   ],
+   "goldSeen": [
+    "danon the kid",
+    "hanshin racecourse",
+    "takarazuka, hyōgo"
+   ],
+   "toolCalls": 5,
+   "agentVerdict": "correct",
+   "agentReason": "Response answers red, matching the ground truth, with plausible supporting reasoning about Takarazuka's flag.",
+   "closedBook": "Blue",
+   "closedVerdict": "incorrect",
+   "closedReason": "Response says Blue, but the ground truth answer is Red."
+  },
+  {
+   "taskUuid": "56964ae3-cdd3-4297-8277-852009429a81",
+   "status": "COMPLETED",
+   "latencySec": 15.2,
+   "subQuestions": [
+    "The Eastern Shawnee Tribe of Oklahoma owns and operates the Indigo Sky Casino. Their tribal headquarters are located in a suburb of the metropolitan area of a historic 2011 tornado that killed 158 people. What is the name of the metropolitan area?"
+   ],
+   "agents": [
+    {
+     "status": "COMPLETED",
+     "steps": 4,
+     "sources": 5,
+     "error": null
+    }
+   ],
+   "usage": {
+    "calls": 6,
+    "promptTokens": 17165,
+    "completionTokens": 2288,
+    "costMicro": 19453
+   },
+   "report": "**The metropolitan area is the Joplin metropolitan area (Joplin, MO–KS)**, which forms part of the broader Joplin–Miami Combined Statistical Area.\n\nThe 2011 tornado that killed 158 people was the Joplin tornado, which struck Joplin, Missouri, on May 22, 2011. It was the deadliest tornado of 2011 and killed 158 people, including eight indirect deaths [2]. The Joplin metropolitan area, as defined by the U.S. Census Bureau, consists of Jasper, Newton, and Cherokee counties in southwest Missouri and southeast Kansas, anchored by the city of Joplin [3].\n\nThe Eastern Shawnee Tribe of Oklahoma owns and operates the Indigo Sky Casino [1]. Its tribal headquarters is in Wyandotte, Oklahoma (Ottawa County). The sources do not explicitly place Wyandotte within the Joplin metropolitan area or the Joplin–Miami Combined Statistical Area. The Combined Statistical Area includes the Miami, Oklahoma micropolitan area [3], and Wyandotte is located in Ottawa County near Miami, which supports the connection. This link is an inference, not a stated fact, and should be checked against current Census delineation files before being relied on.",
+   "sources": [
+    {
+     "n": 1,
+     "url": "https://en.wikipedia.org/wiki/Eastern_Shawnee_Tribe_of_Oklahoma",
+     "title": "Eastern Shawnee Tribe of Oklahoma - Wikipedia"
+    },
+    {
+     "n": 2,
+     "url": "https://en.wikipedia.org/wiki/Joplin_tornado",
+     "quote": "Overall, the tornado killed 158 people (including eight indirect deaths) and injured some 1,150 others, making it the deadliest tornado of 2011.",
+     "title": "Joplin tornado"
+    },
+    {
+     "n": 3,
+     "url": "https://en.wikipedia.org/wiki/Joplin_metropolitan_area",
+     "quote": "The Joplin, Missouri-Kansas, Metropolitan Statistical Area (MSA), as defined by the United States Census Bureau, is an area consisting of Jasper, Newton, and  Cherokee counties in southwest Missouri and southeast Kansas anchored by the city of Joplin.",
+     "title": "Joplin metropolitan area"
+    }
+   ],
+   "rounds": 0,
+   "followUps": [],
+   "id": "frames-349",
+   "category": "Multiple constraints",
+   "question": "The Eastern Shawnee Tribe of Oklahoma owns and operates the Indigo Sky Casino. Their tribal headquarters are located in a suburb of the metropolitan area of a historic 2011 tornado that killed 158 people. What is the name of the metropolitan area?",
+   "gold": "Joplin, Missouri metropolitan area",
+   "goldLinks": [
+    "2011 joplin tornado",
+    "eastern shawnee tribe of oklahoma",
+    "wyandotte, oklahoma"
+   ],
+   "goldSeen": [
+    "eastern shawnee tribe of oklahoma",
+    "wyandotte, oklahoma"
+   ],
+   "toolCalls": 5,
+   "agentVerdict": "correct",
+   "agentReason": "Response identifies the Joplin metropolitan area, matching the ground truth despite extra caveats.",
+   "closedBook": "Joplin, Missouri metropolitan area",
+   "closedVerdict": "correct",
+   "closedReason": "Response exactly matches the ground truth: Joplin, Missouri metropolitan area."
+  },
+  {
+   "taskUuid": "5fd6e657-cf93-4d2c-a318-59ac6b6d8ede",
+   "status": "COMPLETED",
+   "latencySec": 12.1,
+   "subQuestions": [
+    "Was the founder of the bank that was established 42 years before the National Banking Act was expanded to include the Territory of Hawai'i still alive when it acquired Pioneer Federal Savings Bank?"
+   ],
+   "agents": [
+    {
+     "status": "COMPLETED",
+     "steps": 4,
+     "sources": 4,
+     "error": null
+    }
+   ],
+   "usage": {
+    "calls": 6,
+    "promptTokens": 16029,
+    "completionTokens": 1722,
+    "costMicro": 17751
+   },
+   "report": "**Answer: No.** Charles Reed Bishop had died long before the 1993 acquisition of Pioneer Federal Savings Bank.\n\nThe chain of reasoning is as follows:\n\n1. **The 1900 extension:** The National Banking Act was extended to the Territory of Hawai'i by a special act of Congress on April 30, 1900 [1].\n2. **The bank established 42 years earlier:** 1900 − 42 = 1858. Bishop & Co., the first bank in the Kingdom of Hawai'i, was founded in 1858 by Charles Reed Bishop and William A. Aldrich [1].\n3. **The founder's lifespan:** Charles Reed Bishop lived from January 25, 1822 to June 7, 1915 [2].\n4. **The acquisition:** First Hawaiian, Inc. (the successor lineage of Bishop & Co.) purchased Pioneer Federal Savings Bank in 1993 [3].\n\nBishop died in 1915, about 78 years before the 1993 acquisition, so he was not alive when it happened.\n\nOne caveat: the sources establish that Bishop & Co. is the institution from which First Hawaiian descends, and the 1993 purchase is attributed to First Hawaiian. The sources don't spell out the corporate succession in detail, but the answer doesn't depend on it, because Bishop was dead by 1993 regardless.",
+   "sources": [
+    {
+     "n": 1,
+     "url": "https://en.wikipedia.org/wiki/U.S._national_banks_of_Hawaii",
+     "quote": "The first bank established in the Kingdom of Hawaii was Bishop & Co., founded by Charles Reed Bishop and William A. Aldrich in 1858.",
+     "title": "U.S. national banks of Hawaii"
+    },
+    {
+     "n": 2,
+     "url": "https://en.wikipedia.org/wiki/Charles_Reed_Bishop",
+     "quote": "Charles Reed Bishop (January 25, 1822 – June 7, 1915) was an American businessman, politician, and philanthropist in Hawaii.",
+     "title": "Charles Reed Bishop"
+    },
+    {
+     "n": 3,
+     "url": "https://www.encyclopedia.com/books/politics-and-business-magazines/first-hawaiian-inc",
+     "quote": "Dods continued his acquisition strategy in 1993 by purchasing Pioneer Federal Savings Bank.",
+     "title": "First Hawaiian, Inc. | Encyclopedia.com"
+    }
+   ],
+   "rounds": 0,
+   "followUps": [],
+   "id": "frames-107",
+   "category": "Numerical reasoning | Multiple constraints | Temporal reasoning",
+   "question": "Was the founder of the bank that was established 42 years before the National Banking Act was expanded to include the Territory of Hawai'i still alive when it acquired Pioneer Federal Savings Bank?",
+   "gold": "No",
+   "goldLinks": [
+    "charles reed bishop",
+    "first hawaiian bank",
+    "u.s. national banks of hawaii"
+   ],
+   "goldSeen": [
+    "charles reed bishop",
+    "first hawaiian bank",
+    "u.s. national banks of hawaii"
+   ],
+   "toolCalls": 5,
+   "agentVerdict": "correct",
+   "agentReason": "Response answers No, matching ground truth, with consistent reasoning (Bishop died 1915, acquisition 1993).",
+   "closedBook": "No. The bank was Bishop & Co. (established 1858, later First Hawaiian Bank), whose founder Charles Reed Bishop died in 1915, long before First Hawaiian acquired Pioneer Federal Savings Bank in 1993.",
+   "closedVerdict": "correct",
+   "closedReason": "Response answers No, matching ground truth, with consistent supporting reasoning."
+  },
+  {
+   "taskUuid": "d0fd7755-44f9-48aa-a1a2-a33bcc725fca",
+   "status": "COMPLETED",
+   "latencySec": 18.2,
+   "subQuestions": [
+    "If an Ixodes scapularis tick in its nymph stage feeds on a host in the Spring, how many seasons later is it most likely to transmit Lyme disease if it becomes an adult in the same year?"
+   ],
+   "agents": [
+    {
+     "status": "COMPLETED",
+     "steps": 3,
+     "sources": 2,
+     "error": null
+    }
+   ],
+   "usage": {
+    "calls": 5,
+    "promptTokens": 9279,
+    "completionTokens": 1218,
+    "costMicro": 10497
+   },
+   "report": "**Answer: About one season later, which is the following fall (roughly one year after the nymph's spring feeding).**\n\nIxodes scapularis nymphs feed in spring and early summer and molt into adults in the fall. A nymph that feeds in spring and molts that same year becomes an adult in the fall, then overwinters. Adults seek hosts in the fall and on warm winter and spring days [2]. Their most active feeding period is therefore the following fall, when they are most likely to transmit *Borrelia burgdorferi* to a host [1][2]. The next spring is also a possible feeding period, but it is less active than the fall.\n\nThe nymph itself can transmit Lyme disease during its spring feeding, when it is hard to notice. The adult stage is the one most commonly found on humans and is the next major transmission window.",
+   "sources": [
+    {
+     "n": 1,
+     "url": "https://www.cdc.gov/ticks/about/tick-lifecycles.html",
+     "title": "Tick Lifecycles | Ticks | CDC"
+    },
+    {
+     "n": 2,
+     "url": "https://wisconsin-ticks.russell.wisc.edu/ixodes-scapularis-life-cycle",
+     "quote": "During the fall, nymphs molt into adult male and female ticks. Adults seek medium to large mammalian hosts, particularly white-tailed deer (Odocoileus virginianus) during the fall and warm days of winter and the spring.",
+     "title": "Ixodes scapularis Life cycle – Wisconsin Ticks and Tick-borne Diseases – UW–Madison"
+    }
+   ],
+   "rounds": 0,
+   "followUps": [],
+   "id": "frames-105",
+   "category": "Numerical reasoning | Temporal reasoning",
+   "question": "If an Ixodes scapularis tick in its nymph stage feeds on a host in the Spring, how many seasons later is it most likely to transmit Lyme disease if it becomes an adult in the same year?",
+   "gold": "Two seasons.",
+   "goldLinks": [
+    "lyme disease",
+    "tick"
+   ],
+   "goldSeen": [],
+   "toolCalls": 3,
+   "agentVerdict": "incorrect",
+   "agentReason": "Response says about one season later (following fall); ground truth is two seasons.",
+   "closedBook": "About two seasons later (the following fall, when the adult feeds).",
+   "closedVerdict": "correct",
+   "closedReason": "Response states about two seasons later, matching the ground truth of two seasons."
+  },
+  {
+   "taskUuid": "5daf0707-e81c-42c2-a64d-54d4838f5c7a",
+   "status": "COMPLETED",
+   "latencySec": 15.2,
+   "subQuestions": [
+    "If we added the sum of all ages as of 2010 (assuming they were still alive) of the inventors of the cotton gin, vacuum pump, and commercial toilet paper (ignoring the month) and then subtracted the ages of the inventors of the safety pin and the sewing machine what number would we have?"
+   ],
+   "agents": [
+    {
+     "status": "COMPLETED",
+     "steps": 3,
+     "sources": 6,
+     "error": null
+    }
+   ],
+   "usage": {
+    "calls": 5,
+    "promptTokens": 14574,
+    "completionTokens": 2359,
+    "costMicro": 16933
+   },
+   "report": "**441**\n\nUsing the ages as of 2010 (ignoring months):\n\n- Cotton gin (Eli Whitney, born 1765): 245\n- Vacuum pump (Otto von Guericke, born 1602): 408\n- Commercial toilet paper (Joseph Gayetty, born 1817): 193\n\nSum of these three: 846.\n\n- Safety pin (Walter Hunt, born 1796): 214\n- Sewing machine (Elias Howe, born 1819): 191\n\nSum of these two: 405.\n\n846 − 405 = **441**\n\nTwo caveats affect this answer:\n\n1. **Gayetty's birth year is uncertain.** The 1850 census suggests 1817, but some sources give 1827. Using 1827 would make his age 183 and the result 431.\n2. **Walter Hunt also built an early sewing machine.** If he were counted as the sewing machine inventor instead of Howe, the subtracted amount would be 214 + 214 = 428... more precisely, subtracting Hunt's age twice is not right, so the sewing machine term would become 214 instead of 191, giving 846 − (214 + 214) = 418. The conventional attribution to Howe is what the 441 answer assumes.",
+   "sources": [
+    {
+     "n": 1,
+     "url": "https://en.wikipedia.org/wiki/Eli_Whitney",
+     "quote": "Eli Whitney Jr. (December 8, 1765 – January 8, 1825) was an American inventor, widely known for inventing the cotton gin in 1793",
+     "title": "Eli Whitney"
+    },
+    {
+     "n": 2,
+     "url": "https://en.wikipedia.org/wiki/Otto_von_Guericke",
+     "quote": "Otto von Guericke (UK: GAIR-ik-ə, US: G(W)AIR-ik-ə, -⁠ee; German: [ˈɔtoː fɔn ˈɡeːʁɪkə] ; spelled Gericke until 1666; 30 November [O.S. 20 November] 1602 – 21 May [O.S. 11 May] 1686)",
+     "title": "Otto von Guericke"
+    },
+    {
+     "n": 3,
+     "url": "https://en.wikipedia.org/wiki/Vacuum_pump",
+     "quote": "The first vacuum pump was invented in 1650 by Otto von Guericke",
+     "title": "Vacuum pump"
+    },
+    {
+     "n": 4,
+     "url": "https://en.wikipedia.org/wiki/Joseph_Gayetty",
+     "quote": "The first record with his name is the 1850 United States Census, which records that he was born in 1817 in Massachusetts.",
+     "title": "Joseph Gayetty"
+    },
+    {
+     "n": 5,
+     "url": "https://en.wikipedia.org/wiki/Walter_Hunt_(inventor)",
+     "quote": "Walter Hunt (July 29, 1796 – June 8, 1859) was an American mechanical engineer.",
+     "title": "Walter Hunt (inventor)"
+    },
+    {
+     "n": 6,
+     "url": "https://en.wikipedia.org/wiki/Elias_Howe",
+     "quote": "Elias Howe Jr. (; July 9, 1819 – October 3, 1867) was an American inventor best known for his creation of the modern lockstitch sewing machine.",
+     "title": "Elias Howe"
+    }
+   ],
+   "rounds": 0,
+   "followUps": [],
+   "id": "frames-205",
+   "category": "Numerical reasoning | Temporal reasoning",
+   "question": "If we added the sum of all ages as of 2010 (assuming they were still alive) of the inventors of the cotton gin, vacuum pump, and commercial toilet paper (ignoring the month) and then subtracted the ages of the inventors of the safety pin and the sewing machine what number would we have?",
+   "gold": "622",
+   "goldLinks": [
+    "cotton gin",
+    "joseph gayetty",
+    "pneumatics",
+    "walter hunt (inventor)"
+   ],
+   "goldSeen": [
+    "joseph gayetty",
+    "walter hunt (inventor)"
+   ],
+   "toolCalls": 6,
+   "agentVerdict": "incorrect",
+   "agentReason": "Response's final answer is 441, which does not match the ground truth of 622.",
+   "closedBook": "439",
+   "closedVerdict": "incorrect",
+   "closedReason": "Response 439 does not match the ground truth 622."
+  },
+  {
+   "taskUuid": "ad607551-1334-4f49-a204-ce98fbee0fb5",
+   "status": "COMPLETED",
+   "latencySec": 6.1,
+   "subQuestions": [
+    "What lasted longer: the reign of Queen Elizabeth II or the life of Julius Caesar?"
+   ],
+   "agents": [
+    {
+     "status": "COMPLETED",
+     "steps": 2,
+     "sources": 2,
+     "error": null
+    }
+   ],
+   "usage": {
+    "calls": 4,
+    "promptTokens": 5097,
+    "completionTokens": 832,
+    "costMicro": 5929
+   },
+   "report": "**Queen Elizabeth II's reign lasted longer than Julius Caesar's life.**\n\nElizabeth II reigned for 70 years and 214 days, from her accession on 6 February 1952 until her death on 8 September 2022 [1]. Caesar was born on 12 or 13 July 100 BC and was assassinated on 15 March 44 BC [2], so his life lasted roughly 55 to 56 years. The difference is about 14 to 15 years.",
+   "sources": [
+    {
+     "n": 1,
+     "url": "https://en.wikipedia.org/wiki/List_of_monarchs_in_Britain_by_length_of_reign",
+     "quote": "At her death aged 96 later that year, she had reigned for 70 years and 214 days.",
+     "title": "List of monarchs in Britain by length of reign"
+    },
+    {
+     "n": 2,
+     "url": "https://en.wikipedia.org/wiki/Julius_Caesar",
+     "quote": "Gaius Julius Caesar (12 or 13 July 100 BC – 15 March 44 BC) was a Roman general, statesman, and author who was the dictator of the Roman Republic almost continuously from 49 BC until his assassination in 44 BC.",
+     "title": "Julius Caesar"
+    }
+   ],
+   "rounds": 0,
+   "followUps": [],
+   "id": "frames-513",
+   "category": "Temporal reasoning",
+   "question": "What lasted longer: the reign of Queen Elizabeth II or the life of Julius Caesar?",
+   "gold": "The reign of Queen Elizabeth II",
+   "goldLinks": [
+    "elizabeth ii",
+    "julius caesar"
+   ],
+   "goldSeen": [
+    "julius caesar"
+   ],
+   "toolCalls": 2,
+   "agentVerdict": "correct",
+   "agentReason": "Response concludes Elizabeth II's reign lasted longer than Caesar's life, matching the ground truth.",
+   "closedBook": "The reign of Queen Elizabeth II lasted longer, about 70 years, compared with Julius Caesar's life of about 56 years.",
+   "closedVerdict": "correct",
+   "closedReason": "Response identifies Elizabeth II's reign as longer, matching ground truth, with accurate supporting figures."
+  },
+  {
+   "taskUuid": "fa6c921d-278f-4051-bfc3-dc0bade21bed",
+   "status": "COMPLETED",
+   "latencySec": 12.1,
+   "subQuestions": [
+    "How old were the founders of the firm that designed the Empire State Building when construction on the building began?"
+   ],
+   "agents": [
+    {
+     "status": "COMPLETED",
+     "steps": 3,
+     "sources": 5,
+     "error": null
+    }
+   ],
+   "usage": {
+    "calls": 5,
+    "promptTokens": 7641,
+    "completionTokens": 1573,
+    "costMicro": 9214
+   },
+   "report": "**Answer:** When construction began on March 17, 1930, the firm's founders were aged 52 (Richmond Shreve), 51 (Arthur Loomis Harmon), and 46 (William F. Lamb).\n\n**Background:** The Empire State Building was designed by Shreve, Lamb & Harmon, an architectural firm best known for the building, which was the tallest in the world when it was completed in 1931 [1]. Construction started on March 17, 1930, and the building opened thirteen and a half months later, on May 1, 1931 [2].\n\n**Founders' ages on March 17, 1930:**\n- **Richmond Shreve** (born June 25, 1877) was 52. He had not yet reached his 53rd birthday, which fell in June 1930 [3].\n- **Arthur Loomis Harmon** (born July 13, 1878) was 51. His 52nd birthday fell in July 1930 [4].\n- **William F. Lamb** (born November 21, 1883) was 46. He was the principal designer of the building [5].\n\nThe sources list Shreve as a founder of the firm, and Shreve & Lamb was the original name before Harmon joined [1]. Harmon is described as the design partner of the firm [4]. Lamb is not described as a founder in the sources, so the answer treats him as one of the firm's principals rather than a confirmed co-founder.",
+   "sources": [
+    {
+     "n": 1,
+     "url": "https://en.wikipedia.org/wiki/Shreve,_Lamb_%26_Harmon",
+     "quote": "Shreve, Lamb, and Harmon, founded as Shreve & Lamb, was an architectural firm best known for designing the Empire State Building, the tallest building in the world at the time of its completion in 1931.",
+     "title": "Shreve, Lamb & Harmon"
+    },
+    {
+     "n": 2,
+     "url": "https://en.wikipedia.org/wiki/Empire_State_Building",
+     "quote": "Construction started on March 17, 1930, and the building opened thirteen and a half months afterward on May 1, 1931.",
+     "title": "Empire State Building"
+    },
+    {
+     "n": 3,
+     "url": "https://en.wikipedia.org/wiki/Richmond_Shreve",
+     "quote": "Richmond Harold Shreve (June 25, 1877 – September 11, 1946) was a Canadian-American architect.",
+     "title": "Richmond Shreve"
+    },
+    {
+     "n": 4,
+     "url": "https://en.wikipedia.org/wiki/Arthur_Loomis_Harmon",
+     "quote": "Arthur Loomis Harmon (July 13, 1878 – October 17, 1958) was an American architect. He is most famous as the design partner of the firm Shreve, Lamb and Harmon.",
+     "title": "Arthur Loomis Harmon"
+    },
+    {
+     "n": 5,
+     "url": "https://en.wikipedia.org/wiki/William_F._Lamb",
+     "quote": "William Frederick Lamb (November 21, 1883 – September 8, 1952), was an American architect, chiefly known as one of the principal designers of the Empire State Building.",
+     "title": "William F. Lamb"
+    }
+   ],
+   "rounds": 0,
+   "followUps": [],
+   "id": "frames-465",
+   "category": "Numerical reasoning | Multiple constraints | Temporal reasoning",
+   "question": "How old were the founders of the firm that designed the Empire State Building when construction on the building began?",
+   "gold": "Richmond Shreve was 52 years old and William Lamb was 46 years old.",
+   "goldLinks": [
+    "empire state building",
+    "richmond shreve",
+    "shreve, lamb & harmon",
+    "william f. lamb"
+   ],
+   "goldSeen": [
+    "empire state building",
+    "richmond shreve",
+    "shreve, lamb & harmon",
+    "william f. lamb"
+   ],
+   "toolCalls": 3,
+   "agentVerdict": "correct",
+   "agentReason": "Shreve 52 and Lamb 46 match ground truth; extra Harmon age doesn't contradict.",
+   "closedBook": "Richmond Shreve was about 52, William Lamb about 46, and Arthur Loomis Harmon about 51 when construction began in March 1930.",
+   "closedVerdict": "correct",
+   "closedReason": "Gives Shreve 52 and Lamb 46, matching ground truth; Harmon is extra but not contradictory."
+  },
+  {
+   "taskUuid": "8ca5a984-f1e3-4530-98e3-702c51e71d78",
+   "status": "COMPLETED",
+   "latencySec": 9.1,
+   "subQuestions": [
+    "Andre the Giant's favorite acting role was for a 1987 film. Who was the director of that film?"
+   ],
+   "agents": [
+    {
+     "status": "COMPLETED",
+     "steps": 3,
+     "sources": 2,
+     "error": null
+    }
+   ],
+   "usage": {
+    "calls": 5,
+    "promptTokens": 9066,
+    "completionTokens": 751,
+    "costMicro": 9817
+   },
+   "report": "**Rob Reiner** directed *The Princess Bride* (1987), the film in which André the Giant played Fezzik. Wikipedia describes Fezzik as his own favorite role [1], and the film's article states that it was \"directed and co-produced by Rob Reiner\" [2].",
+   "sources": [
+    {
+     "n": 1,
+     "url": "https://en.wikipedia.org/wiki/Andr%C3%A9_the_Giant",
+     "quote": "He appeared most notably as Fezzik, his own favorite role, in the 1987 film The Princess Bride.",
+     "title": "André the Giant - Wikipedia"
+    },
+    {
+     "n": 2,
+     "url": "https://en.wikipedia.org/wiki/The_Princess_Bride",
+     "quote": "The Princess Bride is a 1987 American fantasy-adventure-comedy film directed and co-produced by Rob Reiner and starring Cary Elwes, Robin Wright, Mandy Patinkin, André the Giant, Chris Sarandon, Christopher Guest, Wallace Shawn, Peter Falk, Fred Savage, Billy Crystal and Carol Kane.",
+     "title": "The Princess Bride - Wikipedia"
+    }
+   ],
+   "rounds": 0,
+   "followUps": [],
+   "id": "frames-512",
+   "category": "Multiple constraints",
+   "question": "Andre the Giant's favorite acting role was for a 1987 film. Who was the director of that film?",
+   "gold": "Rob Reiner",
+   "goldLinks": [
+    "andré the giant",
+    "the princess bride (film)"
+   ],
+   "goldSeen": [
+    "andré the giant"
+   ],
+   "toolCalls": 3,
+   "agentVerdict": "correct",
+   "agentReason": "Response identifies Rob Reiner as director of The Princess Bride (1987), matching ground truth.",
+   "closedBook": "Rob Reiner",
+   "closedVerdict": "correct",
+   "closedReason": "Response 'Rob Reiner' exactly matches the ground truth."
+  },
+  {
+   "taskUuid": "67a1c6b0-3e78-4439-aa9b-195b79caba33",
+   "status": "COMPLETED",
+   "latencySec": 9.1,
+   "subQuestions": [
+    "How many years before the founding of Google, was George Orwell's book \"1984\" published?"
+   ],
+   "agents": [
+    {
+     "status": "COMPLETED",
+     "steps": 2,
+     "sources": 2,
+     "error": null
+    }
+   ],
+   "usage": {
+    "calls": 4,
+    "promptTokens": 4926,
+    "completionTokens": 865,
+    "costMicro": 5791
+   },
+   "report": "**Answer: 49 years.** George Orwell's *Nineteen Eighty-Four* was published in 1949, 49 years before Google was founded in 1998 (1998 − 1949 = 49) [1][2].\n\nThe 1949 publication date comes from the description of Orwell's \"1949 dystopian political novel Nineteen Eighty-Four\" [1]. The 1998 date comes from the statement that Google's \"inaugural product\" was launched in 1998, developed mainly by co-founders Larry Page and Sergey Brin [2]. That source describes the 1998 launch of the company's first product rather than its incorporation, so it supports the founding year as used here. Google was incorporated on September 4, 1998, a date that does not appear in the cited sources.",
+   "sources": [
+    {
+     "n": 1,
+     "url": "https://en.wikipedia.org/wiki/Adaptations_of_Nineteen_Eighty-Four",
+     "quote": "George Orwell's 1949 dystopian political novel Nineteen Eighty-Four, has been adapted for the cinema, radio, television, theatre, opera and ballet.",
+     "title": "Adaptations of Nineteen Eighty-Four"
+    },
+    {
+     "n": 2,
+     "url": "https://en.wikipedia.org/wiki/Google_Search",
+     "quote": "Launched in 1998 as the company's inaugural product and mostly developed by the company's co-founders, Larry Page and Sergey Brin",
+     "title": "Google Search"
+    }
+   ],
+   "rounds": 0,
+   "followUps": [],
+   "id": "frames-605",
+   "category": "Numerical reasoning | Tabular reasoning",
+   "question": "How many years before the founding of Google, was George Orwell's book \"1984\" published?",
+   "gold": "49 years.",
+   "goldLinks": [
+    "google",
+    "nineteen eighty-four"
+   ],
+   "goldSeen": [],
+   "toolCalls": 2,
+   "agentVerdict": "correct",
+   "agentReason": "Response gives 49 years (1998 − 1949), matching the ground truth.",
+   "closedBook": "49 years",
+   "closedVerdict": "correct",
+   "closedReason": "Response states 49 years, matching the ground truth exactly."
+  },
+  {
+   "taskUuid": "3cbcf01b-2fe7-4546-b81d-b4972fb05744",
+   "status": "COMPLETED",
+   "latencySec": 24.2,
+   "subQuestions": [
+    "Rosie Ruiz was disqualified from the Boston Marathon. The subsequent winner placed in what position of the 1988 Grandma's Marathon?"
+   ],
+   "agents": [
+    {
+     "status": "COMPLETED",
+     "steps": 6,
+     "sources": 2,
+     "error": null
+    }
+   ],
+   "usage": {
+    "calls": 8,
+    "promptTokens": 34745,
+    "completionTokens": 1973,
+    "costMicro": 36718
+   },
+   "report": "**Answer: The subsequent Boston winner's 1988 Grandma's Marathon position could not be determined from the available sources.**\n\nRosie Ruiz was declared the women's winner of the 1980 Boston Marathon but was stripped of the title eight days later, after it emerged that she had not run the entire course [1]. The sources do not identify who was then named the winner, so the chain of the question cannot be completed from them.\n\nThe 1988 Grandma's Marathon women's results list Jacqueline Gareau first in 2:43:27, with Yoli Casas second and Juditydh Hine third [2]. Those results do not show any runner who could be linked to the 1980 Boston title, and that runner was not found in the top 10 of the women's results. Without the name of the runner who was awarded the Boston title, no position can be assigned.\n\nConfirming the answer would require the official 1980 Boston Marathon results after Ruiz's disqualification, which would name the reinstated winner, followed by that person's place in the full 1988 Grandma's Marathon results.",
+   "sources": [
+    {
+     "n": 1,
+     "url": "https://en.wikipedia.org/wiki/Rosie_Ruiz",
+     "quote": "was declared the winner in the female category for the 84th Boston Marathon in 1980, only to have her title stripped eight days after the race when it was discovered that she had not run the entire course.",
+     "title": "Rosie Ruiz - Wikipedia"
+    },
+    {
+     "n": 2,
+     "url": "https://www.mtecresults.com/race/leaderboard/7688/1988_Grandma%2527s_Marathon-Marathon",
+     "title": "Leaderboard - Marathon - 1988 Grandma's Marathon - MTEC Results"
+    }
+   ],
+   "rounds": 0,
+   "followUps": [],
+   "id": "frames-146",
+   "category": "Tabular reasoning | Multiple constraints",
+   "question": "Rosie Ruiz was disqualified from the Boston Marathon. The subsequent winner placed in what position of the 1988 Grandma's Marathon?",
+   "gold": "Jacqueline Gareau placed first in the 1988 Grandma's Marathon.",
+   "goldLinks": [
+    "boston marathon",
+    "jacqueline gareau"
+   ],
+   "goldSeen": [],
+   "toolCalls": 8,
+   "agentVerdict": "incorrect",
+   "agentReason": "Response says position could not be determined; ground truth is first place (Jacqueline Gareau).",
+   "closedBook": "3rd",
+   "closedVerdict": "incorrect",
+   "closedReason": "Ground truth says first place; response says 3rd, a different position."
+  },
+  {
+   "taskUuid": "c332c2e3-c68f-457a-9550-3046cf1942c3",
+   "status": "COMPLETED",
+   "latencySec": 15.1,
+   "subQuestions": [
+    "Who was the Argentinian president who resigned from the position the same year the José Martín Olaeta Stadium was inaugurated?"
+   ],
+   "agents": [
+    {
+     "status": "COMPLETED",
+     "steps": 7,
+     "sources": 2,
+     "error": null
+    }
+   ],
+   "usage": {
+    "calls": 9,
+    "promptTokens": 33817,
+    "completionTokens": 1392,
+    "costMicro": 35209
+   },
+   "report": "**Pedro Pablo Ramírez** was the Argentine president who resigned in 1944, the year the José Martín Olaeta Stadium was inaugurated.\n\nThe stadium opened on 15 April 1944 [1]. Ramírez had been President of Argentina from 7 June 1943 to 9 March 1944 [2], so he resigned in March 1944, before the stadium opened. He was succeeded by Edelmiro Julián Farrell.",
+   "sources": [
+    {
+     "n": 1,
+     "url": "https://en.wikipedia.org/wiki/Estadio_José_Martín_Olaeta",
+     "quote": "Opened | April 15, 1944; 82 years ago (1944-04-15)",
+     "title": "Estadio José Martín Olaeta - Wikipedia"
+    },
+    {
+     "n": 2,
+     "url": "https://en.wikipedia.org/wiki/Pedro_Pablo_Ram%C3%ADrez",
+     "quote": "Pedro Pablo Ramírez Menchaca (30 January 1884 – 12 May 1962) was President of Argentina from 7 June 1943, to 9 March 1944.",
+     "title": "Pedro Pablo Ramírez - Wikipedia"
+    }
+   ],
+   "rounds": 0,
+   "followUps": [],
+   "id": "frames-631",
+   "category": "Multiple constraints",
+   "question": "Who was the Argentinian president who resigned from the position the same year the José Martín Olaeta Stadium was inaugurated?",
+   "gold": "Pedro Ramírez",
+   "goldLinks": [
+    "1944 in argentina",
+    "estadio josé martín olaeta"
+   ],
+   "goldSeen": [
+    "estadio josé martín olaeta"
+   ],
+   "toolCalls": 8,
+   "agentVerdict": "correct",
+   "agentReason": "Response identifies Pedro Pablo Ramírez, matching ground truth Pedro Ramírez, resigning in 1944.",
+   "closedBook": "I'm not certain of the José Martín Olaeta Stadium's inauguration year, so I can't identify the president with confidence. If you tell me the year, I can name the Argentine president who resigned that year, if any; Fernando de la Rúa, who resigned in December 2001, is the best-known resignation.",
+   "closedVerdict": "incorrect",
+   "closedReason": "Response does not identify Pedro Ramírez; it expresses uncertainty and suggests Fernando de la Rúa instead."
+  },
+  {
+   "taskUuid": "4594ec6f-9c85-43ed-ae9b-4532ee86ba83",
+   "status": "COMPLETED",
+   "latencySec": 12.2,
+   "subQuestions": [
+    "How many years did it take after the FIFA ban was lifted for someone to wear a hijab in the World Cup?"
+   ],
+   "agents": [
+    {
+     "status": "COMPLETED",
+     "steps": 3,
+     "sources": 2,
+     "error": null
+    }
+   ],
+   "usage": {
+    "calls": 5,
+    "promptTokens": 8804,
+    "completionTokens": 1208,
+    "costMicro": 10012
+   },
+   "report": "**Answer: About 9 years.** FIFA lifted its ban on head coverings in March 2014, and Nouhaila Benzina of Morocco became the first player to wear a hijab at a Women's World Cup in July 2023, roughly 9 years and 4 months later.\n\nThe ban was lifted in 2014, when FIFA officially authorised head coverings. The International Football Association Board approved hijabs and turbans on the field that year, after years in which such garments were prohibited. Benzina made her debut in Morocco's opening match against Germany at the 2023 Women's World Cup, becoming the first player to wear a hijab at a senior-level Women's World Cup [1].\n\nThe interval is calculated from the 2014 authorisation to the July 2023 match, giving about 9 years, or 9 years and 4 months if the authorisation is dated to March 2014 as the sub-findings state. The cited source confirms the 2014 authorisation [1] but does not give the exact month, so the \"4 months\" figure rests on the sub-finding rather than on the source itself.",
+   "sources": [
+    {
+     "n": 1,
+     "url": "https://www.abc.net.au/news/2023-07-25/nouhaila-benzina-makes-history-wear-hijab-fifa-womens-world-cup/102638978",
+     "quote": "That was until 2014, when head coverings were officially authorised by FIFA.",
+     "title": "Nouhaila Benzina is the first player to wear a hijab at the Women's World Cup. Why were they once banned by FIFA? - ABC News"
+    }
+   ],
+   "rounds": 0,
+   "followUps": [],
+   "id": "frames-494",
+   "category": "Post processing",
+   "question": "How many years did it take after the FIFA ban was lifted for someone to wear a hijab in the World Cup?",
+   "gold": "11 years",
+   "goldLinks": [
+    "kit (association football)",
+    "nouhaila benzina"
+   ],
+   "goldSeen": [],
+   "toolCalls": 3,
+   "agentVerdict": "incorrect",
+   "agentReason": "Response gives about 9 years, but ground truth is 11 years.",
+   "closedBook": "About 5 years (ban lifted in 2014; hijab-wearing players appeared at the 2019 Women's World Cup).",
+   "closedVerdict": "incorrect",
+   "closedReason": "Response says about 5 years; ground truth is 11 years."
+  },
+  {
+   "taskUuid": "316b3cba-0e82-449b-b065-8e186e9bc021",
+   "status": "COMPLETED",
+   "latencySec": 24.3,
+   "subQuestions": [
+    "Which movie musical produced a song that was inspired by poetry from an American poet, who was born a week after Queen Victoria?"
+   ],
+   "agents": [
+    {
+     "status": "COMPLETED",
+     "steps": 4,
+     "sources": 2,
+     "error": null
+    }
+   ],
+   "usage": {
+    "calls": 6,
+    "promptTokens": 16636,
+    "completionTokens": 1753,
+    "costMicro": 18389
+   },
+   "report": "Walt Whitman, the American poet, was born on May 31, 1819, one week after Queen Victoria (May 24, 1819) [1]. I could not confirm which movie musical produced a song inspired by his poetry. The question's premise remains unverified: the one film I considered, Dead Poets Society (1989), is a drama in which \"O Captain! My Captain!\" is recited rather than sung, and the claim that a musical was built on it came from an unreliable source. The Whitman-based musical works I found, such as Kurt Weill's Four Walt Whitman Songs and Vaughan Williams' Sea Symphony, are concert pieces, not film musicals.\n\nThe poem \"O Captain! My Captain!\" was widely popular, particularly before the mid-20th century [2], which may explain why it appears in many adaptations. Confirming the answer would require identifying the specific film and song, which I was unable to do with the sources available.",
+   "sources": [
+    {
+     "n": 1,
+     "url": "https://en.wikipedia.org/wiki/Walt_Whitman",
+     "quote": "Walter Whitman Jr. (; May 31, 1819 – March 26, 1892) was an American poet, essayist, and journalist; he also wrote two novels.",
+     "title": "Walt Whitman"
+    },
+    {
+     "n": 2,
+     "url": "https://en.wikipedia.org/wiki/Walt_Whitman_and_Abraham_Lincoln",
+     "quote": "\"O Captain! My Captain!\" was very popular, particularly before the mid-20th century, and remains one of his most popular works, despite slipping in critical assessment since the early 1900s.",
+     "title": "Walt Whitman and Abraham Lincoln"
+    }
+   ],
+   "rounds": 0,
+   "followUps": [],
+   "id": "frames-822",
+   "category": "Multiple constraints | Temporal reasoning",
+   "question": "Which movie musical produced a song that was inspired by poetry from an American poet, who was born a week after Queen Victoria?",
+   "gold": "Fame",
+   "goldLinks": [
+    "1819",
+    "queen victoria",
+    "walt whitman"
+   ],
+   "goldSeen": [
+    "walt whitman"
+   ],
+   "toolCalls": 6,
+   "agentVerdict": "incorrect",
+   "agentReason": "Response never identifies Fame; it says it could not determine the movie musical.",
+   "closedBook": "I'm not certain. The poet is likely Walt Whitman (born May 31, 1819, a week after Queen Victoria), but I cannot confidently identify a specific movie musical song inspired by his poetry.",
+   "closedVerdict": "incorrect",
+   "closedReason": "Response does not identify Fame; it says it cannot determine the movie musical."
+  },
+  {
+   "taskUuid": "2317798d-bdd8-4bad-bb41-fcc9c0dedf21",
+   "status": "COMPLETED",
+   "latencySec": 27.2,
+   "subQuestions": [
+    "What was the pseudonym of one of the co-founders of the Eagle Awards that won Favourite Specialist Comics Publication/Trade Publication 1977 and 1978?"
+   ],
+   "agents": [
+    {
+     "status": "COMPLETED",
+     "steps": 8,
+     "sources": 0,
+     "error": null
+    }
+   ],
+   "usage": {
+    "calls": 10,
+    "promptTokens": 51407,
+    "completionTokens": 2517,
+    "costMicro": 53924
+   },
+   "report": "# Eagle Awards Co-founder Pseudonym: Unresolved\n\nI could not confirm the pseudonym asked about. The question requires two things I could not verify together: that the Favourite Specialist Comics Publication category was won in 1977 and 1978 by a publication, and that one of that publication's co-founders used a pseudonym.\n\n## What the sources establish\n\n- **Founders:** The Eagle Awards were founded in 1977 by Mike Conroy and Richard Burton, per ComicsAlliance. ComicScene adds Nick Landau as one of the organisers. \n- **1977 and 1978 winners:** The Wikipedia Eagle Awards page lists winners for these years, including *Howard the Duck* (1977) and *John Carter, Warlord of Mars* (1978). Neither was confirmed as the Specialist Comics Publication winner, because the category label was not visible in the retrieved text. \n- **A pseudonym in the sources, but not the one asked for:** The Wikipedia page attributes the pseudonym \"T.B. Grover\" to John Wagner. This belongs to a 1979 and 1981 UK winner in another category, and Wagner is not a listed co-founder. \n\n## Where the answer likely lies\n\nThe Wikipedia \"List of Eagle Award nominees and winners\" page should contain the 1977 and 1978 Specialist Comics Publication results. My fetch cut off before reaching those sections, so I could not check whether a winner is also a co-founder under a pseudonym. Checking that page is the most direct route to an answer.\n\n**Conclusion:** I cannot name the pseudonym with confidence. The information needed sits on the list page, which I did not retrieve in full.\n\n## Sources\n1. ComicsAlliance, \"Eagle Awards Announces Nominees and Opens Voting\": https://comicsalliance.com/eagle-awards-nominees-voting (\"Founded in 1977 by Mike Conroy and Richard Burton…\")\n2. Wikipedia, \"Eagle Awards\": https://en.wikipedia.org/wiki/Eagle_Awards (lists \"T.B. Grover (pseudonym of John Wagner)\" for the 1979 UK winner)",
+   "sources": [],
+   "rounds": 0,
+   "followUps": [],
+   "id": "frames-536",
+   "category": "Multiple constraints",
+   "question": "What was the pseudonym of one of the co-founders of the Eagle Awards that won Favourite Specialist Comics Publication/Trade Publication 1977 and 1978?",
+   "gold": "Burt",
+   "goldLinks": [
+    "eagle awards",
+    "richard burton (comics)"
+   ],
+   "goldSeen": [
+    "eagle awards"
+   ],
+   "toolCalls": 10,
+   "agentVerdict": "incorrect",
+   "agentReason": "Response states it cannot determine the pseudonym and gives no answer matching 'Burt'.",
+   "closedBook": "I'm not certain; I cannot reliably identify the pseudonym from memory.",
+   "closedVerdict": "incorrect",
+   "closedReason": "Response declines to answer and gives no pseudonym; ground truth is 'Burt'."
+  },
+  {
+   "taskUuid": "efc60bc9-0a9a-41d2-8428-d5114d719191",
+   "status": "COMPLETED",
+   "latencySec": 33.3,
+   "subQuestions": [
+    "Who had their twenty-first number one hit on the US Billboard Hot Country Songs chart the same week Carly Rae Jepsen hit #39 on the Australia ARIA Top 50 Singles chart?"
+   ],
+   "agents": [
+    {
+     "status": "COMPLETED",
+     "steps": 8,
+     "sources": 2,
+     "error": null
+    }
+   ],
+   "usage": {
+    "calls": 10,
+    "promptTokens": 55692,
+    "completionTokens": 2569,
+    "costMicro": 58261
+   },
+   "report": "I could not determine a confident answer to this question from the sources available. The two sources retrieved do not provide the week in which Carly Rae Jepsen reached #39 on the ARIA Top 50 Singles chart, nor a list of Hot Country Songs number-one counts by artist that would identify who reached their twenty-first number one in that same week.\n\nThe Carly Rae Jepsen discography [1] confirms she has released 38 singles, but it does not give ARIA chart positions by week. The Timeline of Billboard number-one country songs [2] notes that Eddy Arnold, Conway Twitty and George Strait hold the record for the greatest number of country number ones, which suggests the answer is likely one of these artists. However, that source does not state which of them had their twenty-first number one in the relevant week, so this remains an inference rather than a sourced finding.\n\nTo answer the question, two pieces of information are needed: the exact ARIA chart week in which Jepsen's single was at #39, and the Billboard Hot Country Songs chart history for that week, specifically each artist's cumulative count of number-one hits. With both in hand, the artist whose count reached twenty-one that week could be identified.",
+   "sources": [
+    {
+     "n": 1,
+     "url": "https://en.wikipedia.org/wiki/Carly_Rae_Jepsen_discography",
+     "quote": "Canadian singer and songwriter Carly Rae Jepsen has released eight studio albums, two remix albums, three extended plays (EPs), 38 singles, 14 promotional singles, and 27 music videos.",
+     "title": "Carly Rae Jepsen discography - Wikipedia"
+    },
+    {
+     "n": 2,
+     "url": "https://en.wikipedia.org/wiki/Timeline_of_Billboard_number-one_country_songs",
+     "quote": "Eddy Arnold, Conway Twitty and George Strait have all held the record for the greatest number of country number ones.",
+     "title": "Timeline of Billboard number-one country songs - Wikipedia"
+    }
+   ],
+   "rounds": 0,
+   "followUps": [],
+   "id": "frames-388",
+   "category": "Numerical reasoning | Tabular reasoning | Multiple constraints | Temporal reasoning",
+   "question": "Who had their twenty-first number one hit on the US Billboard Hot Country Songs chart the same week Carly Rae Jepsen hit #39 on the Australia ARIA Top 50 Singles chart?",
+   "gold": "Kenny Chesney",
+   "goldLinks": [
+    "call me maybe",
+    "list of billboard number-one country songs of 2012",
+    "reality (kenny chesney song)"
+   ],
+   "goldSeen": [],
+   "toolCalls": 13,
+   "agentVerdict": "incorrect",
+   "agentReason": "Response gives no definitive answer and speculates about other artists; ground truth is Kenny Chesney.",
+   "closedBook": "I'm not able to determine this with confidence from my knowledge.",
+   "closedVerdict": "incorrect",
+   "closedReason": "Response declines to answer and does not provide Kenny Chesney."
+  },
+  {
+   "taskUuid": "2d170510-53ca-486e-8635-dc4930beeea4",
+   "status": "COMPLETED",
+   "latencySec": 15.2,
+   "subQuestions": [
+    "As of July 1, 2024, what is the parent company of the current record label of the singer of Edge of Seventeen?"
+   ],
+   "agents": [
+    {
+     "status": "COMPLETED",
+     "steps": 4,
+     "sources": 3,
+     "error": null
+    }
+   ],
+   "usage": {
+    "calls": 6,
+    "promptTokens": 15728,
+    "completionTokens": 1368,
+    "costMicro": 17096
+   },
+   "report": "The parent company is **Warner Music Group**.\n\n\"Edge of Seventeen\" was written and recorded by Stevie Nicks, first appearing on her debut solo album *Bella Donna* (1981) [1]. Her 2014 album *24 Karat Gold: Songs from the Vault* was released through Reprise Records [2]. Reprise Records is owned by Warner Music Group and operates through its flagship label, Warner Records [3].\n\nReprise is the label her recordings were released under as of July 1, 2024, so Warner Music Group is the parent company. The sources do not directly state that Nicks was still signed to Reprise on that exact date, so this rests on her most recent release through the label as of that period.",
+   "sources": [
+    {
+     "n": 1,
+     "url": "https://en.wikipedia.org/wiki/Edge_of_Seventeen",
+     "quote": "\"Edge of Seventeen\" is a song written and recorded by American singer-songwriter Stevie Nicks from her debut solo studio album Bella Donna (1981).",
+     "title": "Edge of Seventeen"
+    },
+    {
+     "n": 2,
+     "url": "https://en.wikipedia.org/wiki/24_Karat_Gold:_Songs_from_the_Vault",
+     "quote": "24 Karat Gold: Songs from the Vault is the eighth solo studio album by the American singer-songwriter and Fleetwood Mac vocalist Stevie Nicks, released on September 30, 2014, through Reprise Records.",
+     "title": "24 Karat Gold: Songs from the Vault"
+    },
+    {
+     "n": 3,
+     "url": "https://en.wikipedia.org/wiki/Reprise_Records",
+     "quote": "Reprise Records is an American record label founded in 1960 by Frank Sinatra. It is owned by Warner Music Group, and operates through Warner Records, one of its flagship labels.",
+     "title": "Reprise Records"
+    }
+   ],
+   "rounds": 0,
+   "followUps": [],
+   "id": "frames-11",
+   "category": "Tabular reasoning | Multiple constraints",
+   "question": "As of July 1, 2024, what is the parent company of the current record label of the singer of Edge of Seventeen?",
+   "gold": "Warner Music Group",
+   "goldLinks": [
+    "atlantic records",
+    "edge of seventeen",
+    "modern records (1980)",
+    "reprise records",
+    "stevie nicks",
+    "warner music group",
+    "warner records"
+   ],
+   "goldSeen": [
+    "edge of seventeen",
+    "reprise records",
+    "stevie nicks"
+   ],
+   "toolCalls": 5,
+   "agentVerdict": "correct",
+   "agentReason": "Response's final answer, Warner Music Group, matches the ground truth despite a minor caveat.",
+   "closedBook": "Warner Music Group",
+   "closedVerdict": "correct",
+   "closedReason": "Response exactly matches the ground truth, Warner Music Group."
+  },
+  {
+   "taskUuid": "8d16be17-b448-41ba-8e9f-d648ff94b116",
+   "status": "COMPLETED",
+   "latencySec": 9.1,
+   "subQuestions": [
+    "If you add up the birth years of Emma Watson, Daniel Radcliffe and Rupert Grint, what is the sum?"
+   ],
+   "agents": [
+    {
+     "status": "COMPLETED",
+     "steps": 2,
+     "sources": 3,
+     "error": null
+    }
+   ],
+   "usage": {
+    "calls": 4,
+    "promptTokens": 6118,
+    "completionTokens": 796,
+    "costMicro": 6914
+   },
+   "report": "The sum of the three birth years is **5967**.\n\n- Emma Watson was born in 1990 [1].\n- Daniel Radcliffe was born in 1989 [2].\n- Rupert Grint was born in 1988 [3].\n\n1990 + 1989 + 1988 = 5967",
+   "sources": [
+    {
+     "n": 1,
+     "url": "https://en.wikipedia.org/wiki/Emma_Watson",
+     "quote": "Emma Charlotte Duerre Watson (born 15 April 1990) is an English actress.",
+     "title": "Emma Watson - Wikipedia"
+    },
+    {
+     "n": 2,
+     "url": "https://en.wikipedia.org/wiki/Daniel_Radcliffe",
+     "quote": "Daniel Jacob Radcliffe (born 23 July 1989) is an English actor best known for portraying Harry Potter in all eight films of the Harry Potter film series from 2001 to 2011.",
+     "title": "Daniel Radcliffe - Wikipedia"
+    },
+    {
+     "n": 3,
+     "url": "https://en.wikipedia.org/wiki/Rupert_Grint",
+     "quote": "Rupert Alexander Lloyd Grint ( ; born 24 August 1988) is an English actor.",
+     "title": "Rupert Grint - Wikipedia"
+    }
+   ],
+   "rounds": 0,
+   "followUps": [],
+   "id": "frames-348",
+   "category": "Numerical reasoning | Multiple constraints",
+   "question": "If you add up the birth years of Emma Watson, Daniel Radcliffe and Rupert Grint, what is the sum?",
+   "gold": "5967",
+   "goldLinks": [
+    "daniel radcliffe",
+    "emma watson",
+    "rupert grint"
+   ],
+   "goldSeen": [
+    "daniel radcliffe",
+    "emma watson",
+    "rupert grint"
+   ],
+   "toolCalls": 3,
+   "agentVerdict": "correct",
+   "agentReason": "Response gives 5967, matching ground truth; birth years and arithmetic are correct.",
+   "closedBook": "5967",
+   "closedVerdict": "correct",
+   "closedReason": "Response 5967 matches ground truth, which equals 1990+1989+1988."
+  },
+  {
+   "taskUuid": "3fc29ef3-e9ba-4550-8387-e18ef74f689e",
+   "status": "COMPLETED",
+   "latencySec": 15.1,
+   "subQuestions": [
+    "What William Wyler movie debuted the same year that the chairman for the 1982–83 Wolverhampton Wanderers season was born?"
+   ],
+   "agents": [
+    {
+     "status": "COMPLETED",
+     "steps": 8,
+     "sources": 3,
+     "error": null
+    }
+   ],
+   "usage": {
+    "calls": 10,
+    "promptTokens": 41094,
+    "completionTokens": 1568,
+    "costMicro": 42662
+   },
+   "report": "The answer is *Jezebel* (1938), directed by William Wyler.\n\nThe 1982–83 Wolverhampton Wanderers chairman was Derek Dougan [1], who was born on 20 January 1938 [2]. Wyler's *Jezebel* is a 1938 American romantic drama released by Warner Bros. Pictures [3], so it matches the birth year.\n\nOne caveat: the sources confirm that *Jezebel* is a 1938 Wyler film, but I did not verify that it is his only release that year. The answer assumes it is the film the question intends.",
+   "sources": [
+    {
+     "n": 1,
+     "url": "https://en.wikipedia.org/wiki/1982%E2%80%9383_Wolverhampton_Wanderers_F.C._season",
+     "quote": "Chairman Derek Dougan Manager Graham Hawkins",
+     "title": "1982–83 Wolverhampton Wanderers F.C. season"
+    },
+    {
+     "n": 2,
+     "url": "https://en.wikipedia.org/wiki/Derek_Dougan",
+     "quote": "Alexander Derek Dougan (20 January 1938 – 24 June 2007) was a Northern Ireland international footballer, football manager, football chairman, pundit, and writer.",
+     "title": "Derek Dougan"
+    },
+    {
+     "n": 3,
+     "url": "https://en.wikipedia.org/wiki/Jezebel_(1938_film)",
+     "quote": "Jezebel is a 1938 American romantic drama film released by Warner Bros. Pictures and directed by William Wyler.",
+     "title": "Jezebel (1938 film)"
+    }
+   ],
+   "rounds": 0,
+   "followUps": [],
+   "id": "frames-273",
+   "category": "Multiple constraints",
+   "question": "What William Wyler movie debuted the same year that the chairman for the 1982–83 Wolverhampton Wanderers season was born?",
+   "gold": "Jezebel",
+   "goldLinks": [
+    "1982–83 wolverhampton wanderers f.c. season",
+    "derek dougan",
+    "william wyler"
+   ],
+   "goldSeen": [
+    "1982–83 wolverhampton wanderers f.c. season",
+    "derek dougan"
+   ],
+   "toolCalls": 8,
+   "agentVerdict": "correct",
+   "agentReason": "Response's final answer is Jezebel, which matches the ground truth despite a questionable chairman detail.",
+   "closedBook": "No William Wyler film debuted in 1923, the birth year of Jack Hayward, the 1982–83 Wolverhampton Wanderers chairman.",
+   "closedVerdict": "incorrect",
+   "closedReason": "Response gives no film and claims none exists; ground truth is Jezebel."
+  },
+  {
+   "taskUuid": "cbbc64c3-48e1-447f-9ca6-4762d1a8388f",
+   "status": "COMPLETED",
+   "latencySec": 12.2,
+   "subQuestions": [
+    "What album by the band named 'The Band' was released on the same day as the Nuclear Non-Proliferation Treaty was opened for signature?"
+   ],
+   "agents": [
+    {
+     "status": "COMPLETED",
+     "steps": 4,
+     "sources": 2,
+     "error": null
+    }
+   ],
+   "usage": {
+    "calls": 6,
+    "promptTokens": 16150,
+    "completionTokens": 1012,
+    "costMicro": 17162
+   },
+   "report": "**Answer: *Music from Big Pink*** (the debut album by The Band, released July 1, 1968).\n\nThe Treaty on the Non-Proliferation of Nuclear Weapons (NPT) opened for signature on 1 July 1968, with ceremonies in London, Moscow and Washington [1]. The Band's discography lists *Music from Big Pink* as released on July 1, 1968, on Capitol Records [2]. The two dates match, so this is the album the question asks for.",
+   "sources": [
+    {
+     "n": 1,
+     "url": "http://www.iaea.org/newscenter/news/npt-turns-40",
+     "quote": "The Treaty on the Non-Proliferation of Nuclear Weapons (NPT) opened for signature on 1 July 1968, at ceremonies taking place in London, Moscow and Washington.",
+     "title": "NPT Turns 40 (IAEA)"
+    },
+    {
+     "n": 2,
+     "url": "https://en.wikipedia.org/wiki/The_Band_discography",
+     "quote": "Music from Big Pink Released: July 1, 1968 Label: Capitol Format: LP, 8T, CS",
+     "title": "The Band discography"
+    }
+   ],
+   "rounds": 0,
+   "followUps": [],
+   "id": "frames-288",
+   "category": "Tabular reasoning",
+   "question": "What album by the band named 'The Band' was released on the same day as the Nuclear Non-Proliferation Treaty was opened for signature?",
+   "gold": "Music from Big Pink",
+   "goldLinks": [
+    "music from big pink",
+    "the band",
+    "treaty on the non-proliferation of nuclear weapons"
+   ],
+   "goldSeen": [
+    "treaty on the non-proliferation of nuclear weapons"
+   ],
+   "toolCalls": 5,
+   "agentVerdict": "correct",
+   "agentReason": "Response identifies Music from Big Pink, matching the ground truth, with consistent July 1, 1968 date.",
+   "closedBook": "Music from Big Pink",
+   "closedVerdict": "correct",
+   "closedReason": "Response 'Music from Big Pink' exactly matches the ground truth album."
+  },
+  {
+   "taskUuid": "bde388f5-556b-4c9a-b21f-d2cc7736cdb4",
+   "status": "COMPLETED",
+   "latencySec": 12.1,
+   "subQuestions": [
+    "Mary Gaulden Jagger worked in the Biology Division of the Oak Ridge National Laboratory; what type of supercomputer, ranked by the TOP500 as the world's most powerful in June 2022, is present on the campus, and in what year did this supercomputer become operational?"
+   ],
+   "agents": [
+    {
+     "status": "COMPLETED",
+     "steps": 3,
+     "sources": 3,
+     "error": null
+    }
+   ],
+   "usage": {
+    "calls": 5,
+    "promptTokens": 10820,
+    "completionTokens": 1259,
+    "costMicro": 12079
+   },
+   "report": "The supercomputer is Frontier (OLCF-5), an exascale system, and it became operational in 2022.\n\nMary Gaulden Jagger began working as a senior radiation biologist in the Biology Division of Oak Ridge National Laboratory in 1949 [2]. Frontier, built by Hewlett Packard Enterprise, is hosted at the Oak Ridge Leadership Computing Facility in Tennessee and is described as the world's first exascale supercomputer [1]. It ranked No. 1 on the TOP500 list, which the Oak Ridge Leadership Computing Facility reported as its results came in [3].\n\nThe sources support the 2022 operational year and the exascale designation, but they do not state the exact month or the deployment timeline. The earlier research notes give deployment dates (September 2021 to May 2022) that none of the cited sources confirm, so I have left them out.",
+   "sources": [
+    {
+     "n": 1,
+     "url": "https://en.wikipedia.org/wiki/Frontier_(supercomputer)",
+     "quote": "Hewlett Packard Enterprise Frontier, or OLCF-5, is the world's first exascale supercomputer. It is hosted at the Oak Ridge Leadership Computing Facility (OLCF) in Tennessee, United States, and became operational in 2022.",
+     "title": "Frontier (supercomputer) - Wikipedia"
+    },
+    {
+     "n": 2,
+     "url": "https://en.wikipedia.org/wiki/Mary_Gaulden_Jagger",
+     "quote": "In 1949, she began working as a senior radiation biologist in the Biology Division of the Oak Ridge National Laboratory in Oak Ridge, Tennessee under Alexander Hollaender.",
+     "title": "Mary Gaulden Jagger - Wikipedia"
+    },
+    {
+     "n": 3,
+     "url": "https://www.olcf.ornl.gov/tag/top500",
+     "quote": "The numbers are in, Frontier ranks No. 1, and the researchers of Oak Ridge National Laboratory's National Center for Computational Sciences are finally breathing a few sighs of relief.",
+     "title": "Top500 – Oak Ridge Leadership Computing Facility"
+    }
+   ],
+   "rounds": 0,
+   "followUps": [],
+   "id": "frames-816",
+   "category": "Multiple constraints",
+   "question": "Mary Gaulden Jagger worked in the Biology Division of the Oak Ridge National Laboratory; what type of supercomputer, ranked by the TOP500 as the world's most powerful in June 2022, is present on the campus, and in what year did this supercomputer become operational?",
+   "gold": "Frontier, 2022",
+   "goldLinks": [
+    "frontier (supercomputer)",
+    "mary gaulden jagger",
+    "oak ridge national laboratory"
+   ],
+   "goldSeen": [
+    "frontier (supercomputer)",
+    "mary gaulden jagger"
+   ],
+   "toolCalls": 4,
+   "agentVerdict": "correct",
+   "agentReason": "Response identifies Frontier as the supercomputer and 2022 as the operational year, matching ground truth.",
+   "closedBook": "Frontier, an HPE Cray EX exascale supercomputer with AMD CPUs and GPUs (a GPU-accelerated system); it became operational in 2022.",
+   "closedVerdict": "correct",
+   "closedReason": "Response identifies Frontier supercomputer and year 2022, matching the ground truth."
+  },
+  {
+   "taskUuid": "b45c5274-2b31-4033-9bd3-1027dc2ea2e8",
+   "status": "COMPLETED",
+   "latencySec": 6.1,
+   "subQuestions": [
+    "On Nov 15, 2017 a painting was sold for US $450 million setting a new record for the most expensive painting ever sold at public auction. What year was the auction house where this purchase took place founded?"
+   ],
+   "agents": [
+    {
+     "status": "COMPLETED",
+     "steps": 2,
+     "sources": 2,
+     "error": null
+    }
+   ],
+   "usage": {
+    "calls": 4,
+    "promptTokens": 5296,
+    "completionTokens": 667,
+    "costMicro": 5963
+   },
+   "report": "**1766**\n\nThe painting was Leonardo da Vinci's *Salvator Mundi*, sold for US$450.3 million on 15 November 2017 by Christie's in New York [2]. Christie's is a British auction house founded in 1766 by James Christie [1], so the purchase took place at an auction house founded that year.",
+   "sources": [
+    {
+     "n": 1,
+     "url": "https://en.wikipedia.org/wiki/Christie%27s",
+     "quote": "Christie's is a British auction house founded in 1766 by James Christie.",
+     "title": "Christie's"
+    },
+    {
+     "n": 2,
+     "url": "https://en.wikipedia.org/wiki/Salvator_Mundi_(painting)",
+     "quote": "The painting was sold at auction for US$450.3 million on 15 November 2017 by Christie's in New York to Prince Badr bin Abdullah Al Saud, setting a new record for the most expensive painting ever sold at public auction.",
+     "title": "Salvator Mundi (painting)"
+    }
+   ],
+   "rounds": 0,
+   "followUps": [],
+   "id": "frames-147",
+   "category": "Multiple constraints",
+   "question": "On Nov 15, 2017 a painting was sold for US $450 million setting a new record for the most expensive painting ever sold at public auction. What year was the auction house where this purchase took place founded?",
+   "gold": "1766",
+   "goldLinks": [
+    "christie's",
+    "list of most expensive paintings"
+   ],
+   "goldSeen": [
+    "christie's"
+   ],
+   "toolCalls": 2,
+   "agentVerdict": "correct",
+   "agentReason": "Response identifies Christie's and gives 1766, matching the ground truth.",
+   "closedBook": "1766",
+   "closedVerdict": "correct",
+   "closedReason": "Response '1766' matches the ground truth year for Christie's founding."
+  },
+  {
+   "taskUuid": "4bfcad37-2e84-45dc-bbe4-7870d0445b2e",
+   "status": "COMPLETED",
+   "latencySec": 9.2,
+   "subQuestions": [
+    "The creator of the animated series Family Guy was supposed to be on one of the planes that was involved in the 9/11 attacks but he arrived too late to board. Altogether, how many letters are in the name of the city from which his missed fight departed that day?"
+   ],
+   "agents": [
+    {
+     "status": "COMPLETED",
+     "steps": 2,
+     "sources": 1,
+     "error": null
+    }
+   ],
+   "usage": {
+    "calls": 4,
+    "promptTokens": 5397,
+    "completionTokens": 757,
+    "costMicro": 6154
+   },
+   "report": "**Answer: 6 letters.**\n\nSeth MacFarlane, creator of *Family Guy*, was scheduled to fly on American Airlines Flight 11 on the morning of September 11, 2001. That flight was bound from Boston to Los Angeles, and the sources note that he arrived too late to board it [1]. The flight later crashed into the North Tower of the World Trade Center.\n\nThe departure city is Boston, which has 6 letters (B-O-S-T-O-N).",
+   "sources": [
+    {
+     "n": 1,
+     "url": "https://www.vice.com/en/article/seth-macfarlane-missed-american-airlines-flight-11-by-minutes-and-the-story-is-still-hard-to-believe-25-years-later",
+     "quote": "On the morning of September 11, 2001, Family Guy creator Seth MacFarlane was scheduled to fly from Boston to Los Angeles on American Airlines Flight 11.",
+     "title": "Seth MacFarlane Was Supposed to Be on One of the Planes That Crashed Into the World Trade Center"
+    }
+   ],
+   "rounds": 0,
+   "followUps": [],
+   "id": "frames-789",
+   "category": "Multiple constraints | Post processing",
+   "question": "The creator of the animated series Family Guy was supposed to be on one of the planes that was involved in the 9/11 attacks but he arrived too late to board. Altogether, how many letters are in the name of the city from which his missed fight departed that day?",
+   "gold": "6 (Boston)",
+   "goldLinks": [
+    "american airlines flight 11",
+    "family guy",
+    "seth macfarlane"
+   ],
+   "goldSeen": [
+    "seth macfarlane"
+   ],
+   "toolCalls": 2,
+   "agentVerdict": "correct",
+   "agentReason": "Response identifies Boston as the departure city and states 6 letters, matching the ground truth.",
+   "closedBook": "The premise is false. Seth MacFarlane, Family Guy's creator, has not been reported as having missed a 9/11 flight. Because no such missed flight exists, there is no departure city to count letters for.",
+   "closedVerdict": "incorrect",
+   "closedReason": "Response denies the premise and gives no answer; ground truth is 6 (Boston)."
+  },
+  {
+   "taskUuid": "0188a14b-644b-4a87-8bd4-3ec336a00c50",
+   "status": "COMPLETED",
+   "latencySec": 18.1,
+   "subQuestions": [
+    "What was the average launch mass of Apollo 11, Apollo 12, and Apollo 13 in kilograms, rounded to the nearest integer?"
+   ],
+   "agents": [
+    {
+     "status": "COMPLETED",
+     "steps": 5,
+     "sources": 3,
+     "error": null
+    }
+   ],
+   "usage": {
+    "calls": 7,
+    "promptTokens": 30432,
+    "completionTokens": 1652,
+    "costMicro": 32084
+   },
+   "report": "The average launch mass of Apollo 11, 12, and 13 is **47,906 kg** (rounded to the nearest integer).\n\nCalculation: (49,735 + 49,915 + 44,069) ÷ 3 = 143,719 ÷ 3 = 47,906.33 kg.\n\nThe Apollo 11 figure (49,735 kg) is taken from its Wikipedia infobox [1]. The Apollo 12 figure (49,915 kg) is cited to its Wikipedia page [2], but the supporting excerpt for that value was not included in the evidence provided, so it is the least directly verified input. The Apollo 13 figure (44,069 kg) appears in its Wikipedia infobox [3] and is the combined Command/Service Module (28,881 kg) and Lunar Module (15,188 kg) mass, which is the basis for the total used here.",
+   "sources": [
+    {
+     "n": 1,
+     "url": "https://en.wikipedia.org/wiki/Apollo_11",
+     "quote": "Launch mass | 109,646 lb (49,735 kg)",
+     "title": "Apollo 11 - Wikipedia"
+    },
+    {
+     "n": 2,
+     "url": "https://en.wikipedia.org/wiki/Apollo_12",
+     "title": "Apollo 12 - Wikipedia"
+    },
+    {
+     "n": 3,
+     "url": "https://en.wikipedia.org/wiki/Apollo_13",
+     "quote": "44,069 kg (CSM: 28,881 kg;<ref>",
+     "title": "Apollo 13 - Wikipedia"
+    }
+   ],
+   "rounds": 0,
+   "followUps": [],
+   "id": "frames-394",
+   "category": "Numerical reasoning",
+   "question": "What was the average launch mass of Apollo 11, Apollo 12, and Apollo 13 in kilograms, rounded to the nearest integer?",
+   "gold": "The average launch mass in kilograms rounded to the nearest integer of Apollo 11, Apollo 12, and Apollo 13 is 47,906 kilograms.",
+   "goldLinks": [
+    "apollo 11",
+    "apollo 12",
+    "apollo 13"
+   ],
+   "goldSeen": [
+    "apollo 11",
+    "apollo 12",
+    "apollo 13"
+   ],
+   "toolCalls": 8,
+   "agentVerdict": "correct",
+   "agentReason": "Response's final answer 47,906 kg matches the ground truth exactly.",
+   "closedBook": "Approximately 2,899,667 kg (about 2,900,000 kg), based on commonly cited launch masses of 2,941,000 kg (Apollo 11), 2,938,000 kg (Apollo 12), and 2,820,000 kg (Apollo 13); exact figures vary by source.",
+   "closedVerdict": "incorrect",
+   "closedReason": "Response gives ~2,899,667 kg, which does not match the ground truth of 47,906 kg."
+  },
+  {
+   "taskUuid": "86c26420-b0f5-4f0e-8a82-099c165fe881",
+   "status": "COMPLETED",
+   "latencySec": 12.1,
+   "subQuestions": [
+    "Azamat Satybaldy's appearance in the film Road to Mother occurred in the same year as the Trace Gas Orbiter's launch from what location?"
+   ],
+   "agents": [
+    {
+     "status": "COMPLETED",
+     "steps": 3,
+     "sources": 3,
+     "error": null
+    }
+   ],
+   "usage": {
+    "calls": 5,
+    "promptTokens": 9242,
+    "completionTokens": 974,
+    "costMicro": 10216
+   },
+   "report": "**Baikonur Cosmodrome (Site 200), Kazakhstan.**\n\nAzamat Satybaldy appeared in *The Road to Mother*, a 2016 Kazakhstani war drama directed by Akan Satayev [2][3]. The ExoMars Trace Gas Orbiter also launched in 2016, on 14 March, aboard a Proton-M rocket from Baikonur Cosmodrome Site 200 in Kazakhstan [1]. Both events took place in 2016, so the launch location is Baikonur.",
+   "sources": [
+    {
+     "n": 1,
+     "url": "https://en.wikipedia.org/wiki/Trace_Gas_Orbiter",
+     "quote": "TGO launched on a Proton-M rocket from Baikonur Cosmodrome Site 200, in Kazakhstan, on 14 March 2016.",
+     "title": "Trace Gas Orbiter - Wikipedia"
+    },
+    {
+     "n": 2,
+     "url": "https://en.wikipedia.org/wiki/The_Road_to_Mother",
+     "quote": "The Road to Mother (Kazakh: Анаға апарар жол, Anaǵa aparar jol) is a 2016 Kazakhstani war drama film directed by Akan Satayev.",
+     "title": "The Road to Mother - Wikipedia"
+    },
+    {
+     "n": 3,
+     "url": "https://www.themoviedb.org/person/1779615-azamat-satybaldy?language=en-US",
+     "title": "Azamat Satybaldy"
+    }
+   ],
+   "rounds": 0,
+   "followUps": [],
+   "id": "frames-706",
+   "category": "Tabular reasoning",
+   "question": "Azamat Satybaldy's appearance in the film Road to Mother occurred in the same year as the Trace Gas Orbiter's launch from what location?",
+   "gold": "Baikonur Cosmodrome",
+   "goldLinks": [
+    "azamat satybaldy",
+    "trace gas orbiter"
+   ],
+   "goldSeen": [
+    "azamat satybaldy",
+    "trace gas orbiter"
+   ],
+   "toolCalls": 3,
+   "agentVerdict": "correct",
+   "agentReason": "Response identifies Baikonur Cosmodrome, matching the ground truth; extra details are consistent.",
+   "closedBook": "Baikonur Cosmodrome",
+   "closedVerdict": "correct",
+   "closedReason": "Response 'Baikonur Cosmodrome' exactly matches the ground truth."
+  },
+  {
+   "taskUuid": "d5e045dd-4a68-49f6-a454-b70e3f6694f5",
+   "status": "COMPLETED",
+   "latencySec": 9.1,
+   "subQuestions": [
+    "Who was the president of the United States when the resort housing the BomBora steel roller coaster first opened?"
+   ],
+   "agents": [
+    {
+     "status": "COMPLETED",
+     "steps": 4,
+     "sources": 3,
+     "error": null
+    }
+   ],
+   "usage": {
+    "calls": 6,
+    "promptTokens": 11588,
+    "completionTokens": 1101,
+    "costMicro": 12689
+   },
+   "report": "**Answer: Barack Obama** was the president of the United States when the BomBora steel roller coaster first opened.\n\nBomBora is a family steel roller coaster at Lagoon, an amusement park in Farmington, Utah. Lagoon is a park rather than a resort, but the question's premise is otherwise satisfied. Its records show that BomBora opened on April 2, 2011 [1]. Obama's tenure as the 44th president ran from January 20, 2009, to January 20, 2017 [2], so he held office on that date.",
+   "sources": [
+    {
+     "n": 1,
+     "url": "https://en.wikipedia.org/wiki/BomBora_(Lagoon)",
+     "quote": "BomBora is a family steel roller coaster currently operating at Lagoon in Farmington, Utah.",
+     "title": "BomBora (Lagoon) - Wikipedia"
+    },
+    {
+     "n": 2,
+     "url": "https://en.wikipedia.org/wiki/Presidency_of_Barack_Obama",
+     "quote": "Barack Obama's tenure as the 44th president of the United States began with his first inauguration on January 20, 2009, and ended on January 20, 2017.",
+     "title": "Presidency of Barack Obama - Wikipedia"
+    }
+   ],
+   "rounds": 0,
+   "followUps": [],
+   "id": "frames-719",
+   "category": "Multiple constraints",
+   "question": "Who was the president of the United States when the resort housing the BomBora steel roller coaster first opened?",
+   "gold": "Grover Cleveland",
+   "goldLinks": [
+    "bombora (lagoon)",
+    "lagoon (amusement park)",
+    "list of presidents of the united states"
+   ],
+   "goldSeen": [
+    "bombora (lagoon)"
+   ],
+   "toolCalls": 4,
+   "agentVerdict": "incorrect",
+   "agentReason": "Response says Barack Obama; ground truth is Grover Cleveland, based on the resort's opening.",
+   "closedBook": "I'm not certain which resort houses the BomBora coaster or when it opened, so I can't confidently name the U.S. president at that time.",
+   "closedVerdict": "incorrect",
+   "closedReason": "Response declines to answer and gives no president; ground truth is Grover Cleveland."
+  },
+  {
+   "taskUuid": "0e80f33a-8b39-4d55-9de8-f780b718954a",
+   "status": "COMPLETED",
+   "latencySec": 9.1,
+   "subQuestions": [
+    "Who was the Prime Minister of Canada the first time that The Toronto Maple Leafs won The Stanley Cup?"
+   ],
+   "agents": [
+    {
+     "status": "COMPLETED",
+     "steps": 3,
+     "sources": 2,
+     "error": null
+    }
+   ],
+   "usage": {
+    "calls": 5,
+    "promptTokens": 9824,
+    "completionTokens": 981,
+    "costMicro": 10805
+   },
+   "report": "The Prime Minister of Canada when the Toronto Maple Leafs first won the Stanley Cup was Sir Robert Borden.\n\nThe Toronto team, then known as the Toronto Arenas, won the 1918 Stanley Cup Final, the first series contested by the new National Hockey League and the first Stanley Cup win by the franchise that later became the Maple Leafs [1]. Borden served as Canada's eighth prime minister from 1911 to 1920 [2], so he held office in 1918 and led the country through the end of World War I.",
+   "sources": [
+    {
+     "n": 1,
+     "url": "https://en.wikipedia.org/wiki/1918_Stanley_Cup_Final",
+     "quote": "It was the first series contested by the new NHL and subsequently the first Stanley Cup win by the team that is now the Toronto Maple Leafs.",
+     "title": "1918 Stanley Cup Final - Wikipedia"
+    },
+    {
+     "n": 2,
+     "url": "https://en.wikipedia.org/wiki/Robert_Borden",
+     "quote": "Sir Robert Laird Borden (June 26, 1854 – June 10, 1937) was a Canadian lawyer and politician who served as the eighth prime minister of Canada from 1911 to 1920.",
+     "title": "Robert Borden - Wikipedia"
+    }
+   ],
+   "rounds": 0,
+   "followUps": [],
+   "id": "frames-583",
+   "category": "Multiple constraints",
+   "question": "Who was the Prime Minister of Canada the first time that The Toronto Maple Leafs won The Stanley Cup?",
+   "gold": "R. B. Bennett",
+   "goldLinks": [
+    "list of prime ministers of canada",
+    "list of stanley cup champions"
+   ],
+   "goldSeen": [],
+   "toolCalls": 4,
+   "agentVerdict": "incorrect",
+   "agentReason": "Response says Borden (1918 Arenas win); ground truth is R. B. Bennett (1932 Maple Leafs win).",
+   "closedBook": "Robert Borden",
+   "closedVerdict": "incorrect",
+   "closedReason": "Response names Robert Borden, but the ground truth is R. B. Bennett."
+  },
+  {
+   "taskUuid": "cc970748-1f70-40ea-b4b9-d267163416a4",
+   "status": "COMPLETED",
+   "latencySec": 9.1,
+   "subQuestions": [
+    "What age was the Director of Inception (2010) when the film was released in the UK?"
+   ],
+   "agents": [
+    {
+     "status": "COMPLETED",
+     "steps": 3,
+     "sources": 2,
+     "error": null
+    }
+   ],
+   "usage": {
+    "calls": 5,
+    "promptTokens": 8697,
+    "completionTokens": 752,
+    "costMicro": 9449
+   },
+   "report": "**Answer: Christopher Nolan was 39 years old** when *Inception* was released in the UK on July 16, 2010.\n\nInception was released in the United States and the United Kingdom on July 16, 2010 [1]. Christopher Nolan, its director, was born on July 30, 1970 [2]. On the release date he had not yet reached his 40th birthday, which fell two weeks later on July 30, 2010. That makes him 39 years old at the time of release.",
+   "sources": [
+    {
+     "n": 1,
+     "url": "https://en.wikipedia.org/wiki/Inception",
+     "quote": "July 16, 2010 (2010-07-16) (United States and United Kingdom)",
+     "title": "Inception - Wikipedia"
+    },
+    {
+     "n": 2,
+     "url": "https://en.wikipedia.org/wiki/Christopher_Nolan",
+     "quote": "Sir Christopher Edward Nolan (born 30 July 1970) is a British and American filmmaker.",
+     "title": "Christopher Nolan"
+    }
+   ],
+   "rounds": 0,
+   "followUps": [],
+   "id": "frames-517",
+   "category": "Numerical reasoning",
+   "question": "What age was the Director of Inception (2010) when the film was released in the UK?",
+   "gold": "39",
+   "goldLinks": [
+    "christopher nolan",
+    "inception"
+   ],
+   "goldSeen": [
+    "christopher nolan",
+    "inception"
+   ],
+   "toolCalls": 3,
+   "agentVerdict": "correct",
+   "agentReason": "Response states Nolan was 39 at UK release, matching the ground truth.",
+   "closedBook": "39",
+   "closedVerdict": "correct",
+   "closedReason": "Response '39' exactly matches the ground-truth answer of 39."
+  }
+ ]
+}

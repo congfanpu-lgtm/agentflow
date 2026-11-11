@@ -1,0 +1,2429 @@
+{
+ "meta": {
+  "label": "holdout-baseline",
+  "date": "2026-11-10 21:57",
+  "model": "claude-haiku-5-5",
+  "judge": "claude-sonnet-5-5",
+  "seed": 20261110,
+  "offset": 30,
+  "n": 30,
+  "payload": {},
+  "note": "旧代码 d4dda12:一次拆成 2~4 个子问题并行查,不分流;closedBook = 同一模型不给工具"
+ },
+ "summary": {
+  "n": 30,
+  "agentCorrect": 12,
+  "completed": 30,
+  "tokensPerQuestion": 25865,
+  "latencyP50": 18.2,
+  "roundsPerQuestion": 0.0,
+  "agents": 91,
+  "avgSteps": 2.5,
+  "agentsNoSource": 28,
+  "goldSeen": 39,
+  "goldTotal": 91,
+  "closedBookCorrect": 12
+ },
+ "records": [
+  {
+   "taskUuid": "341340ba-d69e-4277-bc42-e1fbb93f86f5",
+   "status": "COMPLETED",
+   "latencySec": 12.4,
+   "subQuestions": [
+    "In which year did London host the Olympic Games for the third time?",
+    "Who won Britain's Got Talent in that year?"
+   ],
+   "agents": [
+    {
+     "status": "COMPLETED",
+     "steps": 2,
+     "sources": 1,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 2,
+     "sources": 2,
+     "error": null
+    }
+   ],
+   "usage": {
+    "calls": 6,
+    "promptTokens": 7695,
+    "completionTokens": 1240,
+    "costMicro": 8935
+   },
+   "report": "## Answer\n\nLondon hosted the Olympic Games for the third time in 2012. The winner of Britain's Got Talent in 2012 was Ben Hart, a magician, not the Hawkstone Farmers Choir. The sub-question findings assumed the latest series (2026), which does not match the year the question points to, so that answer does not apply here.\n\n## Basis\n\nLondon's three Olympic Games were 1908, 1948 and 2012. The search results confirm the host-city list but do not state London's three editions explicitly, so the London dates come from general knowledge rather than a quoted source [1 not explicitly listing London's editions].\n\nThe Hawkstone Farmers Choir's win is documented for the 2026 series, not 2012 [2][3]. The 2012 BGT winner (Ben Hart) is not supported by any of the provided sources, so that fact rests on general knowledge rather than the cited material.",
+   "sources": [
+    {
+     "n": 1,
+     "url": "https://en.wikipedia.org/wiki/List_of_Olympic_Games_host_cities",
+     "quote": "In 2022, Beijing became the first city to have hosted both the Summer and Winter Olympics.",
+     "title": "List of Olympic Games host cities"
+    },
+    {
+     "n": 2,
+     "url": "https://www.youtube.com/watch?v=igLRBzvNnnA",
+     "title": "WINNER of BGT 2026 The Hawkstone Farmers Choir - EVERY Performance! (Clarkson's Farm!)"
+    },
+    {
+     "n": 3,
+     "url": "https://www.harper-adams.ac.uk/blog/post/3478/hawkstone-choir-win-britains-got-talent",
+     "title": "Hawkstone Choir win Britain's Got Talent | Harper Adams University - All Harper Blog"
+    }
+   ],
+   "rounds": 0,
+   "followUps": [],
+   "id": "frames-650",
+   "category": "Temporal reasoning",
+   "question": "Who won Britain's Got Talent in the same year that London hosted the Olympics for the third time?",
+   "gold": "Ashleigh and Pudsey",
+   "goldLinks": [
+    "2012 summer olympics",
+    "britain's got talent",
+    "category:summer olympics in london"
+   ],
+   "goldSeen": [],
+   "toolCalls": 2,
+   "agentVerdict": "incorrect",
+   "agentReason": "Response says Ben Hart won 2012; the correct winners were Ashleigh and Pudsey.",
+   "closedBook": "Ben Hart (magician), winner of Britain's Got Talent 2012",
+   "closedVerdict": "incorrect",
+   "closedReason": "Ground truth is Ashleigh and Pudsey (2012 winners); Ben Hart was a different contestant, not the winner."
+  },
+  {
+   "taskUuid": "bcc8b329-2b70-43c1-9aca-03819efdbf83",
+   "status": "COMPLETED",
+   "latencySec": 9.4,
+   "subQuestions": [
+    "When was Anastasia Romanov born, and what was her exact date of death?",
+    "When was the 1997 animated film 'Anastasia' released in theaters, and in which month and year?",
+    "How old would Anastasia Romanov have been at the time of the film's release, if she had been alive?"
+   ],
+   "agents": [
+    {
+     "status": "COMPLETED",
+     "steps": 2,
+     "sources": 1,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 2,
+     "sources": 1,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 2,
+     "sources": 2,
+     "error": null
+    }
+   ],
+   "usage": {
+    "calls": 8,
+    "promptTokens": 12142,
+    "completionTokens": 2004,
+    "costMicro": 14146
+   },
+   "report": "## Anastasia Romanov's Age at the Film's Release\n\nHad Anastasia Romanov survived, she would have been **96 years old** when the 1997 animated film *Anastasia* was released.\n\n**Her birth and death.** Grand Duchess Anastasia Nikolaevna of Russia, the youngest daughter of Tsar Nicholas II, was born on 18 June 1901 (5 June in the Julian calendar used in Russia at the time) [1]. She was killed with her family by Bolsheviks in Yekaterinburg on 17 July 1918 [1]. Later claims that she survived were disproven by scientific analysis, including DNA testing that confirmed the remains found in 2007 belonged to the imperial family.\n\n**The film's release.** *Anastasia* premiered at the Ziegfeld Theater in New York City on 14 November 1997 and was released in the United States on 21 November 1997 [2].\n\n**The calculation.** Anastasia's 96th birthday fell on 18 June 1997, and her 97th would not come until 18 June 1998. Because the film was released in November 1997, she would have been 96 at that point.",
+   "sources": [
+    {
+     "n": 1,
+     "url": "https://en.wikipedia.org/wiki/Grand_Duchess_Anastasia_Nikolaevna_of_Russia",
+     "quote": "Grand Duchess Anastasia Nikolaevna of Russia (Russian: Анастасия Николаевна, romanized: Anastasiya Nikolayevna; 18 June [O.S. 5 June] 1901 – 17 July 1918) was the fourth child and youngest daughter of Tsar Nicholas II",
+     "title": "Grand Duchess Anastasia Nikolaevna of Russia - Wikipedia"
+    },
+    {
+     "n": 2,
+     "url": "https://en.wikipedia.org/wiki/Anastasia_(1997_film)",
+     "quote": "The film premiered at the Ziegfeld Theater in New York City on November 14, 1997, and was released in the United States on November 21.",
+     "title": "Anastasia (1997 film)"
+    }
+   ],
+   "rounds": 0,
+   "followUps": [],
+   "id": "frames-620",
+   "category": "Numerical reasoning",
+   "question": "If Anastasia Romanov had still been alive when the 90s cartoon movie based on her was released, how old would she be?",
+   "gold": "Duchess Anastasia Romanov would have been 96 years old.",
+   "goldLinks": [
+    "anastasia (1997 film)",
+    "grand duchess anastasia nikolaevna of russia"
+   ],
+   "goldSeen": [
+    "anastasia (1997 film)",
+    "grand duchess anastasia nikolaevna of russia"
+   ],
+   "toolCalls": 4,
+   "agentVerdict": "correct",
+   "agentReason": "Response states 96 years old, matching the ground truth.",
+   "closedBook": "96",
+   "closedVerdict": "correct",
+   "closedReason": "Response '96' matches the ground truth age of 96 years old."
+  },
+  {
+   "taskUuid": "6c250ca9-bd52-4db4-a829-d1966fdf6c4f",
+   "status": "COMPLETED",
+   "latencySec": 18.4,
+   "subQuestions": [
+    "What are the Secret Service codenames used for US presidents in the 21st century?",
+    "Which Jeep models have names that match a Secret Service codename for a 21st-century US president?"
+   ],
+   "agents": [
+    {
+     "status": "COMPLETED",
+     "steps": 5,
+     "sources": 0,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 3,
+     "sources": 4,
+     "error": null
+    }
+   ],
+   "usage": {
+    "calls": 10,
+    "promptTokens": 29147,
+    "completionTokens": 3104,
+    "costMicro": 32251
+   },
+   "report": "## Answer: Jeep Renegade (Barack Obama's codename)\n\nThe Jeep model that shares its name with a 21st-century US president's Secret Service codename is the **Renegade**. Barack Obama's codename was \"Renegade,\" which matches the Jeep model of the same name.\n\nI could not verify the codename in the cited sources. Source [1] documents George W. Bush's codenames (\"Tumbler,\" then \"Trailblazer\" as president), and source [3] is a Jeep lineup blog, but neither confirms the Obama codename. The research notes that the Renegade name was used by a Jeep model but could not confirm it is still in production. The Renegade name, as I understand it, was used for a compact Jeep SUV that was produced into the 2020s, but this should be checked against a current Jeep source before you rely on it.\n\nTwo other points from the research:\n\n- **Joe Biden's codename \"Celtic\"** is noted in the research but not tied to any Jeep model.\n- **Trump's codename** was not verified.\n\nA caveat on the sourcing: the answer rests on the Obama–Renegade pairing, which I have not confirmed from the provided sources. If you need this for something where accuracy matters, check Business Insider's codename list [2] directly for the Obama entry.",
+   "sources": [
+    {
+     "n": 1,
+     "url": "https://www.businessinsider.com/presidents-first-ladies-secret-service-code-names",
+     "quote": "Bush originally used the code name \"Tumbler\" when his father was president, and he was under Secret Service protection as the child of the commander in chief. It was changed to \"Trailblazer\" when he became president himself.",
+     "title": "Secret Service Code Names Used by Presidents and First Ladies: History - Business Insider"
+    },
+    {
+     "n": 2,
+     "url": "https://www.businessinsider.com/secret-service-codenames-presidents-of-the-united-states-first-ladies-children-stories-2019-3",
+     "title": "Secret Service Code Names for US Presidents and First Families - Business Insider"
+    },
+    {
+     "n": 3,
+     "url": "https://www.navarreram.com/blog/2026-jeep-suv-lineup-which-jeep-is-right-for-you",
+     "quote": "The Compass The 2026 Jeep Compass is a great choice for commuters who want a shockingly capable, everyday SUV without a lot of extra bulk and outstanding efficiency.",
+     "title": "2026 Jeep SUV Lineup: Which Jeep Is Right for You? – Navarre Jeep Ram Dodge Chrysler Blog"
+    }
+   ],
+   "rounds": 0,
+   "followUps": [],
+   "id": "frames-236",
+   "category": "Multiple constraints",
+   "question": "What Jeep model shares its name with the Secret Service codename for a 21st-century US president?",
+   "gold": "Renegade",
+   "goldLinks": [
+    "list of jeep vehicles",
+    "secret service code name"
+   ],
+   "goldSeen": [
+    "secret service code name"
+   ],
+   "toolCalls": 11,
+   "agentVerdict": "correct",
+   "agentReason": "Response's final answer is Jeep Renegade, matching ground truth despite caveats about sourcing.",
+   "closedBook": "Jeep Renegade (Barack Obama's Secret Service codename was 'Renegade')",
+   "closedVerdict": "correct",
+   "closedReason": "Response states Jeep Renegade, matching the ground truth answer exactly."
+  },
+  {
+   "taskUuid": "7f4e7754-e69a-4412-9724-790e06eee4ca",
+   "status": "COMPLETED",
+   "latencySec": 21.3,
+   "subQuestions": [
+    "Which waterfall in Little River Canyon National Preserve is the tallest in Alabama, and what is its height?",
+    "What is the height of the tallest waterfall in the continental United States (Ribbon Falls in Yosemite, or another candidate depending on definition)?",
+    "How does the height of Alabama's tallest waterfall compare to the height of the tallest continental US waterfall, and what is the difference?"
+   ],
+   "agents": [
+    {
+     "status": "COMPLETED",
+     "steps": 3,
+     "sources": 1,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 4,
+     "sources": 2,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 4,
+     "sources": 4,
+     "error": null
+    }
+   ],
+   "usage": {
+    "calls": 13,
+    "promptTokens": 36975,
+    "completionTokens": 3666,
+    "costMicro": 40641
+   },
+   "report": "The question has two readings, and the answer depends on which Alabama waterfall counts. Grace's High Falls at Little River Canyon is the tallest *above-ground* waterfall in Alabama at 133 feet (about 40.5 m) [1]. The preserve's best-known waterfall, Little River Falls, is much shorter at 45 feet, so Grace's High Falls is the one the question points to. It is rainfall-dependent and does not flow year-round [1].\n\nYosemite's Ribbon Fall is the tallest single-drop waterfall in the continental US, at 1,612 feet (491 m) [3][5]. It is nearly 200 feet taller than Upper Yosemite Fall and is also described as the longest single-drop waterfall in North America [2][3].\n\nThe difference is therefore about 1,479 feet (1,612 − 133). Ribbon Fall is roughly 12 times as tall as Grace's High Falls.\n\nIf \"Alabama's tallest waterfall\" is taken to include seasonal underground falls, Neversink Pit's fall at about 160 feet [4] would be the tallest. That reading gives a difference of about 1,452 feet, or roughly 10 times as tall. Sources differ on waterfall heights and there is no standard measurement method, so these figures are approximate.",
+   "sources": [
+    {
+     "n": 1,
+     "url": "https://www.nps.gov/liri/planyourvisit/waterfalls.htm",
+     "quote": "At 133' high, Graces High Falls is the tallest above ground waterfall in Alabama. This waterfall is dependent on rainfall and does not flow year-round.",
+     "title": "Waterfalls - Little River Canyon National Preserve (U.S. National Park Service)"
+    },
+    {
+     "n": 2,
+     "url": "https://en.wikipedia.org/wiki/Ribbon_Fall",
+     "quote": "Ribbon Fall, located in Yosemite National Park in California, flows off a cliff on the west side of El Capitan and is the longest single-drop waterfall in North America.",
+     "title": "Ribbon Fall - Wikipedia"
+    },
+    {
+     "n": 3,
+     "url": "https://www.youtube.com/watch?v=x9xodKqf408",
+     "quote": "At 1,612' Ribbon Fall is nearly 200' taller than Upper Yosemite Fall and is the tallest single drop waterfall in North America.",
+     "title": "Finding Yosemite's Tallest Waterfall: Ribbon Fall (Yosemite Off Trail Series)"
+    },
+    {
+     "n": 4,
+     "url": "https://www.montgomeryadvertiser.com/story/travel/2026/07/21/what-is-alabamas-tallest-waterfall-a-road-trip-guide/90994137007",
+     "quote": "Neversink Pit features a seasonal waterfall that plunges approximately 160 feet into a giant sinkhole and cave system.",
+     "title": "What is Alabama's tallest waterfall? A road trip guide"
+    },
+    {
+     "n": 5,
+     "url": "https://www.nps.gov/yose/planyourvisit/waterfalls.htm",
+     "quote": "Ribbon Fall 1,612 feet / 490 m",
+     "title": "Waterfalls - Yosemite National Park (U.S. National Park Service)"
+    }
+   ],
+   "rounds": 0,
+   "followUps": [],
+   "id": "frames-692",
+   "category": "Numerical reasoning | Tabular reasoning | Post processing",
+   "question": "Little River Canyon National Preserve has three waterfalls, one of which is the tallest in Alabama. How much shorter is Alabama's tallest waterfall than the tallest waterfall in the continental US?",
+   "gold": "2,452 ft",
+   "goldLinks": [
+    "grace's high falls",
+    "list of waterfalls by height"
+   ],
+   "goldSeen": [
+    "list of waterfalls by height"
+   ],
+   "toolCalls": 13,
+   "agentVerdict": "incorrect",
+   "agentReason": "Response gives about 1,479 ft (or 1,452 ft), not the ground truth 2,452 ft.",
+   "closedBook": "Approximately 2,380 feet shorter (Little River Falls at about 45 ft vs. Yosemite Falls at about 2,425 ft).",
+   "closedVerdict": "incorrect",
+   "closedReason": "Response gives ~2,380 ft, not 2,452 ft; also names wrong falls (tallest AL is Grace's High Falls)."
+  },
+  {
+   "taskUuid": "c59313fc-e61c-4b76-8e2d-cad1d38e4b98",
+   "status": "COMPLETED",
+   "latencySec": 9.2,
+   "subQuestions": [
+    "Which US state was admitted to the union in January 1959?",
+    "What was the capital city of that state?",
+    "What was the approximate population of that capital city according to the 2000 US Census (the last census of the 20th century)?"
+   ],
+   "agents": [
+    {
+     "status": "COMPLETED",
+     "steps": 2,
+     "sources": 1,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 1,
+     "sources": 0,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 1,
+     "sources": 0,
+     "error": null
+    }
+   ],
+   "usage": {
+    "calls": 6,
+    "promptTokens": 6386,
+    "completionTokens": 1000,
+    "costMicro": 7386
+   },
+   "report": "## Findings\n\n**The state.** The only state admitted in January 1959 was Alaska, which became the 49th state on January 3, 1959. Hawaii followed on August 21, 1959. The source cited for this, [1], is the Wikipedia list of U.S. states by date of admission. The excerpt I have from it only quotes the constitutional clause giving Congress power to admit states. It does not show Alaska's date, so that date rests on general knowledge rather than on the cited text.\n\n**The capital.** Alaska's capital is Juneau. The subagent's research did not establish this, and I have not verified it against a source in this session.\n\n**The population.** I could not find the 2000 U.S. Census population for Juneau. The research did not reach this figure, and none of the sources provided contain it. For reference only, from general knowledge and not from a cited source: Juneau's 2000 census population was about 30,700. Please check this against the U.S. Census Bureau's 2000 data before relying on it.\n\n## Summary\n\n- The state is Alaska, admitted January 3, 1959 (partly supported by [1]).\n- The capital is Juneau (unverified here).\n- The approximate 2000 Census population is about 30,700 (from general knowledge; not confirmed by any cited source).",
+   "sources": [
+    {
+     "n": 1,
+     "url": "https://en.wikipedia.org/wiki/List_of_U.S._states_by_date_of_admission_to_the_Union",
+     "quote": "Article IV, Section 3, Clause 1 of the Constitution grants to Congress the authority to admit new states into the Union.",
+     "title": "List of U.S. states by date of admission to the Union"
+    }
+   ],
+   "rounds": 0,
+   "followUps": [],
+   "id": "frames-554",
+   "category": "Tabular reasoning | Multiple constraints | Temporal reasoning",
+   "question": "I live in a US state that was admitted to the union in January 1959. What was the approximate population of the capital of my state according to the last census of the 20th century?",
+   "gold": "26,751",
+   "goldLinks": [
+    "alaska",
+    "juneau, alaska",
+    "list of u.s. states by date of admission to the union"
+   ],
+   "goldSeen": [
+    "list of u.s. states by date of admission to the union"
+   ],
+   "toolCalls": 1,
+   "agentVerdict": "incorrect",
+   "agentReason": "Response gives ~30,700 for Juneau, not the ground truth 26,751; also hedged as unverified.",
+   "closedBook": "Approximately 30,700 (Juneau, Alaska, per the 2000 census)",
+   "closedVerdict": "incorrect",
+   "closedReason": "Response gives 30,700 (2000 census); ground truth is 26,751 (1990 census, last of 20th century)."
+  },
+  {
+   "taskUuid": "26a16c5e-e51d-42ee-86fa-4cdcde250aba",
+   "status": "COMPLETED",
+   "latencySec": 27.3,
+   "subQuestions": [
+    "Which animals are the closest relatives of the capybara, and which are only distantly related to it (e.g., within the rodent order or the guinea pig family)?",
+    "Which land-dwelling mammals are known to have the densest fur, and how is fur density measured or compared across species?",
+    "Among the distant relatives of the capybara, which species has the densest fur according to published measurements or reliable sources?"
+   ],
+   "agents": [
+    {
+     "status": "COMPLETED",
+     "steps": 2,
+     "sources": 3,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 3,
+     "sources": 4,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 4,
+     "sources": 2,
+     "error": null
+    }
+   ],
+   "usage": {
+    "calls": 11,
+    "promptTokens": 28178,
+    "completionTokens": 3464,
+    "costMicro": 31642
+   },
+   "report": "The chinchilla is the answer. It is a distant relative of the capybara and has the densest fur of any land-dwelling mammal.\n\n**Relationship to the capybara.** The capybara (genus *Hydrochoerus*, which includes the lesser capybara as its only other living member) belongs to the cavy family Caviidae, whose closest relatives are guinea pigs and rock cavies [1][2][3]. The chinchilla is more distantly related. It belongs to a different family within the same rodent order, Rodentia, alongside the agouti and the nutria [1].\n\n**Fur density.** Chinchillas are generally cited as having the densest fur of all extant terrestrial mammals, at roughly 20,000 hairs per square centimeter with about 50 hairs per follicle [4]. Guinness World Records gives a higher figure, up to about 25,000 hairs per square centimetre on the rump, with 50 to 80 hairs per follicle [6]. Fur density is usually measured by counting hairs or follicles in a magnified patch of skin, and figures vary by body part and season, so comparisons across sources should be made with care [5]. The sea otter has even denser fur, but it is marine and so falls outside the land-mammal category [5].\n\nI did not find a published measurement that places any other capybara relative above the chinchilla, although I did not check every caviomorph species.",
+   "sources": [
+    {
+     "n": 1,
+     "url": "https://en.wikipedia.org/wiki/Capybara",
+     "quote": "Its other close relatives include guinea pigs and rock cavies, and it is more distantly related to the agouti, the chinchilla, and the nutria.",
+     "title": "Capybara - Wikipedia"
+    },
+    {
+     "n": 2,
+     "url": "https://en.wikipedia.org/wiki/Caviidae",
+     "quote": "Caviidae, the cavy family, is composed of rodents native to South America and includes the domestic guinea pig, wild cavies, and the largest living rodent, the capybara.",
+     "title": "Caviidae - Wikipedia"
+    },
+    {
+     "n": 3,
+     "url": "https://en.wikipedia.org/wiki/Hydrochoerus",
+     "quote": "The genus Hydrochoerus contains two living (the lesser and greater capybaras) and three extinct species of rodents from South America, the Caribbean island of Grenada, California and Panama.",
+     "title": "Hydrochoerus - Wikipedia"
+    },
+    {
+     "n": 4,
+     "url": "https://en.wikipedia.org/wiki/Chinchilla",
+     "quote": "Chinchillas have the densest fur of all extant terrestrial mammals, with around 20,000 hairs per square centimeter and 50 hairs growing from each follicle.",
+     "title": "Chinchilla - Wikipedia"
+    },
+    {
+     "n": 5,
+     "url": "https://www.truthaboutfur.com/amazing-facts-about-fur-natures-densest-furs",
+     "title": "Amazing Facts About Fur: Nature's Densest Furs - Truth About Fur"
+    },
+    {
+     "n": 6,
+     "url": "https://www.guinnessworldrecords.com/world-records/785582-densest-fur-land-animal",
+     "quote": "The terrestrial animal with the thickest fur is the long-tailed chinchilla (Chinchilla lanigera), a rodent native to mountainous regions of western South America. Each of its follicles can produce between 50 and 80 fine hairs, with up to c. 25,000 hairs per square centimetre (161,000 hairs per square inch) where the coat is thickest on its rump.",
+     "title": "Densest fur (land animal) | Guinness World Records"
+    }
+   ],
+   "rounds": 0,
+   "followUps": [],
+   "id": "frames-332",
+   "category": "Multiple constraints",
+   "question": "What is an animal that is distantly related to the capybara and has the densest fur of all land-dwelling mammals?",
+   "gold": "Chinchilla",
+   "goldLinks": [
+    "capybara",
+    "chinchilla"
+   ],
+   "goldSeen": [
+    "capybara",
+    "chinchilla"
+   ],
+   "toolCalls": 11,
+   "agentVerdict": "correct",
+   "agentReason": "Response clearly identifies the chinchilla as the answer, matching the ground truth.",
+   "closedBook": "The chinchilla",
+   "closedVerdict": "correct",
+   "closedReason": "Response 'The chinchilla' matches the ground truth 'Chinchilla'."
+  },
+  {
+   "taskUuid": "20abe173-5aaa-4e89-99cf-64e3917e6044",
+   "status": "COMPLETED",
+   "latencySec": 24.3,
+   "subQuestions": [
+    "Which actors in the Star Wars franchise have a first or last name of 'Jack'?",
+    "For each of those actors, how many Star Wars films (as of 2024) did they appear in?",
+    "How many of those actors appeared in more than two Star Wars films as of 2024?"
+   ],
+   "agents": [
+    {
+     "status": "COMPLETED",
+     "steps": 4,
+     "sources": 3,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 1,
+     "sources": 0,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 1,
+     "sources": 0,
+     "error": null
+    }
+   ],
+   "usage": {
+    "calls": 8,
+    "promptTokens": 21365,
+    "completionTokens": 2332,
+    "costMicro": 23697
+   },
+   "report": "## Star Wars Actors Named \"Jack\" with More Than Two Films (as of 2024)\n\n**Answer: Based on the evidence gathered, none of the identified actors can be confirmed to have appeared in more than two Star Wars films as of 2024.**\n\n### Who was identified\n\nThe first sub-question surfaced three actors with \"Jack\" as a first or last name:\n\n- **Andrew Jack** (last name Jack): According to Deadline, he played Major Ematt in *The Force Awakens* and *The Last Jedi* and had a voice role in *Solo: A Star Wars Story* [1]. That is three films, which would exceed the threshold. However, this comes from a single source, and the sub-question answerer also described him as a dialect coach, which the cited snippet does not mention.\n- **Jack Thompson** (first name Jack): Listed as playing Cliegg Lars [2]. The source excerpt does not state how many films he appeared in.\n- **Jack Purvis** (first name Jack): Listed as playing a Chief Ugnaught [2]. The source excerpt does not state how many films he appeared in.\n\nJack Quaid and Jack O'Connell were mentioned in search results, but no retrieved source confirmed a Star Wars role for either, so they were excluded.\n\n### What remains unresolved\n\nThe second and third sub-questions were not answered. The sub-question answerers reported no earlier context and asked for the list of actors, even though the list was available from the first step. As a result, no film counts were verified for Thompson or Purvis, and the final tally was never completed.\n\n### Assessment\n\n- **Andrew Jack** is the only candidate with evidence pointing to more than two films (three, per Deadline [1]). Note that the Deadline snippet is the only support for this, and it names two films in the main franchise plus one in the anthology spin-off, so whether that counts as \"Star Wars movies\" under the question's wording is a judgment call; under a plain reading, three qualifies.\n- **Jack Thompson and Jack Purvis** could not be checked against the film counts, so they cannot be ruled in or out.\n\n**Tentative conclusion:** At least one actor (Andrew Jack) appears to meet the criterion, giving a count of **1**, but the count is incomplete because the film totals for Jack Thompson and Jack Purvis were never verified. A full answer requires checking the filmographies of those two actors as of 2024.",
+   "sources": [
+    {
+     "n": 1,
+     "url": "https://deadline.com/2020/04/mark-hamill-remembers-star-wars-costar-andrew-jack-in-tweet-1202899336",
+     "quote": "Jack played Major Ematt in Stars Wars: Episode VIII – The Last Jedi and Episode VII – The Force Awakens and also had a voice role in Solo: A Star Wars Story.",
+     "title": "Mark Hamill Remembers 'Star Wars' Actor Andrew Jack - Deadline"
+    },
+    {
+     "n": 2,
+     "url": "https://en.wikipedia.org/wiki/List_of_Star_Wars_film_actors",
+     "quote": "| Cliegg Lars | Jack Thompson \"Jack Thompson (actor)\") |",
+     "title": "List of Star Wars film actors - Wikipedia"
+    }
+   ],
+   "rounds": 0,
+   "followUps": [],
+   "id": "frames-116",
+   "category": "Multiple constraints",
+   "question": "As of 2024, how many of the Star Wars actors whose first or last names are 'Jack' have starred in more than 2 Star wars movies?",
+   "gold": "2",
+   "goldLinks": [
+    "andrew jack (dialect coach)",
+    "jack purvis (actor)",
+    "jack thompson (actor)",
+    "list of star wars film actors"
+   ],
+   "goldSeen": [
+    "list of star wars film actors"
+   ],
+   "toolCalls": 6,
+   "agentVerdict": "incorrect",
+   "agentReason": "Response gives tentative count of 1 (and hedges), not the ground truth of 2.",
+   "closedBook": "0",
+   "closedVerdict": "incorrect",
+   "closedReason": "Response gives 0, but ground truth is 2; the values differ."
+  },
+  {
+   "taskUuid": "26a28135-c0c9-4860-9781-af908d875381",
+   "status": "COMPLETED",
+   "latencySec": 24.2,
+   "subQuestions": [
+    "Which presidential nominee did Texas's electoral college vote for in each presidential election from 1924 through 2020?",
+    "Which presidential nominee did California's electoral college vote for in each presidential election from 1924 through 2020?",
+    "For each presidential election from 1924 through 2020, did Texas and California cast their electoral votes for the same nominee?",
+    "Which presidential nominees did Texas and California vote for in the 2024 election, and did they match?"
+   ],
+   "agents": [
+    {
+     "status": "COMPLETED",
+     "steps": 5,
+     "sources": 2,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 5,
+     "sources": 0,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 1,
+     "sources": 0,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 2,
+     "sources": 4,
+     "error": null
+    }
+   ],
+   "usage": {
+    "calls": 15,
+    "promptTokens": 43338,
+    "completionTokens": 5702,
+    "costMicro": 49040
+   },
+   "report": "## Texas vs. California Electoral Votes, 1924–2024\n\nThe question asks how many times Texas's and California's electoral colleges chose the same nominee between 1924 and August 2024. The sub-findings do not support a confident count. Two of the four sub-questions were answered only partly or from memory, and the year-by-year comparison was left incomplete. What follows reports what can be stated with reasonable confidence and marks the gaps.\n\n**Texas.** The sources support Democratic electoral votes in 1924, 1932, and 1936, and Republican votes from 1980 through 2020. A source snippet lists Texas as Republican in 1928, though Texas's electors voted for Al Smith (D) that year. The 1940–1976 results were not verified against any fetched source, so this period is unresolved [1][2].\n\n**California.** California's electoral votes went to the statewide popular-vote winner in every election from 1924 to 2020. This is drawn from general historical knowledge rather than a fetched source, so treat it as unverified [1][2].\n\n**2024.** The two states diverged. Texas gave its 40 electoral votes to Republican Donald Trump, who won the state by about 14 points. California gave its 54 electoral votes to Democrat Kamala Harris, who won by about 20 points [3][4]. Trump, running with JD Vance, won the national election over Harris and Tim Walz [5].\n\n**Count.** No reliable total is available. The 1924–2020 comparison requires year-by-year verified results for both states, and the sources do not supply that for the 1940–1976 period or for 1928. Adding 2024 as a disagreement does not change that. A verified count would need a primary source such as FEC or official state records, or Wikipedia's per-election results, checked for each of the 25 elections in the window.",
+   "sources": [
+    {
+     "n": 1,
+     "url": "https://ballotpedia.org/Presidential_voting_trends_in_Texas",
+     "quote": "| Year | 1900 | 1904 | 1908 | 1912 | 1916 | 1920 | 1924 | 1928 | 1932 | 1936 | 1940 | 1944 | 1948 | 1952 | 1956 | 1960 | 1964 | 1968 | 1972 | 1976 | 1980 | 1984 | 1988 | 1992 | 1996 | 2000 | 2004 | 2008 | 2012 | 2016 | 2020 | 2024 |",
+     "title": "Presidential voting trends in Texas - Ballotpedia"
+    },
+    {
+     "n": 2,
+     "url": "https://www.270towin.com/states/texas",
+     "title": "Texas Presidential Election Voting History - 270toWin"
+    },
+    {
+     "n": 3,
+     "url": "https://www.nytimes.com/interactive/2024/11/05/us/elections/results-president.html",
+     "quote": "| Calif. California | 54 | D+20 | 100% |",
+     "title": "2024 Presidential Election Results Map: Trump Wins"
+    },
+    {
+     "n": 4,
+     "url": "https://www.politico.com/2024-election/results/president",
+     "title": "Presidential Election Results 2024: Electoral Votes & Map by State - POLITICO"
+    },
+    {
+     "n": 5,
+     "url": "https://en.wikipedia.org/wiki/2024_United_States_presidential_election",
+     "quote": "The Republican ticket of former president Donald Trump and Ohio junior senator JD Vance defeated the Democratic ticket of incumbent vice president Kamala Harris and Minnesota governor Tim Walz.",
+     "title": "2024 United States presidential election"
+    }
+   ],
+   "rounds": 0,
+   "followUps": [],
+   "id": "frames-673",
+   "category": "Tabular reasoning | Temporal reasoning",
+   "question": "From 1924 to August 2024, how many times did Texas's and California's electoral colleges elect the same nominee during the presidential election? ",
+   "gold": "13 times.",
+   "goldLinks": [
+    "politics of california",
+    "politics of texas"
+   ],
+   "goldSeen": [],
+   "toolCalls": 13,
+   "agentVerdict": "incorrect",
+   "agentReason": "Response gives no count and says it cannot determine the answer; ground truth is 13.",
+   "closedBook": "13",
+   "closedVerdict": "correct",
+   "closedReason": "Response '13' matches the ground truth of 13 times."
+  },
+  {
+   "taskUuid": "add740ff-42dc-4e64-93ad-62a2fbc64d04",
+   "status": "COMPLETED",
+   "latencySec": 24.3,
+   "subQuestions": [
+    "What is the Pruett rule for determining which month or occurrence is a 'blue moon', and how does it differ from the common definition of a blue moon?",
+    "Which full moons (blue moons under the Pruett rule) occurred between the start of World War I (July 28, 1914) and the end of World War II (September 2, 1945)?",
+    "Of those identified blue moons, on which calendar dates did each one fall, and how many of them fell on the 31st of a month?"
+   ],
+   "agents": [
+    {
+     "status": "COMPLETED",
+     "steps": 2,
+     "sources": 1,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 4,
+     "sources": 2,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 5,
+     "sources": 0,
+     "error": null
+    }
+   ],
+   "usage": {
+    "calls": 13,
+    "promptTokens": 37440,
+    "completionTokens": 4809,
+    "costMicro": 42249
+   },
+   "report": "## Blue Moons on the 31st, 1914–1945 (Pruett Rule)\n\n**Short answer:** The question cannot be answered reliably from the material gathered. The subquestion work turned up only a few confirmed Pruett-rule blue moons in the 1914–1945 window, none on the 31st, and the 31st-of-month tally in the last subanswer draws on dates outside that window and contains counting errors. My best supported reading is that the answer is **0 among the confirmed dates, with the true count likely higher because the list is incomplete**.\n\n**What is established**\n\n- The Pruett rule defines a blue moon as the second full moon within a single calendar month. James Hugh Pruett introduced it in 1946 [1].\n- Within 1914–1945, the confirmed Pruett-rule blue moons are 22 August 1918, 21 November 1934, and 22 August 1937 [1][2]. None fall on the 31st.\n- Project Pluto's other dates (21 May 1921, 20 February 1924, 21 May 1940) are the older \"season\" definition, not the Pruett rule, so they are excluded [2].\n\n**Why the count is incomplete**\n\nRoughly 25–27 Pruett blue moons would be expected in a span of about 31 years, far more than the three confirmed above. I could not retrieve a full ephemeris for the period, so most of the window is unverified. The earlier subanswer's list also came from partial search snippets that covered other years (1901–1966 and 2037–2099), and its tallies were not reliable.\n\n**Conclusion**\n\nAmong the blue moons confirmed for 1914–1945, none occurred on the 31st of the month. A complete answer would require a full list of monthly blue moons for that period (for example, a 1914–1945 Pruett-rule ephemeris), which I did not obtain.\n\nSources:\n[1] https://en.wikipedia.org/wiki/Blue_moon\n[2] https://www.projectpluto.com/bluemoon.htm",
+   "sources": [
+    {
+     "n": 1,
+     "url": "https://en.wikipedia.org/wiki/Blue_moon",
+     "quote": "The practice of designating the second full moon in a month as \"blue\" originated with amateur astronomer James Hugh Pruett in 1946.",
+     "title": "Blue moon - Wikipedia"
+    },
+    {
+     "n": 2,
+     "url": "https://www.projectpluto.com/bluemoon.htm",
+     "quote": "The Blue Moons mentioned in the above excerpt occur on 21 Nov 1915, 22 Aug 1918, 21 May 1921, 20 Feb 1924, 21 Nov 1934, 22 Aug 1937, and 21 May 1940.",
+     "title": "Rules for determining Blue Moons"
+    }
+   ],
+   "rounds": 0,
+   "followUps": [],
+   "id": "frames-26",
+   "category": "Numerical reasoning | Tabular reasoning | Multiple constraints | Temporal reasoning",
+   "question": "Using the Pruett rule, out of all of the blue moons that occurred between the beginning of World War I and the end of World War II, how many of them occurred on the 31st of the month?",
+   "gold": "9",
+   "goldLinks": [
+    "blue moon",
+    "world war i",
+    "world war ii"
+   ],
+   "goldSeen": [
+    "blue moon"
+   ],
+   "toolCalls": 12,
+   "agentVerdict": "incorrect",
+   "agentReason": "Response gives 0 (with caveat it can't determine); ground truth is 9.",
+   "closedBook": "I cannot determine this reliably; a verified lunar calendar for 1914–1945 is needed to count Pruett-rule blue moons falling on the 31st.",
+   "closedVerdict": "incorrect",
+   "closedReason": "The response declines to give an answer and does not provide the ground truth of 9."
+  },
+  {
+   "taskUuid": "8aae9de3-c35d-4999-a460-691444b6c881",
+   "status": "COMPLETED",
+   "latencySec": 12.2,
+   "subQuestions": [
+    "Who were the original members of the rock band Queen and what were their primary roles (vocals, guitar, bass, drums, etc.)?",
+    "Which original member of Queen was also in a band called Smile?",
+    "In what year did the band Smile begin, and in what year did it end?"
+   ],
+   "agents": [
+    {
+     "status": "COMPLETED",
+     "steps": 3,
+     "sources": 3,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 2,
+     "sources": 2,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 3,
+     "sources": 2,
+     "error": null
+    }
+   ],
+   "usage": {
+    "calls": 10,
+    "promptTokens": 17532,
+    "completionTokens": 2534,
+    "costMicro": 20066
+   },
+   "report": "## Original Queen Members and Their Roles\n\nQueen was formed in London in 1970 by three musicians. Freddie Mercury was the lead vocalist and pianist [1]. Brian May played guitar [1]. Roger Taylor was the drummer and also contributed backing vocals; he is known for sometimes singing lead on his own songs [2]. John Deacon joined in 1971 as bassist, completing the classic four-piece lineup [3]. Deacon also wrote several of the band's hits, including \"You're My Best Friend\" [3].\n\n## The Band Smile and Queen's Original Members\n\nTwo original Queen members had a connection to Smile. Brian May, guitarist, was a founding member, formed along with Tim Staffell [4][5]. Roger Taylor, drummer, joined later [4][5]. Since the question asks for one member, Brian May is the most prominent answer, though Roger Taylor fits as well.\n\nSmile was formed in London in 1968 by Tim Staffell and Brian May. After Staffell left, the band added Freddie Mercury and later John Deacon, and this lineup became Queen. The band disbanded in 1970. The sources I checked do not provide the 1968 and 1970 dates, so they should be verified against other references.\n\n## Clarification on the Smile Dates\n\nA separate band called The Smile, formed by Thom Yorke, Jonny Greenwood and Tom Skinner, began in 2018 [6]. It is not the 1960s Smile associated with Queen. The sources list its years active as \"2018–present\" [6], so no end year is given, and the band had not ended as of the source text.",
+   "sources": [
+    {
+     "n": 1,
+     "url": "https://en.wikipedia.org/wiki/Freddie_Mercury",
+     "quote": "he formed Queen in 1970 with guitarist Brian May and drummer Roger Taylor.",
+     "title": "Freddie Mercury - Wikipedia"
+    },
+    {
+     "n": 2,
+     "url": "https://en.wikipedia.org/wiki/Roger_Taylor_(Queen_drummer)",
+     "quote": "He achieved international fame as the drummer and backing vocalist for the rock band Queen.",
+     "title": "Roger Taylor (Queen drummer) - Wikipedia"
+    },
+    {
+     "n": 3,
+     "url": "https://en.wikipedia.org/wiki/John_Deacon",
+     "quote": "John Richard Deacon (born 19 August 1951) is an English retired musician who was the bass guitarist for the rock band Queen.",
+     "title": "John Deacon - Wikipedia"
+    },
+    {
+     "n": 4,
+     "url": "https://en.wikipedia.org/wiki/Smile_(band)",
+     "quote": "Smile were formed by Tim Staffell and Brian May, and later joined by drummer Roger Taylor.",
+     "title": "Smile (band) - Wikipedia"
+    },
+    {
+     "n": 5,
+     "url": "https://en.wikipedia.org/wiki/Tim_Staffell",
+     "quote": "He was a member of Smile, a band that included guitarist Brian May and drummer Roger Taylor.",
+     "title": "Tim Staffell - Wikipedia"
+    },
+    {
+     "n": 6,
+     "url": "https://en.wikipedia.org/wiki/The_Smile_(band)",
+     "quote": "Years active 2018–present",
+     "title": "The Smile (band) - Wikipedia"
+    }
+   ],
+   "rounds": 0,
+   "followUps": [],
+   "id": "frames-335",
+   "category": "Temporal reasoning",
+   "question": "Who were the key members of the original lineup of the rock band Queen, and what were their primary roles in the band?  Which original member of Queen was also in a band named Smile and what year did that band begin and end?",
+   "gold": "The original lineup of Queen consisted of Freddie Mercury (lead vocals, piano), Brian May (guitar, vocals), Roger Taylor (drums, vocals), and John Deacon (bass guitar).    Smile was an English rock band formed in London in 1968 with Brian May and Tim Staffell.  It ended in 1970 when Staffell left to join another band, Humpy Bong.",
+   "goldLinks": [
+    "queen (band)",
+    "smile (band)"
+   ],
+   "goldSeen": [
+    "smile (band)"
+   ],
+   "toolCalls": 5,
+   "agentVerdict": "correct",
+   "agentReason": "Lineup roles correct; identifies Brian May in Smile, formed 1968, ended 1970, matching ground truth.",
+   "closedBook": "Original Queen lineup: Freddie Mercury (lead vocals, piano), Brian May (lead guitar, vocals), Roger Taylor (drums, vocals), and John Deacon (bass guitar). Brian May (and Roger Taylor) was also in Smile, which began in 1968 and ended in 1972.",
+   "closedVerdict": "incorrect",
+   "closedReason": "Smile ended in 1970 per ground truth, but response says 1972; also adds Roger Taylor."
+  },
+  {
+   "taskUuid": "5da23be3-5f7b-4321-8c75-3bb18b71043d",
+   "status": "COMPLETED",
+   "latencySec": 18.2,
+   "subQuestions": [
+    "What is the height of the Eiffel Tower in metres?",
+    "How many arrondissements does Paris have?",
+    "What is the street number of the official residence of the French prime minister (Hôtel Matignon, 57 rue de Varenne)?",
+    "Adding the Eiffel Tower height to the arrondissement count and subtracting the prime minister's street number gives what final integer, and is that integer prime?"
+   ],
+   "agents": [
+    {
+     "status": "COMPLETED",
+     "steps": 2,
+     "sources": 1,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 2,
+     "sources": 1,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 2,
+     "sources": 2,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 2,
+     "sources": 3,
+     "error": null
+    }
+   ],
+   "usage": {
+    "calls": 10,
+    "promptTokens": 16965,
+    "completionTokens": 3114,
+    "costMicro": 20079
+   },
+   "report": "# Is the Result a Prime Number?\n\n**Short answer: Yes.** Using the sourced figures, 330 + 20 − 57 = 293, and 293 is prime.\n\n## The inputs\n\n- **Eiffel Tower height: 330 m.** The Wikipedia entry gives 330 metres (1,083 ft) including the broadcasting aerial added in 1957 [1]. The 276 m figure in the subquestion notes refers to the upper platform, not the full height, so it is not used here.\n- **Number of arrondissements: 20.** Paris is divided into twenty administrative districts called arrondissements municipaux [2].\n- **Prime minister's street number: 57.** The Hôtel Matignon, the official residence of the French Prime Minister, is at 57 Rue de Varenne in the 7th arrondissement [3]. Apple Maps lists the same address [4].\n\n## The calculation\n\n330 + 20 − 57 = 293\n\n## Primality check\n\n293 is not divisible by any prime up to its square root (√293 ≈ 17.1). The primes to check are 2, 3, 5, 7, 11, 13 and 17:\n\n- Not even, so not divisible by 2.\n- Digit sum is 14, so not divisible by 3.\n- Does not end in 0 or 5, so not divisible by 5.\n- 7 × 41 = 287, remainder 6.\n- 11 × 26 = 286, remainder 7.\n- 13 × 22 = 286, remainder 7.\n- 17 × 17 = 289, remainder 4.\n\nNone of these divide 293, so it is prime.",
+   "sources": [
+    {
+     "n": 1,
+     "url": "https://en.wikipedia.org/wiki/Eiffel_Tower",
+     "title": "Eiffel Tower - Wikipedia"
+    },
+    {
+     "n": 2,
+     "url": "https://en.wikipedia.org/wiki/Arrondissements_of_Paris",
+     "quote": "The City of Paris is divided into twenty arrondissements municipaux, administrative districts, referred to as arrondissements",
+     "title": "Arrondissements of Paris - Wikipedia"
+    },
+    {
+     "n": 3,
+     "url": "https://en.wikipedia.org/wiki/H%C3%B4tel_Matignon",
+     "quote": "The Hôtel Matignon (French: Hôtel de Matignon, pronounced [otɛl d(ə) matiɲɔ̃]) is the official residence of the Prime Minister of France. It is located in the 7th arrondissement of Paris, at 57 Rue de Varenne.",
+     "title": "Hôtel Matignon - Wikipedia"
+    },
+    {
+     "n": 4,
+     "url": "https://maps.apple.com/place?place-id=IC600D960A3480A79",
+     "title": "Hôtel de Matignon in Paris, France - Apple Maps"
+    }
+   ],
+   "rounds": 0,
+   "followUps": [],
+   "id": "frames-108",
+   "category": "Numerical reasoning | Post processing",
+   "question": "If you take the height of the Eiffel Tower in metres, add the number of arrondissements in Paris and subtract the street number of the official residence of the French prime minister, is the final answer a prime number?",
+   "gold": "Yes",
+   "goldLinks": [
+    "arrondissements of paris",
+    "eiffel tower",
+    "hôtel matignon"
+   ],
+   "goldSeen": [
+    "arrondissements of paris",
+    "eiffel tower",
+    "hôtel matignon"
+   ],
+   "toolCalls": 7,
+   "agentVerdict": "correct",
+   "agentReason": "Computes 330+20-57=293, which is prime; final answer Yes matches ground truth.",
+   "closedBook": "Yes, using the commonly cited 330 m height (including antennas): 330 + 20 − 57 = 293, which is prime. (Note: with the 324 m height excluding antennas, the result would be 287 = 7×41, not prime.)",
+   "closedVerdict": "correct",
+   "closedReason": "Final answer Yes (330+20-57=293, prime) matches ground truth; caveat is only a side note."
+  },
+  {
+   "taskUuid": "b3e5cee0-8e67-4357-ace2-f45ed3f290f9",
+   "status": "COMPLETED",
+   "latencySec": 21.2,
+   "subQuestions": [
+    "Which ancient archaeoastronomical sites in the United Kingdom are aligned with the summer solstice sunrise or sunset?",
+    "Which of these sites has a chamber in which sunlight illuminates a quartz-rich or quartz-containing stone at the summer solstice?",
+    "What are the documented details (construction date, orientation, and chamber features) of the identified site and its solstice light phenomenon?"
+   ],
+   "agents": [
+    {
+     "status": "COMPLETED",
+     "steps": 4,
+     "sources": 5,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 2,
+     "sources": 2,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 4,
+     "sources": 4,
+     "error": null
+    }
+   ],
+   "usage": {
+    "calls": 12,
+    "promptTokens": 34481,
+    "completionTokens": 4997,
+    "costMicro": 39478
+   },
+   "report": "## Summary\n\nNo site I could verify fits all parts of the question. The question asks for a U.K. site linked to a summer-solstice light effect on a quartz-rich stone in a chamber. The only chamber in the sources where solstice sunlight illuminates the interior is Newgrange, which is in Ireland and lit at the winter solstice, so it fails both the location and the season.\n\n## U.K. sites aligned with the summer solstice\n\nStonehenge (Wiltshire) is the best-documented case. Its axis points to the midsummer sunrise, an alignment noted since William Stukeley's 1720 survey [1]. The sun rises near the Heel Stone, which is not precisely aligned, and evidence for a lost second stone suggests a \"solar corridor\" framing the sunrise [1][2]. Some scholars argue Stonehenge was mainly used at the winter solstice, so the summer alignment is contested.\n\nAvebury's Cove (Wiltshire) is suggested to align with the midsummer sunrise, though this is debated [2]. Calanais (Lewis, Scotland) is claimed to align with the summer solstice sunrise and lunar events [2]. Ballochroy (Kintyre) is reported to align with the summer solstice [3], but I did not verify this against a primary source. The sources for Calanais and Ballochroy are popular or secondary, so these claims need checking.\n\n## Chamber lit by solstice sunlight\n\nNewgrange (County Meath, Ireland) is the best-known chamber lit by solstice sunlight. Its roof-box admits the winter solstice sunrise, which lights the passage and inner chamber for about 17 minutes [4][5][6]. Its facade is made of white quartz cobblestones, but the illumination occurs at the winter solstice, not the summer solstice, so Newgrange does not match the question's condition [4][5]. Maeshowe, also in Orkney, faces the winter solstice sunset and is likewise outside the summer-solstice condition.\n\n## Documented details of Newgrange\n\n- **Construction:** a Neolithic passage tomb built around 3100 BC, older than Stonehenge and the Egyptian pyramids [4].\n- **Orientation:** aligned so the rising sun on the winter solstice shines through the roof-box above the entrance and floods the inner chamber [4].\n- **Chamber features:** a 19 m (62 ft) passage leads to a central cruciform chamber decorated with megalithic art; burnt and unburnt human bones and possible grave goods or votive offerings were found there [4][6].\n- **Phenomenon:** the light moves along the passage, widens as the sun climbs, and fills the chamber with a golden glow for about 17 minutes [6].\n\nThe sources do not give a precise compass bearing for the orientation.\n\n## Conclusion\n\nThe question's premise may mix up a U.K. summer-solstice site with Newgrange's winter-solstice light. If you can share the list of candidate sites, each can be checked for a summer-solstice illumination of a quartz-containing stone.",
+   "sources": [
+    {
+     "n": 1,
+     "url": "https://en.wikipedia.org/wiki/Archaeoastronomy_and_Stonehenge",
+     "quote": "The site is aligned in the direction of the sunrise of the summer solstice and the sunset of the winter solstice.",
+     "title": "Archaeoastronomy and Stonehenge - Wikipedia"
+    },
+    {
+     "n": 2,
+     "url": "https://www.sarsen.org/2025/06/seven-summer-solstitial-sunrise-sites.html",
+     "quote": "The Cove is suggested to align with the summer solstice sunrise, with the sun rising in line with its northeastern orientation. While there is some debate, the evidence leans toward confirmation.",
+     "title": "www.Sarsen.org: Seven Summer Solstitial Sunrise Sites"
+    },
+    {
+     "n": 3,
+     "url": "https://spookyscotland.net/calanais",
+     "quote": "The Ballochroy Standing Stones and Kist in Kintyre align with the summer solstice.",
+     "title": "Calanais stones connected with land features and the sun and moon"
+    },
+    {
+     "n": 4,
+     "url": "https://en.wikipedia.org/wiki/Newgrange",
+     "quote": "It is aligned so that the rising sun on the winter solstice shines through a \"roofbox\" above the entrance and floods the inner chamber.",
+     "title": "Newgrange - Wikipedia"
+    },
+    {
+     "n": 5,
+     "url": "https://www.knowth.com/newgrange.htm",
+     "title": "Newgrange Passage Tomb | Brú na Bóinne UNESCO World Heritage Site"
+    },
+    {
+     "n": 6,
+     "url": "https://www.newgrange.com/winter_solstice.htm",
+     "quote": "The light moves along the 19m (62ft) passage and reaches the inner chamber, widening as the sun climbs and filling the space with a warm golden glow.",
+     "title": "Newgrange - Winter Solstice"
+    }
+   ],
+   "rounds": 0,
+   "followUps": [],
+   "id": "frames-391",
+   "category": "Multiple constraints",
+   "question": "Which ancient archaeoastronomical site in the U.K. is also associated with the summer solstice during which time light illuminates a quartz-rich stone in the chamber.",
+   "gold": "Bryn Celli Ddu",
+   "goldLinks": [
+    "bryn celli ddu",
+    "list of archaeoastronomical sites by country",
+    "summer solstice"
+   ],
+   "goldSeen": [
+    "bryn celli ddu"
+   ],
+   "toolCalls": 14,
+   "agentVerdict": "incorrect",
+   "agentReason": "Response never identifies Bryn Celli Ddu; says no site fits and suggests Stonehenge, Newgrange, etc.",
+   "closedBook": "Maeshowe (Orkney, Scotland) - note that its chamber illumination occurs at the winter solstice, not the summer solstice, so the question's details may be partly inaccurate.",
+   "closedVerdict": "incorrect",
+   "closedReason": "Response names Maeshowe, not Bryn Celli Ddu; different site."
+  },
+  {
+   "taskUuid": "bf3ee5fc-1e11-4e9c-a0c8-27cae733e58f",
+   "status": "COMPLETED",
+   "latencySec": 15.1,
+   "subQuestions": [
+    "Who is Brian Bergstein and which company is he employed by as of August 5, 2024?",
+    "Has that company been found by a federal authority or court to have violated a federal law, and what was the date of that finding?",
+    "What is the official name of the federal law that was found to have been violated in that finding?"
+   ],
+   "agents": [
+    {
+     "status": "COMPLETED",
+     "steps": 3,
+     "sources": 3,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 1,
+     "sources": 0,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 1,
+     "sources": 0,
+     "error": null
+    }
+   ],
+   "usage": {
+    "calls": 7,
+    "promptTokens": 10601,
+    "completionTokens": 1783,
+    "costMicro": 12384
+   },
+   "report": "**Answer: I could not determine this from the available sources.** The question depends on a chain of facts (the employer as of August 5, 2024, and a federal finding against it), and the research did not establish either link with confidence.\n\n**Employer.** Brian Bergstein is a Boston-based science and technology journalist. The sources describe him as National Technology Editor at the Associated Press [3], and an undated search snippet lists him as a senior editor in Globe Opinion at The Boston Globe [1]. A third source is a community profile page [2]. None of these is dated to August 5, 2024, so I cannot confirm his employer on that date. The Boston Globe is the most likely answer, but this is an inference, not a verified fact.\n\n**Federal violation.** The research did not identify any federal authority or court finding against the employer, nor the law involved. Without a confirmed company, this step could not be completed.\n\n**To resolve this**, it would help to confirm:\n- The employer on August 5, 2024 (for example, from a dated staff page, archived page, or news item).\n- The company's name, so the relevant federal findings can be searched for.\n\nIf you can provide the company name or the specific finding you have in mind, I can look into the law's official name.",
+   "sources": [
+    {
+     "n": 1,
+     "url": "https://www.bostonglobe.com/about/staff-list/staff/brian-bergstein",
+     "title": "Brian Bergstein - Senior Editor, Globe Opinion - The Boston Globe"
+    },
+    {
+     "n": 2,
+     "url": "https://grayarea.org/community-entry/brian-bergstein",
+     "title": "Brian Bergstein - Gray Area"
+    },
+    {
+     "n": 3,
+     "url": "https://en.wikipedia.org/wiki/Brian_Bergstein",
+     "quote": "Brian Bergstein is the National Technology Editor for the American Associated Press news agency, based in Boston, Massachusetts.",
+     "title": "Brian Bergstein - Wikipedia"
+    }
+   ],
+   "rounds": 0,
+   "followUps": [],
+   "id": "frames-142",
+   "category": "Multiple constraints",
+   "question": "As of August 5, 2024, what is the name of the federal law that was found to be violated by the company that Brian Bergstein is employed by?",
+   "gold": "The Sherman Antitrust Act",
+   "goldLinks": [
+    "associated press",
+    "associated press v. united states",
+    "brian bergstein",
+    "sherman antitrust act"
+   ],
+   "goldSeen": [
+    "brian bergstein"
+   ],
+   "toolCalls": 4,
+   "agentVerdict": "incorrect",
+   "agentReason": "Response states it could not determine the answer and does not name the Sherman Antitrust Act.",
+   "closedBook": "I don't have information establishing a federal law violation by Brian Bergstein's employer as of August 5, 2024, so I can't name one.",
+   "closedVerdict": "incorrect",
+   "closedReason": "Response declines to answer and does not identify the Sherman Antitrust Act."
+  },
+  {
+   "taskUuid": "88cfd1ea-e424-4786-84e2-7e5aeb398e51",
+   "status": "COMPLETED",
+   "latencySec": 18.2,
+   "subQuestions": [
+    "Which artist released the album \"Father of Asahd\", and what is that artist's high school?",
+    "Which Olympic diver attended the same high school as that artist, as of August 3, 2024?",
+    "How many Olympic teams did that diver participate on?"
+   ],
+   "agents": [
+    {
+     "status": "COMPLETED",
+     "steps": 4,
+     "sources": 3,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 1,
+     "sources": 0,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 1,
+     "sources": 0,
+     "error": null
+    }
+   ],
+   "usage": {
+    "calls": 8,
+    "promptTokens": 18083,
+    "completionTokens": 1692,
+    "costMicro": 19775
+   },
+   "report": "# Report: Olympic Diver Who Attended DJ Khaled's High School\n\n## Summary\n\nThe question chains three facts: the artist behind \"Father of Asahd,\" that artist's high school, and an Olympic diver who attended the same school as of August 3, 2024. The first two links are established by the evidence. The third link, the diver and their Olympic team count, is not answered by the sub-findings, because the sub-agents treated \"that artist\" as unidentified and never resolved the chain.\n\n## Established facts\n\nThe album \"Father of Asahd\" was released on May 17, 2019, and is the eleventh studio album by American disc jockey and record producer DJ Khaled [1]. Sources state that his family moved to Orlando, where he attended Dr. Phillips High School [2]. A school theatre post also notes that he graduated from it [3].\n\n## Gap in the research\n\nThe sub-agent responsible for finding the Olympic diver asked for clarification instead of carrying forward the artist identified in the prior step. That prior step did identify DJ Khaled and Dr. Phillips High School, so the diver search should have used that school. No diver's name, no list of Olympic teams, and no check against the August 3, 2024 date appear in the findings. The question therefore remains unanswered.\n\n## Next steps\n\nTo close the gap, search for Olympic divers who attended Dr. Phillips High School in Orlando, confirm the school link as of August 3, 2024, and then count each diver's Olympic team appearances from a reliable source such as Olympedia or Wikipedia.",
+   "sources": [
+    {
+     "n": 1,
+     "url": "https://en.wikipedia.org/wiki/Father_of_Asahd",
+     "quote": "Father of Asahd is the eleventh studio album by American disc jockey and record producer DJ Khaled. It was released on May 17, 2019, by We the Best Music Group and Epic Records.",
+     "title": "Father of Asahd - Wikipedia"
+    },
+    {
+     "n": 2,
+     "url": "https://www.arabamerica.com/who-is-dj-khaled",
+     "quote": "DJ Khaled's family moved to Orlando in which he attended Dr. Phillips High School.",
+     "title": "Who is DJ Khaled?"
+    },
+    {
+     "n": 3,
+     "url": "https://www.facebook.com/Dr.PhillipsHighSchoolTheatre/posts/did-you-know-the-two-time-grammy-nominee-singerproducer-dj-khaled-graduated-from/1790627077623499",
+     "title": "Dr. Phillips High School Theatre"
+    }
+   ],
+   "rounds": 0,
+   "followUps": [],
+   "id": "frames-7",
+   "category": "Multiple constraints | Temporal reasoning",
+   "question": "As of Aug 3, 2024, the artist who released the album \"Father of Asahd\" went to the same high school as an Olympic diver. How many Olympic teams did this diver participate on?",
+   "gold": "2",
+   "goldLinks": [
+    "dj khaled",
+    "dr. phillips high school",
+    "father of asahd",
+    "mark ruiz"
+   ],
+   "goldSeen": [
+    "father of asahd"
+   ],
+   "toolCalls": 5,
+   "agentVerdict": "incorrect",
+   "agentReason": "Response never identifies the diver or gives a team count; it concludes the question is unanswered.",
+   "closedBook": "I'm not certain",
+   "closedVerdict": "incorrect",
+   "closedReason": "Response expresses uncertainty and gives no answer; ground truth is 2."
+  },
+  {
+   "taskUuid": "0ee01392-fe37-4441-9236-f4dae03d0345",
+   "status": "COMPLETED",
+   "latencySec": 18.3,
+   "subQuestions": [
+    "What awards programme was founded and chaired by Prince Philip, and what are its tiers (levels)?",
+    "Which tier of that programme takes at most the same number of months to complete as the duration of an average pregnancy (about 9 months), and what is that tier's name?",
+    "Which heavy metal shares a name with that tier, and what is its atomic number?",
+    "What is the sum of the digits of that atomic number?"
+   ],
+   "agents": [
+    {
+     "status": "COMPLETED",
+     "steps": 3,
+     "sources": 3,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 4,
+     "sources": 0,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 1,
+     "sources": 0,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 1,
+     "sources": 0,
+     "error": null
+    }
+   ],
+   "usage": {
+    "calls": 11,
+    "promptTokens": 19040,
+    "completionTokens": 2736,
+    "costMicro": 21776
+   },
+   "report": "## Answer\n\nThe number is **Bronze → Bronze is not a heavy metal? ** Let me work this through.\n\n**Step 1: Identify the programme.** The Duke of Edinburgh's Award was founded in 1956 by Prince Philip. It has three tiers: Bronze, Silver, and Gold [1].\n\n**Step 2: Find the tier that takes at most about 9 months.** The question asks for the tier that takes at most the same number of months as an average pregnancy, which is about 9 months. The sub-question research did not find a duration for each tier, so this step is unresolved from the evidence gathered. The research also did not establish completion durations for the DofE tiers, so I cannot confirm which tier meets the 9-month threshold.\n\n**Step 3: Find the heavy metal sharing the tier's name.** Bronze is a heavy metal (an alloy of copper), and Gold is a heavy metal (atomic number 79). Silver is also a heavy metal (atomic number 47). The question's wording depends on the tier identified in Step 2, which I could not confirm.\n\n**Step 4: Sum the digits of the atomic number.** Without a confirmed tier, I cannot determine the atomic number, so I cannot compute the digit sum.\n\n## Result\n\nI cannot give a definitive answer. The two missing facts are:\n- The completion duration of each DofE tier, to determine which one takes at most about 9 months.\n- Whether \"heavy metal\" applies to the chosen tier name directly as an element. Gold (79) and Silver (47) are elements, while Bronze is an alloy, so it has no single atomic number.\n\nIf Gold is the intended tier, the atomic number is 79, and the digit sum is 7 + 9 = **16**. If Silver is intended, the atomic number is 47, and the digit sum is 4 + 7 = **11**.",
+   "sources": [
+    {
+     "n": 1,
+     "url": "https://en.wikipedia.org/wiki/The_Duke_of_Edinburgh%27s_Award",
+     "quote": "The Duke of Edinburgh's Award (commonly abbreviated DofE) is a youth awards programme founded in the United Kingdom in 1956 by Prince Philip, Duke of Edinburgh, which has since expanded to 144 nations.",
+     "title": "The Duke of Edinburgh's Award - Wikipedia"
+    }
+   ],
+   "rounds": 0,
+   "followUps": [],
+   "id": "frames-503",
+   "category": "Numerical reasoning | Multiple constraints | Post processing",
+   "question": "The number I am thinking about is the atomic number of the heavy metal that shares a name with the tier of the awards programme founded and chaired by Prince Philip that takes , at most, the same number of months to complete as the duration of an average pregnancy. What is the sum of the digits in this number?",
+   "gold": "11",
+   "goldLinks": [
+    "pregnancy",
+    "prince philip, duke of edinburgh",
+    "silver",
+    "the duke of edinburgh's award"
+   ],
+   "goldSeen": [
+    "the duke of edinburgh's award"
+   ],
+   "toolCalls": 8,
+   "agentVerdict": "incorrect",
+   "agentReason": "Response hedges between 16 and 11 and declares no definitive answer.",
+   "closedBook": "11",
+   "closedVerdict": "correct",
+   "closedReason": "人工判定:评审输出解析失败,答案 '11' 与标准答案 '11' 完全一致"
+  },
+  {
+   "taskUuid": "5d24f36c-6f14-4beb-81e4-91638cf08d38",
+   "status": "COMPLETED",
+   "latencySec": 12.1,
+   "subQuestions": [
+    "Who is the only mayor of Austin, Texas in the 21st century who also served as mayor during the 1990s?",
+    "In which city was that mayor born?",
+    "What was the 2000 United States census population of that birth city, and what is it rounded to the nearest thousand?"
+   ],
+   "agents": [
+    {
+     "status": "COMPLETED",
+     "steps": 3,
+     "sources": 1,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 1,
+     "sources": 0,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 1,
+     "sources": 0,
+     "error": null
+    }
+   ],
+   "usage": {
+    "calls": 7,
+    "promptTokens": 9546,
+    "completionTokens": 1146,
+    "costMicro": 10692
+   },
+   "report": "# Austin Mayor Birthplace Population Question\n\n## The Mayor\n\nThe mayor in question is **Kirk Watson**. He served as mayor of Austin, Texas from 1997 to 2001 and again from January 6, 2023, winning re-election in 2024 [1]. He is the only Austin mayor who held office in both the 1990s and the 21st century.\n\n## Birth City and Population\n\nThe sub-question on Watson's birthplace was not answered. The research returned no source for where he was born, and I cannot confirm that from the evidence available here. The 2000 census population figure therefore cannot be determined yet. Rounding to the nearest thousand is not possible without the city.\n\n## Next Steps\n\nTo answer fully, the birthplace of Kirk Watson needs to be confirmed from a source, after which its 2000 U.S. census population can be looked up and rounded to the nearest thousand.",
+   "sources": [
+    {
+     "n": 1,
+     "url": "https://en.wikipedia.org/wiki/Mayor_of_Austin",
+     "quote": "Kirk Watson took office as mayor on January 6, 2023, for a third term and was re-elected to a fourth term in 2024, having served as mayor from 1997 to 2001.",
+     "title": "Mayor of Austin - Wikipedia"
+    }
+   ],
+   "rounds": 0,
+   "followUps": [],
+   "id": "frames-5",
+   "category": "Numerical reasoning | Tabular reasoning | Multiple constraints",
+   "question": "According to the 2000 United States census, what was the 2000 population of the birth city of the only 21st-century mayor of Austin, Texas who also served as mayor in the 1990s? Round your answer to the nearest thousand.",
+   "gold": "506000",
+   "goldLinks": [
+    "kirk watson",
+    "mayor of austin",
+    "oklahoma city"
+   ],
+   "goldSeen": [
+    "mayor of austin"
+   ],
+   "toolCalls": 2,
+   "agentVerdict": "incorrect",
+   "agentReason": "Response gives no final population figure; says it cannot be determined, whereas ground truth is 506000.",
+   "closedBook": "1,954,000",
+   "closedVerdict": "incorrect",
+   "closedReason": "Response 1,954,000 differs from the ground truth 506,000."
+  },
+  {
+   "taskUuid": "2bf926f9-ab61-458c-a321-894e3df1da42",
+   "status": "COMPLETED",
+   "latencySec": 15.1,
+   "subQuestions": [
+    "Who are the members of the 'Big Four' of Thrash Metal (Metallica, Slayer, Megadeth, Anthrax)?",
+    "What is the release date of each Big Four band's debut full-length studio album?",
+    "Which of these debut albums was released earliest?"
+   ],
+   "agents": [
+    {
+     "status": "COMPLETED",
+     "steps": 3,
+     "sources": 5,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 3,
+     "sources": 3,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 1,
+     "sources": 0,
+     "error": null
+    }
+   ],
+   "usage": {
+    "calls": 9,
+    "promptTokens": 27799,
+    "completionTokens": 3416,
+    "costMicro": 31215
+   },
+   "report": "# The Big Four's Debut Albums: Which Came First?\n\nAmong the Big Four of thrash metal (Metallica, Slayer, Megadeth, and Anthrax), **Slayer's debut album came out first**: *Show No Mercy*, released in December 1983 on Metal Blade Records [8]. Metallica followed with *Kill 'Em All* on July 25, 1983 [6]. That date is earlier than Slayer's, so Metallica is actually the first. The release order is as follows:\n\n1. **Metallica – *Kill 'Em All*** (July 25, 1983, Megaforce Records) [6]\n2. **Slayer – *Show No Mercy*** (December 1983, Metal Blade Records) [8]\n3. **Anthrax – *Fistful of Metal*** (January 1984, Megaforce Records in the US and Music for Nations internationally) [7]\n4. **Megadeth – *Killing Is My Business... and Business Is Good!*** (May 17, 1985 in the UK on Music for Nations; June 12, 1985 in the US on Combat Records) [see note]\n\nSome caveats:\n\n- The sources I was given list Metallica, Slayer, and Anthrax debut dates, but the Megadeth release date came from the research notes rather than a cited source, so I've not attached a citation to it.\n- The sources also list Show No Mercy as December 1983, without the exact day that the notes give (December 3). I have kept the month only.\n\n**Winner: Metallica**, whose *Kill 'Em All* was released in July 1983, earlier than any of its peers' debuts.",
+   "sources": [
+    {
+     "n": 1,
+     "url": "https://en.wikipedia.org/wiki/Thrash_metal",
+     "quote": "bringing prominence to Metallica, Slayer, Megadeth, and Anthrax, all grouped together as the \"Big Four\" of U.S. thrash metal.",
+     "title": "Thrash metal"
+    },
+    {
+     "n": 2,
+     "url": "https://en.wikipedia.org/wiki/Metallica",
+     "quote": "Metallica's current lineup comprises founding members and primary songwriters Hetfield and Ulrich, longtime lead guitarist Kirk Hammett and bassist Robert Trujillo.",
+     "title": "Metallica"
+    },
+    {
+     "n": 3,
+     "url": "https://en.wikipedia.org/wiki/Slayer",
+     "quote": "Slayer is an American thrash metal band from Huntington Park, California, formed in 1981 by guitarists Kerry King and Jeff Hanneman, drummer Dave Lombardo and vocalist/bassist Tom Araya.",
+     "title": "Slayer"
+    },
+    {
+     "n": 4,
+     "url": "https://en.wikipedia.org/wiki/Megadeth_(album)",
+     "quote": "Megadeth (also known as the White Album) is the seventeenth and final studio album by the American thrash metal band Megadeth.",
+     "title": "Megadeth (album)"
+    },
+    {
+     "n": 5,
+     "url": "https://en.wikipedia.org/wiki/Anthrax_(American_band)",
+     "quote": "The band's current lineup consists of Scott Ian, drummer Charlie Benante, bassist Frank Bello, vocalist Joey Belladonna and lead guitarist Jonathan Donais.",
+     "title": "Anthrax (American band)"
+    },
+    {
+     "n": 6,
+     "url": "https://en.wikipedia.org/wiki/Kill_%27Em_All",
+     "quote": "Kill 'Em All is the debut album by the American heavy metal band Metallica, released on July 25, 1983, through the independent label Megaforce Records.",
+     "title": "Kill 'Em All - Wikipedia"
+    },
+    {
+     "n": 7,
+     "url": "https://en.wikipedia.org/wiki/Fistful_of_Metal",
+     "quote": "Fistful of Metal is the debut studio album by the American heavy metal band Anthrax, released in January 1984 by Megaforce Records in the United States and Music for Nations internationally.",
+     "title": "Fistful of Metal - Wikipedia"
+    },
+    {
+     "n": 8,
+     "url": "https://en.wikipedia.org/wiki/Show_No_Mercy",
+     "quote": "Show No Mercy is the debut studio album by American thrash metal band Slayer, released in December 1983 by Metal Blade Records.",
+     "title": "Show No Mercy - Wikipedia"
+    }
+   ],
+   "rounds": 0,
+   "followUps": [],
+   "id": "frames-276",
+   "category": "Multiple constraints",
+   "question": "Of the 'Big Four' of Thrash Metal, whose debut full-length was released first?",
+   "gold": "Metallica",
+   "goldLinks": [
+    "anthrax (american band)",
+    "kill 'em all",
+    "megadeth",
+    "metallica",
+    "show no mercy",
+    "slayer",
+    "thrash metal"
+   ],
+   "goldSeen": [
+    "anthrax (american band)",
+    "kill 'em all",
+    "metallica",
+    "show no mercy",
+    "slayer",
+    "thrash metal"
+   ],
+   "toolCalls": 12,
+   "agentVerdict": "correct",
+   "agentReason": "Final answer is Metallica, matching ground truth, despite an initial self-corrected misstatement.",
+   "closedBook": "Metallica (Kill 'Em All, 1983)",
+   "closedVerdict": "correct",
+   "closedReason": "Metallica's Kill 'Em All (1983) predates the other Big Four debuts; matches ground truth."
+  },
+  {
+   "taskUuid": "49a12e0a-50c5-423b-920c-7d7c64aa19e5",
+   "status": "COMPLETED",
+   "latencySec": 45.4,
+   "subQuestions": [
+    "Which Pan American Games (2003, 2007, 2011, 2015, 2019) did the Argentina women's field hockey team enter between 2000 and 2020?",
+    "Which Pan American Games (2003, 2007, 2011, 2015, 2019) did the Uruguay women's field hockey team enter between 2000 and 2020?",
+    "Which Olympic Games (2000, 2004, 2008, 2012, 2016, 2020) did the Argentina women's field hockey team enter between 2000 and 2020?",
+    "Which Olympic Games (2000, 2004, 2008, 2012, 2016, 2020) did the Uruguay women's field hockey team enter between 2000 and 2020?"
+   ],
+   "agents": [
+    {
+     "status": "COMPLETED",
+     "steps": 4,
+     "sources": 3,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 7,
+     "sources": 5,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 2,
+     "sources": 3,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 5,
+     "sources": 2,
+     "error": null
+    }
+   ],
+   "usage": {
+    "calls": 20,
+    "promptTokens": 95885,
+    "completionTokens": 7424,
+    "costMicro": 103309
+   },
+   "report": "# Pan American Games and Olympic Participation: Argentina and Uruguay Women's Field Hockey (2000–2020)\n\n**Short answer:** Argentina entered 11 tournaments (5 Pan American Games and 6 Olympic Games), while Uruguay entered 4 Pan American Games and no Olympic Games. The combined total is 15 entries. The Uruguay Olympic count is an inference from absence of evidence, and the Uruguay Pan American count rests on partly incomplete evidence, so treat those figures with some caution.\n\n## Argentina\n\nArgentina's women's team entered all five women's Pan American Games tournaments held in that window: 2003, 2007, 2011, 2015 and 2019. It won gold in 2003, 2007 and 2019, and was runner-up in 2011 (losing 4–2 to the United States in the final) and in 2015 [1][2][3].\n\nThe team also entered all six Olympic Games from 2000 to 2020: Sydney 2000, Athens 2004, Beijing 2008, London 2012, Rio 2016 and Tokyo 2020 (held in 2021 under the 2020 name). Results were silver in 2000, bronze in 2004 and 2008, silver in 2012, 7th place in 2016, and silver in 2020 [3][9][10].\n\n## Uruguay\n\nUruguay's team appears to have competed at four Pan American Games in the window: 2003, 2007, 2015 and 2019. Uruguay won bronze at the 2003 tournament, beating Chile on penalties after a 2–2 draw [4]. Match results confirm the 2019 entry [7]. The 2015 entry rests on a squad announcement [5], and the 2007 entry rests on group standings and classification matches [6]. I found no evidence of Uruguay in the 2011 women's tournament; its pool listing does not include Uruguay [8].\n\nFor the Olympics, I found no source showing that Uruguay's women's team entered any Olympic Games between 2000 and 2020. Its listed major achievements are the Pan American Games (first appearance 2003) and the Pan American Cup (first 2001), and a federation article about a first World Cup appearance does not mention the Olympics [11][12]. This conclusion rests on the absence of an Olympic record, not on a full check of Olympic field lists, which I did not retrieve.\n\n## Total\n\n- Argentina: 5 Pan American Games + 6 Olympic Games = 11\n- Uruguay: 4 Pan American Games + 0 Olympic Games = 4\n- **Combined: 15**",
+   "sources": [
+    {
+     "n": 1,
+     "url": "https://en.wikipedia.org/wiki/Field_hockey_at_the_2011_Pan_American_Games_%E2%80%93_Women%27s_tournament",
+     "quote": "The United States won the tournament after defeating Argentina 4–2 in the final, obtaining their first title and ending Argentina's streak of six consecutive titles since the women's tournament was included in the Pan American Games in 1987.",
+     "title": "Field hockey at the 2011 Pan American Games – Women's tournament - Wikipedia"
+    },
+    {
+     "n": 2,
+     "url": "https://en.wikipedia.org/wiki/Field_hockey_at_the_2015_Pan_American_Games_%E2%80%93_Women%27s_tournament",
+     "title": "Field hockey at the 2015 Pan American Games – Women's tournament - Wikipedia"
+    },
+    {
+     "n": 3,
+     "url": "https://en.wikipedia.org/wiki/Argentina_women%27s_national_field_hockey_team",
+     "quote": "Argentina has been very successful at the Summer Olympics, winning four consecutive medals (two silver, two bronze) since the 2000 edition",
+     "title": "Argentina women's national field hockey team - Wikipedia"
+    },
+    {
+     "n": 4,
+     "url": "https://en.wikipedia.org/wiki/Field_hockey_at_the_2003_Pan_American_Games_%E2%80%93_Women%27s_tournament",
+     "quote": "Uruguay won the bronze medal by defeating Chile 5–4 in penalties after the match finished a 2–2 draw.",
+     "title": "Field hockey at the 2003 Pan American Games – Women's tournament"
+    },
+    {
+     "n": 5,
+     "url": "https://en.wikipedia.org/wiki/Uruguay_at_the_2015_Pan_American_Games",
+     "title": "Uruguay at the 2015 Pan American Games - Wikipedia"
+    },
+    {
+     "n": 6,
+     "url": "https://en.wikipedia.org/wiki/Field_hockey_at_the_2007_Pan_American_Games_%E2%80%93_Women%27s_tournament",
+     "title": "Field hockey at the 2007 Pan American Games – Women's tournament"
+    },
+    {
+     "n": 7,
+     "url": "https://en.wikipedia.org/wiki/Field_hockey_at_the_2019_Pan_American_Games_%E2%80%93_Women%27s_tournament",
+     "quote": "| 31 July 2019 (2019-07-31) 14:00 | | Uruguay | 8–1 | Cuba |",
+     "title": "Field hockey at the 2019 Pan American Games – Women's tournament"
+    },
+    {
+     "n": 8,
+     "url": "https://en.wikipedia.org/wiki/Field_hockey_at_the_2011_Pan_American_Games",
+     "title": "Field hockey at the 2011 Pan American Games"
+    },
+    {
+     "n": 9,
+     "url": "https://www.olympedia.org/event_names/338/countries/ARG",
+     "quote": "| 2000 Summer Olympics | Argentina | 2 | Silver |",
+     "title": "Olympedia – Results for Argentina in Hockey, Women"
+    },
+    {
+     "n": 10,
+     "url": "https://en.wikipedia.org/wiki/Field_hockey_at_the_Summer_Olympics",
+     "quote": "Argentina | 3 (2000, 2012, 2020) | 3 (2004, 2008, 2024) | [...]",
+     "title": "Field hockey at the Summer Olympics - Wikipedia"
+    },
+    {
+     "n": 11,
+     "url": "https://en.wikipedia.org/wiki/Uruguay_women%27s_national_field_hockey_team",
+     "title": "Uruguay women's national field hockey team - Wikipedia"
+    },
+    {
+     "n": 12,
+     "url": "https://www.fih.hockey/news/uruguay-women-on-the-cusp-of-greatness-ahead-of-world-cup-qualifiers",
+     "title": "Uruguay women on the brink of history ahead of World Cup Qualifiers"
+    }
+   ],
+   "rounds": 0,
+   "followUps": [],
+   "id": "frames-347",
+   "category": "Numerical reasoning | Tabular reasoning | Temporal reasoning",
+   "question": "How many times in total did the Argentina women's field hockey team and the Uruguay women's field hockey team enter the Pan American Games and the Olympic Games from 2000 to 2020?",
+   "gold": "15",
+   "goldLinks": [
+    "field hockey at the pan american games",
+    "field hockey at the summer olympics"
+   ],
+   "goldSeen": [
+    "field hockey at the pan american games",
+    "field hockey at the summer olympics"
+   ],
+   "toolCalls": 28,
+   "agentVerdict": "correct",
+   "agentReason": "Response's final combined total is 15, matching the ground truth.",
+   "closedBook": "Approximately 11 total entries combined, but I am not certain of the exact count. Argentina likely appeared at the Olympics in 2000, 2004, 2008, 2012, 2016 and 2020 and at Pan American Games in 2003, 2007, 2011, 2015 and 2019 (about 11 entries), while Uruguay appears to have entered only Pan American Games editions in that period (roughly 2 to 5). My best estimate is around 13 to 16 combined, but please verify against official records.",
+   "closedVerdict": "incorrect",
+   "closedReason": "Response gives inconsistent estimates (11, then 13 to 16) and no definite answer of 15; hedges."
+  },
+  {
+   "taskUuid": "dfa70c89-8af4-4a1d-be17-16cac624c356",
+   "status": "COMPLETED",
+   "latencySec": 21.3,
+   "subQuestions": [
+    "Which seasons did Tommy Lawton play for Chelsea FC, and in what years?",
+    "What squad numbers did Chelsea FC use in the era when Tommy Lawton played for the club?",
+    "Is there a documented record of the specific shirt number Tommy Lawton wore during his time at Chelsea?"
+   ],
+   "agents": [
+    {
+     "status": "COMPLETED",
+     "steps": 3,
+     "sources": 2,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 4,
+     "sources": 2,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 3,
+     "sources": 3,
+     "error": null
+    }
+   ],
+   "usage": {
+    "calls": 12,
+    "promptTokens": 34044,
+    "completionTokens": 3557,
+    "costMicro": 37601
+   },
+   "report": "Tommy Lawton most likely wore the number 9 shirt for Chelsea, but no source confirms it. The evidence is indirect.\n\n**What is documented.** Lawton joined Chelsea from Everton in November 1945 for £14,000 and scored a club-record 26 league goals in 34 league games in 1946–47. He left for Notts County in November 1947 for a British record fee of £20,000 [1]. Chelsea's 1946–47 season marked the resumption of the Football League after its suspension during the Second World War [2].\n\n**What is not documented.** Neither the Wikipedia articles nor the squad lists found give Chelsea's shirt numbers for 1945–47 [1][2]. Transfermarkt's squad-number history for Lawton covers Everton, Notts County and Arsenal (numbers 8 and 9) but has no Chelsea entries [3]. The only source naming Chelsea's number 9 for this period is a Facebook post, which gives no primary citation and cannot be verified [4].\n\n**Inference.** Lawton was a centre-forward, and the number 9 was the conventional striker's shirt. He wore 9 at Everton, Arsenal and Notts County [3], so the number is plausible at Chelsea as well. This is an inference, not a documented fact.\n\nTo confirm, check Chelsea's official club records or a historical kit and squad-numbers database for the 1945–47 seasons.",
+   "sources": [
+    {
+     "n": 1,
+     "url": "https://en.wikipedia.org/wiki/Tommy_Lawton",
+     "quote": "In November 1945, he moved to Chelsea for £14,000 and scored a club-record 26 goals in 34 league games in the 1946–47 season.",
+     "title": "Tommy Lawton - Wikipedia"
+    },
+    {
+     "n": 2,
+     "url": "https://en.wikipedia.org/wiki/1946%E2%80%9347_Chelsea_F.C._season",
+     "quote": "The 1946–47 season was Chelsea Football Club's thirty-third competitive season. The season marked the resumption of the Football League, which had been suspended since 1939 due to the Second World War.",
+     "title": "1946–47 Chelsea F.C. season - Wikipedia"
+    },
+    {
+     "n": 3,
+     "url": "https://www.transfermarkt.com/tommy-lawton/rueckennummern/spieler/315945",
+     "quote": "Season Club Jersey number 55/56 Arsenal FC 9 54/55 Arsenal FC 9 53/54 Arsenal FC 9 48/49 Notts County 9 38/39 Everton FC 9 37/38 Everton FC 9 36/37 Everton FC 8 36/37 Everton FC 9",
+     "title": "Tommy Lawton - Squad number history | Transfermarkt"
+    },
+    {
+     "n": 4,
+     "url": "https://www.facebook.com/fb-answers/chelsea-number-9-history-list-includes-tommy-lawton",
+     "title": "Chelsea Number 9 History List Includes Tommy Lawton | Facebook"
+    }
+   ],
+   "rounds": 0,
+   "followUps": [],
+   "id": "frames-27",
+   "category": "Temporal reasoning",
+   "question": "What number would Tommy Lawton have worn playing for Chelsea FC?",
+   "gold": "9",
+   "goldLinks": [
+    "squad number (association football)",
+    "tommy lawton"
+   ],
+   "goldSeen": [
+    "tommy lawton"
+   ],
+   "toolCalls": 12,
+   "agentVerdict": "correct",
+   "agentReason": "Response concludes Lawton most likely wore number 9, matching ground truth despite noting lack of confirmation.",
+   "closedBook": "9",
+   "closedVerdict": "correct",
+   "closedReason": "Response '9' matches the ground truth number 9 exactly."
+  },
+  {
+   "taskUuid": "321104e9-7c04-484d-b3c0-951f6f0d235f",
+   "status": "COMPLETED",
+   "latencySec": 51.4,
+   "subQuestions": [
+    "Which US city ranks 50th in population according to the 2023 Census Bureau estimates?",
+    "In what year was that 50th most populous US city founded?",
+    "In what year was UK Patent 1344259 granted to Frank Fox?"
+   ],
+   "agents": [
+    {
+     "status": "COMPLETED",
+     "steps": 4,
+     "sources": 1,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 7,
+     "sources": 1,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 2,
+     "sources": 2,
+     "error": null
+    }
+   ],
+   "usage": {
+    "calls": 15,
+    "promptTokens": 43453,
+    "completionTokens": 2777,
+    "costMicro": 46230
+   },
+   "report": "**Answer: not determinable from the evidence gathered.** The question needs three facts, and the sub-findings verify only one of them with confidence.\n\n**What is verified.** UK Patent 1344259 was granted to Frank Fox on January 16, 1974, for his \"Spherical 3×3×3\" puzzle, an early Rubik's Cube-style design. Fox applied on April 9, 1970. Two independent sources agree on these dates [3][4].\n\n**What is unverified.**\n- *The 50th most populous US city.* One sub-finding names Wichita, Kansas, but its source ([1]) uses 2022 estimates, not the 2023 estimates the question specifies, and the sub-finding itself says the 2023 ranking was not confirmed. Another source ([2]) says Aurora, Colorado is the 50th-most populous city \"as of 2025.\" These two answers conflict, and the evidence does not resolve the discrepancy.\n- *That city's founding year.* No founding year was retrieved for either candidate, so this input is missing entirely.\n\n**Calculation.** The answer would be (1974 − founding year of the 50th city). The founding year is unknown, so the difference cannot be computed. For reference, if the city were founded in year X, the answer would be 1974 − X, but I have not established X or confirmed which city it is.\n\n**To resolve this:** check the Census Bureau's Vintage 2023 city population estimates to identify the 50th city, then look up that city's founding date from an authoritative source (city government or a historical record). With those two facts, the calculation is one subtraction.",
+   "sources": [
+    {
+     "n": 1,
+     "url": "https://finance.yahoo.com/news/50-cities-largest-population-us-201006410.html",
+     "quote": "Note that based on the most recent available data provided by the Census, our list is based on the 2022 estimates.",
+     "title": "50 Cities With The Largest Population In The US"
+    },
+    {
+     "n": 2,
+     "url": "https://en.wikipedia.org/wiki/Aurora,_Colorado",
+     "quote": "It is the third-most populous city in Colorado and the 50th-most populous city in the United States as of 2025.",
+     "title": "Aurora, Colorado"
+    },
+    {
+     "n": 3,
+     "url": "https://www.5election.com/2013/10/19/rubick",
+     "quote": "On April 9, 1970, Frank Fox applied to patent his \"Spherical 3×3×3\". He received his UK patent (1344259) on January 16, 1974.",
+     "title": "THE RUBIK'S CUBE HISTORY | 5election - The International Coolhunting Magazine"
+    },
+    {
+     "n": 4,
+     "url": "https://www.andrews.edu/~jangs/rubik.html",
+     "quote": "On April 9, 1970, Frank Fox applied to patent his \"Spherical 333\". He received his UK patent (1344259) on January 16, 1974.",
+     "title": "Rubik's Cube"
+    }
+   ],
+   "rounds": 0,
+   "followUps": [],
+   "id": "frames-18",
+   "category": "Numerical reasoning | Tabular reasoning | Multiple constraints | Temporal reasoning",
+   "question": "How many years after the founding of the 50th most populous US city, based on 2023 estimate population data, did Frank Fox receive UK Patent (1344259)?",
+   "gold": "98 Years (Arlington, TX & Rubik's Cube)",
+   "goldLinks": [
+    "arlington, texas",
+    "list of united states cities by population",
+    "rubik's cube"
+   ],
+   "goldSeen": [
+    "list of united states cities by population"
+   ],
+   "toolCalls": 13,
+   "agentVerdict": "incorrect",
+   "agentReason": "Response gives no numeric answer, says it's not determinable; ground truth is 98 years.",
+   "closedBook": "I don't have reliable enough information to determine this answer.",
+   "closedVerdict": "incorrect",
+   "closedReason": "The response declines to answer and gives no value; ground truth is 98 years."
+  },
+  {
+   "taskUuid": "9003ac77-eb2d-4b7d-84d1-4b6b26412896",
+   "status": "COMPLETED",
+   "latencySec": 12.1,
+   "subQuestions": [
+    "What was the main CPU of the Nintendo Entertainment System, and what processor family was it derived from?",
+    "Which Apple computer released after the Apple I and before 1980 used the processor family that the NES CPU derived from?",
+    "When was that original Apple computer model discontinued?"
+   ],
+   "agents": [
+    {
+     "status": "COMPLETED",
+     "steps": 2,
+     "sources": 2,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 3,
+     "sources": 2,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 2,
+     "sources": 2,
+     "error": null
+    }
+   ],
+   "usage": {
+    "calls": 9,
+    "promptTokens": 18080,
+    "completionTokens": 2660,
+    "costMicro": 20740
+   },
+   "report": "The question asks about an Apple computer released after the Apple I and before 1980 that used the same processor family as the NES CPU, and when the original model of that device was discontinued. The chain points to the Apple II, not the Apple I, so the sub-answers' final step, which discontinued the Apple I, does not match what was asked.\n\n**The NES CPU and its family.** The Nintendo Entertainment System used the Ricoh 2A03 (RP2A03 in the NTSC version, 2A07 in PAL), an 8-bit microprocessor that contains a derivative of the MOS Technology 6502 core, with binary-coded decimal mode disabled [1]. The 6502 was used in many home computers and consoles, including the Apple I, Apple II, Atari 2600, Commodore 64, and the NES [2].\n\n**The Apple computer.** The Apple II used the 6502 family. Early models used the 8-bit MOS Technology 6502, and later models used the compatible WDC 65C02 [3]. It was released in 1977, after the Apple I and before 1980, which fits the question's window. The Apple I used the 6502 too, but it was released before the Apple II, so it is excluded by the \"released after the Apple 1\" clause.\n\n**When the original Apple II was discontinued.** The sources retrieved for this question do not state when the Apple II was discontinued. The only discontinuation date among them is for the Apple I, which was discontinued on September 30, 1977, following the introduction of the Apple II [4]. That date does not answer the question as asked, because the question is about the Apple II.\n\nIf you want the Apple II's discontinuation date, it would need a source that covers the Apple II's end of production, which I did not retrieve here.",
+   "sources": [
+    {
+     "n": 1,
+     "url": "https://en.wikipedia.org/wiki/Ricoh_2A03",
+     "quote": "The Ricoh 2A03 or RP2A03 (NTSC version) / Ricoh 2A07 or RP2A07 (PAL version) is an 8-bit microprocessor manufactured by Ricoh for the Nintendo Entertainment System video game console.",
+     "title": "Ricoh 2A03"
+    },
+    {
+     "n": 2,
+     "url": "https://en.wikipedia.org/wiki/MOS_Technology_6502",
+     "quote": "Devices adopting the 6502 included the Atari 2600, Atari 8-bit computers, Apple I, Apple II, Nintendo Entertainment System, Commodore 64, Atari Lynx, and BBC Micro, used the 6502 or processors based on its design.",
+     "title": "MOS Technology 6502"
+    },
+    {
+     "n": 3,
+     "url": "https://en.wikipedia.org/wiki/Apple_II",
+     "quote": "Early Apple II models used the 8-bit MOS Technology 6502 processor, while later models used the compatible but improved WDC 65C02.",
+     "title": "Apple II - Wikipedia"
+    },
+    {
+     "n": 4,
+     "url": "https://en.wikipedia.org/wiki/Apple_I",
+     "quote": "It was discontinued on September 30, 1977, following the introduction of the Apple II.",
+     "title": "Apple I - Wikipedia"
+    }
+   ],
+   "rounds": 0,
+   "followUps": [],
+   "id": "frames-590",
+   "category": "Multiple constraints | Temporal reasoning",
+   "question": "The Nintendo Entertainment System shipped with a main processor that was a derivative of the CPU in an Apple Computer that was released after the Apple 1 and before 1980. When was the original model Apple device I am referring to discontinued?",
+   "gold": "1979",
+   "goldLinks": [
+    "apple ii (original)",
+    "list of apple products",
+    "mos technology 6502",
+    "nintendo entertainment system",
+    "ricoh 2a03"
+   ],
+   "goldSeen": [
+    "mos technology 6502",
+    "ricoh 2a03"
+   ],
+   "toolCalls": 7,
+   "agentVerdict": "incorrect",
+   "agentReason": "Response never gives 1979; it says the Apple II discontinuation date is unknown and only cites 1977 for Apple I.",
+   "closedBook": "The original Apple II was discontinued in 1979, when it was succeeded by the Apple II Plus (introduced June 1979).",
+   "closedVerdict": "correct",
+   "closedReason": "Response states the original Apple II was discontinued in 1979, matching the ground truth."
+  },
+  {
+   "taskUuid": "15c3dc8a-53f5-4013-a949-ee85868f7cf0",
+   "status": "COMPLETED",
+   "latencySec": 27.2,
+   "subQuestions": [
+    "When was the song \"I Think I'm Go Go\" by the band Squeeze released?",
+    "When did the theatrical premiere of E.T. the Extra-Terrestrial take place?",
+    "How many years separate the release date of \"I Think I'm Go Go\" and the theatrical premiere of E.T. the Extra-Terrestrial?"
+   ],
+   "agents": [
+    {
+     "status": "COMPLETED",
+     "steps": 2,
+     "sources": 2,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 3,
+     "sources": 1,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 3,
+     "sources": 2,
+     "error": null
+    }
+   ],
+   "usage": {
+    "calls": 10,
+    "promptTokens": 19576,
+    "completionTokens": 2191,
+    "costMicro": 21767
+   },
+   "report": "**Answer: 2 years** (about 2 years and 3 months, from February 1980 to the May 26, 1982 Cannes premiere).\n\n**The song.** \"I Think I'm Go Go\" is a 1980 song by the British new wave band Squeeze, released on their third album, *Argybargy* [1]. The sources consulted do not give the exact release day, and the song was not issued as a standalone single, so \"February 1980\" is the release month used here rather than a sourced date.\n\n**The film.** E.T. the Extra-Terrestrial premiered as the closing film of the 1982 Cannes Film Festival on May 26, 1982, and was released in the United States on June 11, 1982 [2].\n\n**The gap.** Measured from the song's release in early 1980 to the theatrical premiere in May 1982, the interval is a little over two years. Because the exact release day is unknown, the answer is best stated as roughly 2 years.",
+   "sources": [
+    {
+     "n": 1,
+     "url": "https://en.wikipedia.org/wiki/I_Think_I%27m_Go_Go",
+     "quote": "\"I Think I'm Go Go\" is a 1980 song by the British new wave band Squeeze, released on their third album Argybargy.",
+     "title": "I Think I'm Go Go - Wikipedia"
+    },
+    {
+     "n": 2,
+     "url": "https://en.wikipedia.org/wiki/E.T._the_Extra-Terrestrial",
+     "quote": "{{Film date|1982|5|26|[[1982 Cannes Film Festival|Cannes]]|1982|6|11|United States}}",
+     "title": "E.T. the Extra-Terrestrial - Wikipedia"
+    }
+   ],
+   "rounds": 0,
+   "followUps": [],
+   "id": "frames-564",
+   "category": "Numerical reasoning | Temporal reasoning",
+   "question": "How many years elapsed between the release of the song \"I Think I'm Go Go\" by the band Squeeze and the theatrical premier of E.T. the movie?",
+   "gold": "2",
+   "goldLinks": [
+    "e.t. the extra-terrestrial",
+    "i think i'm go go"
+   ],
+   "goldSeen": [
+    "e.t. the extra-terrestrial",
+    "i think i'm go go"
+   ],
+   "toolCalls": 7,
+   "agentVerdict": "correct",
+   "agentReason": "Response concludes about 2 years, matching the ground truth of 2.",
+   "closedBook": "About 3 years (assuming the song was released in 1985, versus E.T.'s 1982 premiere); I am not fully certain of the song's release year.",
+   "closedVerdict": "incorrect",
+   "closedReason": "Response says about 3 years, not the ground truth of 2, and is uncertain."
+  },
+  {
+   "taskUuid": "8d738c91-dded-4e38-86b7-34a904b76617",
+   "status": "COMPLETED",
+   "latencySec": 15.1,
+   "subQuestions": [
+    "Who is the oldest member of the band BTS, and what is his family name or clan (bon-gwan / 본관)?",
+    "Which former South Korean prime minister shares that same clan (bon-gwan)?",
+    "In what year was that former South Korean prime minister born?"
+   ],
+   "agents": [
+    {
+     "status": "COMPLETED",
+     "steps": 3,
+     "sources": 3,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 3,
+     "sources": 2,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 1,
+     "sources": 0,
+     "error": null
+    }
+   ],
+   "usage": {
+    "calls": 9,
+    "promptTokens": 17724,
+    "completionTokens": 3033,
+    "costMicro": 20757
+   },
+   "report": "**Report: Birth year of the former South Korean prime minister sharing BTS's oldest member's clan**\n\nThe oldest member of BTS is Jin, born Kim Seok-jin on December 4, 1992 [1]. His family name is Kim (김). A social media post states that Jin and V belong to the Gwangsan Kim clan (광산 김씨), whose bon-gwan (ancestral seat) is Gwangsan, present-day Gwangju [2][3]. The post is not a genealogical record, so this attribution is reported rather than verified.\n\nThe chain of reasoning breaks at the next step. The question asks for the former prime minister from \"the same clan,\" but the sources do not identify one from the Gwangsan Kim clan. The Indong Jang clan article lists Chang Myon (Jang Myeon), who was prime minister in 1960–1961, among notable members [4]. However, that source does not explicitly link him to the clan's bon-gwan in a way that settles the question, and it is not the Kim clan. The Gangneung Kim clan article shows no former prime minister [5], and that clan is also not the Gwangsan Kim clan.\n\nBecause no source establishes which former prime minister shares Jin's Gwangsan Kim clan, I cannot give a birth year with confidence. The only candidate I found, Chang Myon, belongs to a different clan according to the available evidence. Identifying the correct person would require a source listing notable members of the Gwangsan Kim clan, which the sources provided do not include.",
+   "sources": [
+    {
+     "n": 1,
+     "url": "https://en.wikipedia.org/wiki/Jin_(singer)",
+     "quote": "Kim Seok-jin (Korean: 김석진; born December 4, 1992), known professionally as Jin, is a South Korean singer. He rose to prominence as member of the South Korean boy band BTS.",
+     "title": "Jin (singer) - Wikipedia"
+    },
+    {
+     "n": 2,
+     "url": "https://www.tiktok.com/@itsbenkang/video/7616033571173616909",
+     "quote": "V and Jin repping the Gwangsan Kim clan 🇰🇷 Family lineages differentiate Koreans of the same surname since there are so many Kim's, Lee's and Park's.",
+     "title": "TikTok - Make Your Day"
+    },
+    {
+     "n": 3,
+     "url": "https://en.wikipedia.org/wiki/Gwangsan_Kim_clan",
+     "quote": "The Gwangsan Kim clan (Korean: 광산 김씨; Hanja: 光山 金氏) is a Korean clan with its bon-gwan located in Gwangsan, present-day Gwangju.",
+     "title": "Gwangsan Kim clan - Wikipedia"
+    },
+    {
+     "n": 4,
+     "url": "https://en.wikipedia.org/wiki/Indong_Jang_clan",
+     "title": "Indong Jang clan - Wikipedia"
+    },
+    {
+     "n": 5,
+     "url": "https://en.wikipedia.org/wiki/Gangneung_Kim_clan",
+     "title": "Gangneung Kim clan - Wikipedia"
+    }
+   ],
+   "rounds": 0,
+   "followUps": [],
+   "id": "frames-419",
+   "category": "Multiple constraints",
+   "question": "In what year was the former South Korean prime minister who is from the same clan as the oldest member of the band BTS born?",
+   "gold": "1948",
+   "goldLinks": [
+    "bts",
+    "gwangsan kim clan",
+    "jin (singer)"
+   ],
+   "goldSeen": [
+    "gwangsan kim clan",
+    "jin (singer)"
+   ],
+   "toolCalls": 8,
+   "agentVerdict": "incorrect",
+   "agentReason": "Response gives no birth year and says it cannot determine the answer; ground truth is 1948.",
+   "closedBook": "1926",
+   "closedVerdict": "incorrect",
+   "closedReason": "Response gives 1926, which does not match ground truth 1948."
+  },
+  {
+   "taskUuid": "d9daef2d-659c-4602-ba2c-5635701c6d4c",
+   "status": "COMPLETED",
+   "latencySec": 9.2,
+   "subQuestions": [
+    "When did Queen Victoria die, and what was the first season of the Football League after her death?",
+    "Which team won the first Football League title after Queen Victoria's death?",
+    "Who was the manager (or equivalent team leader) of that championship-winning team at the time?"
+   ],
+   "agents": [
+    {
+     "status": "COMPLETED",
+     "steps": 2,
+     "sources": 2,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 3,
+     "sources": 1,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 1,
+     "sources": 0,
+     "error": null
+    }
+   ],
+   "usage": {
+    "calls": 8,
+    "promptTokens": 11526,
+    "completionTokens": 1397,
+    "costMicro": 12923
+   },
+   "report": "The first Football League season after Queen Victoria's death was 1901–02, the 14th season of The Football League. Queen Victoria died on 22 January 1901 at Osborne House on the Isle of Wight, aged 81 [1][2].\n\nThe sub-findings identify Sunderland as the champions of that season, but the source passages provided do not state this. The only cited evidence for the Sunderland claim is the season's own page, which I can confirm only as establishing the season's numbering [2]. The claims that Sunderland finished top of the First Division and that this was their fourth English league title are not supported by the quoted evidence, so they should be checked against another source before being relied on.\n\nThe question about the manager of that team also remains unresolved. The last sub-question answered that it could not identify the team, which is a mistake: the team and championship are determined by the question itself once the 1901–02 season is established. Nothing in the available sources names the manager, so no answer about the manager can be given from them. Verifying the 1901–02 champion and then looking up that club's manager or equivalent leader at the time would complete the answer.",
+   "sources": [
+    {
+     "n": 1,
+     "url": "https://en.wikipedia.org/wiki/Death_and_state_funeral_of_Queen_Victoria",
+     "quote": "Victoria, Queen of the United Kingdom of Great Britain and Ireland and Empress of India, died on 22 January 1901 at Osborne House on the Isle of Wight, at the age of 81 years old.",
+     "title": "Death and state funeral of Queen Victoria"
+    },
+    {
+     "n": 2,
+     "url": "https://en.wikipedia.org/wiki/1901%E2%80%9302_Football_League",
+     "quote": "The 1901–02 season was the 14th season of The Football League.",
+     "title": "1901–02 Football League"
+    }
+   ],
+   "rounds": 0,
+   "followUps": [],
+   "id": "frames-587",
+   "category": "Tabular reasoning | Multiple constraints | Temporal reasoning",
+   "question": "Who was the manager of the team that won the first Football League after the death of Queen Victoria?",
+   "gold": "Tom Watson was the manager of Liverpool F.C. in 1901.",
+   "goldLinks": [
+    "1900–01 football league",
+    "list of liverpool f.c. managers",
+    "queen victoria"
+   ],
+   "goldSeen": [],
+   "toolCalls": 4,
+   "agentVerdict": "incorrect",
+   "agentReason": "Response gives no manager name and says it cannot determine; ground truth is Tom Watson.",
+   "closedBook": "Bob Campbell (Sunderland's secretary-manager, who led the club to the 1901–02 Football League title)",
+   "closedVerdict": "incorrect",
+   "closedReason": "Ground truth says Tom Watson (Liverpool, 1901); response names Bob Campbell of Sunderland, a different person and team."
+  },
+  {
+   "taskUuid": "f6f3c79b-97d3-470e-b99d-a102d2c9c2cf",
+   "status": "COMPLETED",
+   "latencySec": 12.1,
+   "subQuestions": [
+    "根据August 2024版本的Seattle, WA维基百科文章,2020年的人口数据是多少?",
+    "根据August 2024版本的Portland, OR维基百科文章,2020年的人口数据是多少?",
+    "两个城市2020年人口数据之间的差值是多少(以及哪个城市人口更多)?"
+   ],
+   "agents": [
+    {
+     "status": "COMPLETED",
+     "steps": 3,
+     "sources": 1,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 2,
+     "sources": 1,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 1,
+     "sources": 0,
+     "error": null
+    }
+   ],
+   "usage": {
+    "calls": 8,
+    "promptTokens": 11828,
+    "completionTokens": 1702,
+    "costMicro": 13530
+   },
+   "report": "## Seattle vs. Portland: 2020 Population Difference\n\n**Seattle, WA:** 737,015 residents at the 2020 census [1]\n**Portland, OR:** 652,503 residents at the 2020 census [2]\n\n**Difference:** 737,015 − 652,503 = **84,512**\n\nSeattle had 84,512 more residents than Portland at the 2020 census.\n\n**Caveat on the August 2024 requirement:** The question asks for the figures as they appeared in the Wikipedia articles in August 2024. I could not access those historical revisions. The sources above reflect the current versions of the articles at the time they were retrieved. The 2020 census counts themselves are fixed official figures, so the difference should be the same, but I could not confirm the exact wording or values in the August 2024 revisions.",
+   "sources": [
+    {
+     "n": 1,
+     "url": "https://en.wikipedia.org/wiki/Seattle",
+     "quote": "\"population_as_of\":{\"wt\":\"[[2020 United States census|2020]]\"},\"population_total\":{\"wt\":\"737015\"}",
+     "title": "Seattle - Wikipedia"
+    },
+    {
+     "n": 2,
+     "url": "https://en.wikipedia.org/wiki/Portland,_Oregon",
+     "quote": "with a population of 652,503 at the 2020 census.",
+     "title": "Portland, Oregon - Wikipedia"
+    }
+   ],
+   "rounds": 0,
+   "followUps": [],
+   "id": "frames-70",
+   "category": "Numerical reasoning | Tabular reasoning",
+   "question": "According to the population data in their respective Wikipedia articles in August 2024, what is the difference between the population of Seattle, WA, and Portland, OR, according to the data from 2020?",
+   "gold": "84,512",
+   "goldLinks": [
+    "portland, oregon",
+    "seattle"
+   ],
+   "goldSeen": [
+    "portland, oregon",
+    "seattle"
+   ],
+   "toolCalls": 3,
+   "agentVerdict": "correct",
+   "agentReason": "Response computes 737,015 − 652,503 = 84,512, matching the ground truth exactly.",
+   "closedBook": "84,512 (Seattle's 2020 population of 737,015 minus Portland's 652,503)",
+   "closedVerdict": "correct",
+   "closedReason": "Response gives 84,512, matching ground truth; supporting figures 737,015 − 652,503 = 84,512 are consistent."
+  },
+  {
+   "taskUuid": "05dfba21-1f0e-4fb9-9860-9831884cfe0f",
+   "status": "COMPLETED",
+   "latencySec": 21.2,
+   "subQuestions": [
+    "Which physicist attended the oldest college in London, and what is that college?",
+    "Which medal did that physicist win in 1979?",
+    "Who is the physicist that is famous and is associated with the oldest college in London, and does the college's identity match the 1979 award record?"
+   ],
+   "agents": [
+    {
+     "status": "COMPLETED",
+     "steps": 5,
+     "sources": 2,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 1,
+     "sources": 0,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 4,
+     "sources": 2,
+     "error": null
+    }
+   ],
+   "usage": {
+    "calls": 12,
+    "promptTokens": 29630,
+    "completionTokens": 3248,
+    "costMicro": 32878
+   },
+   "report": "## Report: Medal Won in 1979 by a King's College London Physicist\n\n**Answer:** The sub-questions do not establish a 1979 medal for any King's College London physicist, so no medal can be confirmed from the available sources.\n\n**Identifying the college and physicist.** King's College London is generally regarded as the oldest college in London. It was established by royal charter in 1829 under the patronage of King George IV and the Duke of Wellington, and became one of the two founding colleges of the University of London in 1836 [1]. The physicist most often linked to it in the sources is Peter Higgs, a theoretical physicist and Nobel laureate known for predicting the Higgs boson. He took his bachelor's, master's and PhD at King's, and the college's alumni channel describes him as a King's alumnus and Nobel Prize winner [2].\n\n**Checking the 1979 award.** The sub-question on the 1979 medal did not return a name, so it could not answer the question. It asked for clarification rather than identifying a physicist. A separate check on Maurice Wilkins, the King's physicist whose X-ray diffraction work on DNA contributed to the double-helix discovery, found his recorded awards to be the Albert Lasker Award (1960) and the Nobel Prize in Physiology or Medicine (1962), with no 1979 award [3]. That makes Wilkins an unlikely fit for the question as posed, though the sources do not rule out other awards he may have received.\n\n**Gaps.** The sources do not show any medal awarded to Peter Higgs in 1979, and they do not identify another King's physicist with a 1979 medal. The question as worded is also ambiguous: it could refer to Higgs or to Wilkins, and neither has a confirmed 1979 medal in these sources. Checking a list of 1979 medal recipients, such as those from the Royal Society or the Institute of Physics, would be the next step.\n\n**Sources:**\n[1] King's College London - Wikipedia, https://en.wikipedia.org/wiki/King%27s_College_London\n[2] King's College London Alumni, Facebook post on Peter Higgs, https://www.facebook.com/KCLalumni/videos/happy-birthday-to-kings-alumnus-and-nobel-prize-winner-peter-higgs-peter-higgs-p/1316950542042933\n[3] Maurice Wilkins - Wikipedia, https://en.wikipedia.org/wiki/Maurice_Wilkins",
+   "sources": [
+    {
+     "n": 1,
+     "url": "https://en.wikipedia.org/wiki/King%27s_College_London",
+     "quote": "King's was established by royal charter in 1829 under the patronage of King George IV and the Duke of Wellington. In 1836, King's became one of the two founding colleges of the University of London.",
+     "title": "King's College London - Wikipedia"
+    },
+    {
+     "n": 2,
+     "url": "https://www.facebook.com/KCLalumni/videos/happy-birthday-to-kings-alumnus-and-nobel-prize-winner-peter-higgs-peter-higgs-p/1316950542042933",
+     "title": "24 reactions | Happy Birthday to King's alumnus and Nobel Prize winner Peter Higgs"
+    },
+    {
+     "n": 3,
+     "url": "https://en.wikipedia.org/wiki/Maurice_Wilkins",
+     "title": "Maurice Wilkins - Wikipedia"
+    }
+   ],
+   "rounds": 0,
+   "followUps": [],
+   "id": "frames-728",
+   "category": "Multiple constraints",
+   "question": "What medal was won in 1979 by the famous physicist who attended the oldest college in London?",
+   "gold": "Albert Einstein medal",
+   "goldLinks": [
+    "albert einstein medal",
+    "stephen hawking",
+    "university of oxford"
+   ],
+   "goldSeen": [],
+   "toolCalls": 11,
+   "agentVerdict": "incorrect",
+   "agentReason": "Response fails to identify the Albert Einstein Medal; says no medal could be confirmed.",
+   "closedBook": "The Hughes Medal (Royal Society), awarded to Peter Higgs in 1979",
+   "closedVerdict": "incorrect",
+   "closedReason": "Response says Hughes Medal to Peter Higgs; ground truth is the Albert Einstein medal."
+  },
+  {
+   "taskUuid": "bf8e6c47-399d-4a52-a1a5-522c1cc0db07",
+   "status": "COMPLETED",
+   "latencySec": 9.2,
+   "subQuestions": [
+    "Which country has the largest energy complex in South Eastern Europe?",
+    "As of August 3, 2024, what is the capital city of that country?"
+   ],
+   "agents": [
+    {
+     "status": "COMPLETED",
+     "steps": 2,
+     "sources": 2,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 1,
+     "sources": 0,
+     "error": null
+    }
+   ],
+   "usage": {
+    "calls": 5,
+    "promptTokens": 6177,
+    "completionTokens": 979,
+    "costMicro": 7156
+   },
+   "report": "As of August 3, 2024, the capital of Bulgaria, the country with the largest energy complex in South Eastern Europe, is Sofia.\n\nThe Maritsa Iztok Complex, located in southeastern Bulgaria near Stara Zagora, is described by Global Energy Monitor as the largest energy complex in South Eastern Europe [1]. It comprises the Maritsa Iztok-1, -2 and -3 power stations, with a proposed Maritsa Iztok-4. Maritsa Iztok-2 is the largest thermal power plant in the Balkans, with 1,465 MW of installed capacity, and generates about 30% of Bulgaria's electricity.",
+   "sources": [
+    {
+     "n": 1,
+     "url": "https://www.gem.wiki/Maritsa_Iztok_Complex",
+     "quote": "Maritsa Iztok Complex (Iztok means East in Bulgarian) is the largest energy complex in South Eastern Europe.",
+     "title": "Maritsa Iztok Complex - Global Energy Monitor"
+    }
+   ],
+   "rounds": 0,
+   "followUps": [],
+   "id": "frames-509",
+   "category": "Multiple constraints",
+   "question": "As of August 3, 2024, what is the capital of the country with the largest energy complex in South Eastern Europe?",
+   "gold": "Sofia is the capital of Bulgaria, which is home to the largest energy complex in South Eastern Europe, the Maritsa Iztok Complex in Galabovo. ",
+   "goldLinks": [
+    "bulgaria",
+    "maritsa iztok complex"
+   ],
+   "goldSeen": [],
+   "toolCalls": 2,
+   "agentVerdict": "correct",
+   "agentReason": "Response gives Sofia, capital of Bulgaria, matching the ground truth.",
+   "closedBook": "Belgrade",
+   "closedVerdict": "incorrect",
+   "closedReason": "Response says Belgrade; ground truth is Sofia (Bulgaria). Different capital."
+  },
+  {
+   "taskUuid": "5e8ef871-07b1-4569-aa62-563dd87e949f",
+   "status": "COMPLETED",
+   "latencySec": 15.2,
+   "subQuestions": [
+    "In which countries were the Potsdam Agreement and the Wellington Convention signed?",
+    "Who were the political leaders of those countries at the time of signing, and what are their birth dates?",
+    "Who was the older of those political leaders as of 1 July 1905?"
+   ],
+   "agents": [
+    {
+     "status": "COMPLETED",
+     "steps": 3,
+     "sources": 3,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 1,
+     "sources": 0,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 1,
+     "sources": 0,
+     "error": null
+    }
+   ],
+   "usage": {
+    "calls": 7,
+    "promptTokens": 12137,
+    "completionTokens": 1834,
+    "costMicro": 13971
+   },
+   "report": "**Report: Which leader was older on 1 July 1905?**\n\nThe question asks, in effect, which political leader of the countries where the Potsdam Agreement and the Wellington Convention were signed was older on 1 July 1905. The sub-question findings resolve the first part, but the later steps could not be completed.\n\n**Where the two agreements were concluded.** The Potsdam Agreement was signed at Potsdam, near Berlin, Germany, on 1 August 1945 by the United Kingdom, the United States, and the Soviet Union [1]. The Wellington Convention (the Convention on the Regulation of Antarctic Mineral Resource Activities, CRAMRA) was concluded at Wellington, New Zealand, on 2 June 1988 [2][3]. It was never ratified and did not enter into force, and it was concluded rather than signed in the strict sense.\n\n**Why the question is not resolved.** Identifying the relevant leaders requires the countries' political leaders at the time of each signing, and their birth dates. That work was not completed, so the sub-questions could not be answered. Their conclusions asked for clarification rather than providing names and dates. The question, read carefully, points to Germany and New Zealand (and possibly the three Allied powers for Potsdam), but the research did not establish that reading, nor did it gather leaders' birth dates. Without those dates, no comparison as of 1 July 1905 can be made.\n\n**Next steps.** To answer the question, one would need to:\n1. Confirm which countries are meant (for Potsdam, the three Allied powers or Germany, the site of signing; for Wellington, New Zealand).\n2. Identify the political leader of each country at the time of signing (for example, the leaders of the UK, US, and USSR in 1945, and of New Zealand in 1988).\n3. Look up each leader's birth date and compare them against 1 July 1905.",
+   "sources": [
+    {
+     "n": 1,
+     "url": "https://en.wikipedia.org/wiki/Potsdam_Agreement",
+     "quote": "The Potsdam Agreement (German: Potsdamer Abkommen) was the agreement among three of the Allies of World War II: the United Kingdom, the United States, and the Soviet Union after the end of World War II in Europe that was signed on 1 August 1945 and published the following day.",
+     "title": "Potsdam Agreement"
+    },
+    {
+     "n": 2,
+     "url": "https://2001-2009.state.gov/g/oes/ocns/9570.htm",
+     "quote": "The Convention was concluded at Wellington, New Zealand in 1988, after six years of negotiation.",
+     "title": "Antarctic Treaty"
+    },
+    {
+     "n": 3,
+     "url": "https://en.wikipedia.org/wiki/Convention_on_the_Regulation_of_Antarctic_Mineral_Resource_Activities",
+     "quote": "The convention was concluded at Wellington on 2 June 1988. The government of New Zealand is the depository of the treaty.",
+     "title": "Convention on the Regulation of Antarctic Mineral Resource Activities"
+    }
+   ],
+   "rounds": 0,
+   "followUps": [],
+   "id": "frames-344",
+   "category": "Numerical reasoning | Multiple constraints | Temporal reasoning",
+   "question": "Which political leader of the countries where the Potsdam agreement and the Wellington Convention were signed was older on the 1st of July 1905?",
+   "gold": "Richard Seddon",
+   "goldLinks": [
+    "bernhard von bülow",
+    "list of chancellors of germany",
+    "list of prime ministers of new zealand",
+    "potsdam agreement",
+    "richard seddon",
+    "wellington convention"
+   ],
+   "goldSeen": [
+    "potsdam agreement"
+   ],
+   "toolCalls": 4,
+   "agentVerdict": "incorrect",
+   "agentReason": "The response gives no final answer; it says the question could not be resolved and never names Richard Seddon.",
+   "closedBook": "Winston Churchill",
+   "closedVerdict": "incorrect",
+   "closedReason": "Response names Winston Churchill, but the ground truth is Richard Seddon."
+  },
+  {
+   "taskUuid": "aafa735d-78dd-4f4a-94fa-c555a935883e",
+   "status": "COMPLETED",
+   "latencySec": 9.1,
+   "subQuestions": [
+    "Which George Eliot novel did Virginia Woolf describe as \"one of the few English novels written for grown-up people\"?",
+    "Which main characters appear in that novel, and what are their first names?",
+    "Who is the former prime minister of Burkina Faso who later joined the board of a Canadian mining company, and what is his first name?",
+    "Which character first name from the novel matches the first name of that former prime minister?"
+   ],
+   "agents": [
+    {
+     "status": "COMPLETED",
+     "steps": 2,
+     "sources": 2,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 1,
+     "sources": 0,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 2,
+     "sources": 1,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 1,
+     "sources": 0,
+     "error": null
+    }
+   ],
+   "usage": {
+    "calls": 8,
+    "promptTokens": 12156,
+    "completionTokens": 1597,
+    "costMicro": 13753
+   },
+   "report": "## Research Report\n\n**Answer: Tertius**\n\nThe novel is *Middlemarch* (1871–1872) by George Eliot (Mary Ann Evans). Virginia Woolf called it \"one of the few English novels written for grown-up people\" [1][2].\n\nThe former prime minister is Tertius Zongo. He served as Prime Minister of Burkina Faso from June 2007 to April 2011 under President Blaise Compaoré. In May 2012 he was appointed to the Board of Directors of SEMAFO, a Canadian mining company with operations in Burkina Faso and other West African countries [3].\n\n*Middlemarch* has a character named Tertius Lydgate, one of its main characters, a doctor whose storyline runs throughout the novel. His first name matches Zongo's, so the shared forename is **Tertius**. The sources cited here do not mention Lydgate, so this link comes from my general knowledge of the novel and is not supported by the cited sources.",
+   "sources": [
+    {
+     "n": 1,
+     "url": "https://en.wikipedia.org/wiki/George_Eliot",
+     "quote": "Middlemarch was described by the novelist Virginia Woolf as \"one of the few English novels written for grown-up people\"",
+     "title": "George Eliot - Wikipedia"
+    },
+    {
+     "n": 2,
+     "url": "https://global.georgetown.edu/events/cultural-encounters-in-george-eliot-s-middlemarch",
+     "quote": "Virginia Woolf famously called George Eliot's Middlemarch (1871-1872) \"one of the few English novels written for grownup people.\"",
+     "title": "Cultural Encounters in George Eliot's “Middlemarch”"
+    },
+    {
+     "n": 3,
+     "url": "https://en.wikipedia.org/wiki/Tertius_Zongo",
+     "quote": "Zongo was subsequently appointed to the Board of Directors of SEMAFO\"), a Canadian mining company with operations in Burkina Faso and other West African countries, in May 2012.",
+     "title": "Tertius Zongo - Wikipedia"
+    }
+   ],
+   "rounds": 0,
+   "followUps": [],
+   "id": "frames-215",
+   "category": "Multiple constraints",
+   "question": "In the George Eliot novel described by Virginia Woolf as \"one of the few English novels written for grown-up people\", one of the main characters shares a first name with a former prime minister of Burkino Faso who went on the join the board of a Canadian mining company. What forename do they share?",
+   "gold": "Tertius",
+   "goldLinks": [
+    "george eliot",
+    "middlemarch",
+    "tertius zongo"
+   ],
+   "goldSeen": [
+    "george eliot",
+    "tertius zongo"
+   ],
+   "toolCalls": 4,
+   "agentVerdict": "correct",
+   "agentReason": "Response's final answer 'Tertius' matches the ground truth exactly.",
+   "closedBook": "Tertius",
+   "closedVerdict": "correct",
+   "closedReason": "Response 'Tertius' exactly matches the ground truth forename."
+  },
+  {
+   "taskUuid": "fbef2248-3729-46d8-991d-3a1fdda00f0c",
+   "status": "COMPLETED",
+   "latencySec": 6.1,
+   "subQuestions": [
+    "In what year was John Steinbeck awarded the Nobel Prize in Literature?",
+    "Who won the Academy Award for Best Actor in that year?"
+   ],
+   "agents": [
+    {
+     "status": "COMPLETED",
+     "steps": 2,
+     "sources": 1,
+     "error": null
+    },
+    {
+     "status": "COMPLETED",
+     "steps": 1,
+     "sources": 0,
+     "error": null
+    }
+   ],
+   "usage": {
+    "calls": 5,
+    "promptTokens": 5178,
+    "completionTokens": 730,
+    "costMicro": 5908
+   },
+   "report": "Steinbeck received the 1962 Nobel Prize in Literature, which places the year in question at 1962 [1]. The Swedish Academy honored him for \"realistic and imaginative writings, combining as they do sympathetic humour and keen social perception\" [1].\n\nThe sub-question about the Best Actor award did not get a usable answer. Its conclusion asked for a year that was never supplied, so no winner was identified. The Academy Award for Best Actor for 1962 is not covered by any of the sources provided, so I can't name the winner from the evidence here. The 35th Academy Awards, held in 1963 and honoring films of 1962, would be the ceremony to check.",
+   "sources": [
+    {
+     "n": 1,
+     "url": "https://en.wikipedia.org/wiki/1962_Nobel_Prize_in_Literature",
+     "quote": "The 1962 Nobel Prize in Literature was awarded to the American author John Steinbeck (1902–1968) \"for his realistic and imaginative writings, combining as they do sympathetic humour and keen social perception.\"",
+     "title": "1962 Nobel Prize in Literature"
+    }
+   ],
+   "rounds": 0,
+   "followUps": [],
+   "id": "frames-519",
+   "category": "Multiple constraints",
+   "question": "Who won the Academy Award for Best Actor the year that John Steinbeck was awarded the Nobel prize for Literature?",
+   "gold": "Gregory Peck",
+   "goldLinks": [
+    "academy award for best actor",
+    "list of nobel laureates in literature"
+   ],
+   "goldSeen": [],
+   "toolCalls": 1,
+   "agentVerdict": "incorrect",
+   "agentReason": "Response never names a winner; says it cannot determine the answer, not Gregory Peck.",
+   "closedBook": "Gregory Peck (To Kill a Mockingbird), at the 35th Academy Awards honoring 1962 films.",
+   "closedVerdict": "correct",
+   "closedReason": "Steinbeck won Nobel in 1962; Best Actor for 1962 films was Gregory Peck, matching ground truth."
+  }
+ ]
+}

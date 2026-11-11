@@ -30,4 +30,4 @@ jobs:
       - run: pip install -r agentflow-rag/requirements.txt
       - run: cd agentflow-rag && pytest -q
       - name: Eval harness self-check
-        run: python3 eval/run_eval.py --self-check
+        run: python3 eval/run_eval.py --self-check && python3 eval/frames_eval.py --self-check

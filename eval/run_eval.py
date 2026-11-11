@@ -19,7 +19,7 @@
   评审模型复用 .env 里的 OPENAI_BASE_URL / OPENAI_API_KEY / OPENAI_EXTRA_BODY,脚本按字面读取 .env
   (和 docker compose 一致;不要 source,shell 会吃掉 JSON 里的引号)
   python3 eval/run_eval.py --label baseline [--limit 3] [--concurrency 3] [--no-judge]
-  python3 eval/run_eval.py --label reflect --reflect   # 打开反思阶段(默认关闭)做对照
+  python3 eval/run_eval.py --label reflect --rounds 1   # 打开一轮反思(默认关闭)做对照
   python3 eval/run_eval.py --render eval/results/x.json   # 指标代码改了:用已有结果重算汇总
   python3 eval/run_eval.py --self-check     # 离线自检纯函数
 结果写到 eval/results/<label>.json 与 <label>.md。
@@ -265,11 +265,13 @@ def fetch_text(url, limit=12000):
 
 # ---------------------------------------------------------------- 单题流程
 
-def run_one(base, q, timeout, judge, samples, reflect=False):
+def run_one(base, q, timeout, judge, samples, rounds=None):
     t0 = time.time()
     rec = {"id": q["id"], "category": q["category"], "question": q["question"]}
     try:
-        payload = {"question": q["question"], "reflect": reflect}
+        payload = {"question": q["question"]}
+        if rounds is not None:
+            payload["rounds"] = rounds
         uuid = http_json(base + "/api/v1/tasks", {"type": "RESEARCH_AGENT", "payload": payload})["taskUuid"]
     except Exception as e:
         rec.update(status="SUBMIT_ERROR", error=type(e).__name__)
@@ -454,7 +456,8 @@ def main():
                     help="评审模型的厂商参数 JSON,默认同 OPENAI_EXTRA_BODY")
     ap.add_argument("--samples", type=int, default=4, help="每篇报告抽查几句引用")
     ap.add_argument("--no-judge", action="store_true")
-    ap.add_argument("--reflect", action="store_true", help="payload.reflect=true:打开反思阶段(服务端默认关闭)")
+    ap.add_argument("--rounds", type=int, default=None,
+                    help="payload.rounds:反思轮数上限,服务端默认 0(关闭)")
     ap.add_argument("--self-check", action="store_true")
     ap.add_argument("--render", metavar="RESULT_JSON", help="只用已有结果重新生成汇总和 .md(指标代码改了之后用)")
     ap.add_argument("--env-file", default=os.path.join(HERE, "..", ".env"))
@@ -482,7 +485,7 @@ def main():
     print("running %d questions, concurrency=%d, judge=%s" % (len(qs), a.concurrency, judge and judge.model), flush=True)
 
     def job(q):
-        r = run_one(a.base.rstrip("/"), q, a.timeout, judge, a.samples, reflect=a.reflect)
+        r = run_one(a.base.rstrip("/"), q, a.timeout, judge, a.samples, rounds=a.rounds)
         print("  %-18s %-10s %6ss depth=%s gaps=%s" % (r["id"], r.get("status"), r.get("latencySec"),
                                                         r.get("coverage", {}).get("depth"), r.get("reflectGaps")), flush=True)
         return r
@@ -490,7 +493,7 @@ def main():
     with ThreadPoolExecutor(a.concurrency) as ex:
         records = list(ex.map(job, qs))
     meta = {"label": a.label, "date": time.strftime("%Y-%m-%d %H:%M"), "model": os.environ.get("LLM_MODEL", "?"),
-            "judge": judge.model if judge else "none", "concurrency": a.concurrency, "reflect": a.reflect}
+            "judge": judge.model if judge else "none", "concurrency": a.concurrency, "rounds": a.rounds}
     s = summarize(records)
     out = os.path.join(HERE, "results", a.label)
     os.makedirs(os.path.dirname(out), exist_ok=True)
