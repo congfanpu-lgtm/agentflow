@@ -35,8 +35,8 @@ flowchart LR
 
 | Stage | Subtasks | What happens |
 |---|---|---|
-| ① Plan | 1 | LLM splits the question into 2–4 sub-questions (schema-validated) |
-| ② Agents | N, in parallel | ReAct loop, max 6 steps; each step checkpointed to Redis; tools are read-only |
+| ① Plan | 1 | Routes first: a *report* question is split into 2–4 sub-questions (schema-validated); an *answer* question (one specific fact, usually multi-hop) is kept whole |
+| ② Agents | N, in parallel | ReAct loop, max 10 steps; each step checkpointed to Redis; tools are read-only |
 | ③ Synthesize | 1 | LLM writes the report; citations limited to URLs tools actually returned |
 
 Every stage is an ordinary Kafka subtask, so it inherits the existing reliability layer: staged retries
@@ -153,11 +153,31 @@ Each run checks about 70 cited sentences, so strict accuracy has a ±11-point 95
 
 What the numbers changed:
 - **v1 → v2:** English questions were answered in Chinese (the prompts are Chinese), and 36 of 41 tool errors were Wikipedia HTTP 429s. Fixed: the response language is pinned from the question, and `wiki_search` now makes one API call instead of four.
-- **Reflection didn't pay off.** It added +85% cost and ~2× latency for no gain in depth, so it is **off by default**. Turn it on with `payload.reflect=true` or the *Deep review* toggle.
+- **Reflection didn't pay off.** It added +85% cost and ~2× latency for no gain in depth, so it is **off by default**. Turn it on with the *Deep review* toggle (`payload.reflect=true`, one round) or `payload.rounds=1..4`.
 - **Citations are the real weakness, and the hardest to move.** The report writer never saw the source text, so it attached sources to claims they don't make. Fix: each agent returns a verbatim quote per source, the loop keeps a quote only if it appears in that source's own tool output, and the writer cites only what the evidence supports. Remaining errors are mostly "partial" support: a date or number is not in the excerpt the agent read.
 - **Truncated answers lost their sources.** An 800-token answer budget truncated the JSON, so sources were silently lost; raising it to 1600 fixed this. The *agents with no sources* metric was added because of this bug.
 
 Re-run: `python3 eval/run_eval.py --label my-run` (judge reads `.env`; `--self-check` runs in CI).
+
+### Multi-hop questions (FRAMES)
+
+The 20 questions above can each be answered from one or two pages. `eval/frames_eval.py` runs questions from
+[FRAMES](https://huggingface.co/datasets/google/frames-benchmark) instead: each needs 2–15 Wikipedia articles
+and has a gold answer. 30 questions were used for tuning (dev) and 30 were held out.
+
+| Configuration | dev (30) | holdout (30) | Tokens / question |
+|---|---|---|---|
+| Same model, no tools | 16 | 12 | — |
+| Before: plan 2–4 sub-questions, research them in parallel | 13 | 12 | 27.8k / 25.9k |
+| **After (default): route first, answer-type questions are not split** | **19** | **17** | 22.8k / 21.9k |
+| After + `rounds=4` (a reviewer sends follow-up agents) | 22 | 19 | 45.4k / 44.4k |
+
+- **Parallel decomposition broke chained questions.** The planner wrote sub-questions like "In which city is *that* racecourse?" and sent them to parallel agents that could not know what "that" meant. 13 of 17 wrong answers ended with "cannot determine", and the pipeline scored below the same model with no tools.
+- **Fix: route first.** Answer-type questions go whole to one agent; report-type questions keep the old pipeline, which did not regress (depth 93% vs 95%, citation accuracy 62% / 87%, $0.047 per question).
+- **Follow-up rounds didn't pay off here either.** They rescued 1 of 9 questions while doubling tokens, so they stay off by default.
+- Before → after pooled over both sets is 25/60 → 36/60 (paired, p = 0.035); holdout alone is not significant at n = 30.
+
+Details, limits and re-run commands: [`eval/results/frames.md`](eval/results/frames.md).
 
 ## Retrieval evaluation
 
