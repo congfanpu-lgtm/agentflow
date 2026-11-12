@@ -125,8 +125,8 @@ Kafka `AGENTFLOW_TRACE` topic;server 侧唯一的 `TraceConsumer` 消费落 Mong
 
 **Redis + Lua 令牌桶限流**:桶状态存 Redis(跨 worker 实例共享,水平扩展下限流才是全局的),
 "读令牌→按时间补充→判够→扣减→回写"整段用一个 Lua 脚本原子执行(Redis 单线程 = 天然原子,
-免分布式锁,与状态机用 MySQL CAS 同源)。扣不到令牌 → `RateLimitedException`,worker 侧当普通失败
-交 W3 阶梯重试(复用可靠性层,不另造机制)。
+免分布式锁,与状态机用 MySQL CAS 同源)。扣不到令牌 → 先排队等(最多 `llm.max-wait-ms`,默认 60 秒),
+等不到才抛 `RateLimitedException` 交 W3 阶梯重试。
 
 **token 记账**:每次调用把 prompt/completion token 数 + 估算成本(微美元)原子累加到 Redis;
 `GET /api/v1/llm/usage` 按模型返回累计 token 与成本(简历指标3/6 数据源)。
@@ -206,6 +206,8 @@ router(意图判断是否需要检索)→ retriever(**命中才检索**,不是�
 | 指标 | 实测 |
 |---|---|
 | 吞吐/延迟(3 worker) | 提交 P50 40ms/P99 137ms;端到端 P50 5.3s/P99 6.9s;103 任务/分;8.6 子任务/秒 |
+| 提高并发上限 | 64 分区、2 × 32 个消费线程、3 个结果线程:**每秒 200 个子任务,是理论上限 213 的 94%**(默认 8 分区时每秒 25 个);过程中瓶颈转移到 server 的单线程结果消费,并暴露出一个分发与结果的竞态(已修) |
+| 过载(请求量是限流配额的 4 倍) | 改前:60 个任务只完成 22 个,52 个子任务进死信,耗时 344 秒;改后(没令牌就排队等):**60/60,31 秒** |
 | 水平扩展 1→3 worker | 子任务吞吐 3.1→8.6/秒 = **2.77×**(单机资源瓶颈,非架构瓶颈) |
 | 成本控制(幂等拦截) | 崩溃场景 45/165 = **27.3%** 重复投递被幂等拦住,省冗余处理(≈LLM 调用) |
 | 容错(故障矩阵) | 压测中途 `kill -9` worker / server / Kafka / MySQL / Redis / MongoDB 各一次,挂 30 秒:**收下的任务全部 COMPLETED,0 个子任务被重复执行**;Redis 挂 3 分钟、MySQL 挂 5 分半:120/120、21/21(修复前:丢 24 条消息、5 个任务卡住、1 个任务被误判部分失败)。`scripts/fault_matrix.py`,详见 [docs/benchmarks.md](docs/benchmarks.md) |

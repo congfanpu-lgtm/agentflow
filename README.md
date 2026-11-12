@@ -120,6 +120,8 @@ the scheduler, not the model — free & deterministic). Reproduce: `scripts/load
 | Metric | Result |
 |---|---|
 | Throughput / latency (2 workers × 4 consumer threads, compose stack) | 120 tasks × 5 subtasks: submit P50 36ms / P99 357ms; end-to-end P50 3.8s / P99 4.3s; **25.5 subtasks/s = 96% of the 26.7/s ceiling** (8 threads × 300ms echo work) |
+| Raising the ceiling | 64 partitions, 2 × 32 worker threads, 3 result threads: **200 subtasks/s = 94% of the 213/s ceiling**, 8× the default setup. On the way the bottleneck moved to the server's single result consumer, and the higher concurrency exposed a dispatch/result race (fixed) |
+| Overload (4× the rate-limit quota) | before: 22/60 tasks completed, 52 subtasks dead-lettered, 344 s. After (a call waits for a token instead of failing): **60/60 in 31 s** |
 | Throughput / latency (3 workers, earlier run) | submit P50 40ms / P99 137ms; end-to-end P50 5.3s / P99 6.9s; 103 tasks/min; 8.6 subtasks/s |
 | Horizontal scaling 1→3 workers | 3.1 → 8.6 subtasks/s = **2.77×** (single-machine resource bound, not architectural) |
 | Cost control (idempotency) | crash scenario: **27.3%** of redeliveries intercepted (no duplicate LLM calls) |
