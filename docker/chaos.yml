@@ -1,0 +1,11 @@
+# 故障演练专用(scripts/fault_matrix.py):独立的容器名、数据卷,不占宿主机端口(server 除外,映射到 18080)。
+# 这样杀 MySQL / Kafka / Redis / Mongo 不会碰到日常那套容器里的数据。
+# 用法:docker compose -p agentflow-chaos -f docker-compose.yml -f docker/chaos.yml ...
+services:
+  mysql: {container_name: !reset null, ports: !reset []}
+  redis: {container_name: !reset null, ports: !reset []}
+  mongo: {container_name: !reset null, ports: !reset []}
+  kafka: {container_name: !reset null, ports: !reset []}
+  server: {container_name: !reset null, ports: !override ["127.0.0.1:18080:8080"]}
+  worker-1: {container_name: !reset null}
+  worker-2: {container_name: !reset null}
