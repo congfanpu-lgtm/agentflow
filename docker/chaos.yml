@@ -7,5 +7,8 @@ services:
   mongo: {container_name: !reset null, ports: !reset []}
   kafka: {container_name: !reset null, ports: !reset []}
   server: {container_name: !reset null, ports: !override ["127.0.0.1:18080:8080"]}
-  worker-1: {container_name: !reset null}
-  worker-2: {container_name: !reset null}
+  # worker 固定用模拟模型:.env 里配的是真模型和 key,演练和压测不能花钱
+  worker-1: &mock
+    container_name: !reset null
+    environment: {LLM_PROVIDER: mock, LLM_DEFAULTMODEL: mock-small, LLM_MODEL: mock-small, OPENAI_API_KEY: "", TAVILY_API_KEY: ""}
+  worker-2: *mock
