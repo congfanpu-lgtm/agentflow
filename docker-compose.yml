@@ -90,6 +90,7 @@ services:
     container_name: agentflow-server
     ports: ["${SERVER_BIND:-127.0.0.1}:8080:8080"]
     environment:
+      AGENTFLOW_SUBTASK_PARTITIONS: ${SUBTASK_PARTITIONS:-8}   # 同时在跑的子任务上限,和 WORKER_CONCURRENCY 一起调
       DEMO_ACCESS_CODE: ${DEMO_ACCESS_CODE:-}
       DEMO_PER_IP_DAILY: ${DEMO_PER_IP_DAILY:-5}
       DEMO_DAILY_BUDGET_USD: ${DEMO_DAILY_BUDGET_USD:-1.0}
@@ -116,6 +117,7 @@ services:
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:19092
       SPRING_DATA_REDIS_HOST: redis
       RAG_BASEURL: http://rag:8000
+      AGENTFLOW_WORKER_SUBTASK_CONCURRENCY: ${WORKER_CONCURRENCY:-4}
       LLM_PROVIDER: ${LLM_PROVIDER:-mock}
       LLM_DEFAULTMODEL: ${LLM_MODEL:-mock-small}
       LLM_MODEL: ${LLM_MODEL:-mock-small}

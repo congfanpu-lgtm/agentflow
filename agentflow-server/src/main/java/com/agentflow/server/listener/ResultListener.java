@@ -14,7 +14,9 @@ public class ResultListener {
 
     private final ResultHandleService resultHandleService;
 
-    @KafkaListener(topics = Topics.RESULT)
+    // 3 个线程对应 RESULT 的 3 个分区。同一任务的结果会被并发处理,靠任务计数行锁串行化(见 ResultHandleService);
+    // 单线程时每秒约 130 条结果就是整个引擎的上限(docs/benchmarks.md)。
+    @KafkaListener(topics = Topics.RESULT, concurrency = "${agentflow.result-concurrency:3}")
     public void onMessage(ResultMessage msg) {
         resultHandleService.handle(msg);
     }

@@ -2,6 +2,7 @@ package com.agentflow.server.config;
 
 import com.agentflow.common.mq.Topics;
 import org.apache.kafka.clients.admin.NewTopic;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.config.TopicBuilder;
@@ -26,10 +27,13 @@ public class KafkaTopicConfig {
         return new DefaultErrorHandler(backOff);
     }
 
+    /**
+     * SUBTASK 分区数 = 全集群同时在处理的子任务上限(每个分区同一时刻只处理一条)。
+     * 已有的 topic 启动时会被自动扩到这个数;分区只能加不能减。
+     */
     @Bean
-    public NewTopic subtaskTopic() {
-        // 8 分区 = 2 worker × 4 消费线程,每个线程一个分区;KafkaAdmin 启动时会把已有 topic 扩到 8 分区
-        return TopicBuilder.name(Topics.SUBTASK).partitions(8).replicas(1).build();
+    public NewTopic subtaskTopic(@Value("${agentflow.subtask-partitions:8}") int partitions) {
+        return TopicBuilder.name(Topics.SUBTASK).partitions(partitions).replicas(1).build();
     }
 
     @Bean

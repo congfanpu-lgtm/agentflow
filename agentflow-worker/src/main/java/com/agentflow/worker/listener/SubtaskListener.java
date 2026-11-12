@@ -43,7 +43,8 @@ public class SubtaskListener {
         this.traceEmitter = traceEmitter;
     }
 
-    @KafkaListener(topics = Topics.SUBTASK)
+    // 一个消费线程同一时刻只处理一条(处理完才提交位移),所以 线程数 × worker 数 就是同时在跑的子任务数,上限是分区数
+    @KafkaListener(topics = Topics.SUBTASK, concurrency = "${agentflow.worker.subtask-concurrency:4}")
     public void onMessage(SubtaskMessage msg,
                           @Header(name = Topics.RETRY_ATTEMPT_HEADER, required = false) byte[] attemptHeader) {
         int attempt = attemptHeader == null ? 0

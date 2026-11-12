@@ -23,10 +23,16 @@ spring:
         max.poll.interval.ms: 600000
     listener:
       immediate-stop: false
-      concurrency: 4          # 2 worker × 4 = 8 线程,对应 SUBTASK 的 8 个分区
+      concurrency: 4          # 重试延迟消费者的线程数;SUBTASK 消费者单独配,见下面的 agentflow.worker.subtask-concurrency
 
 server:
   shutdown: graceful
+
+# 每个 worker 同时处理几个子任务。默认 2 worker × 4 = 8,对应 SUBTASK 的 8 个分区(server 的 agentflow.subtask-partitions);
+# 两个数要一起调大。压测用 64 分区 / 2 × 32,见 docs/benchmarks.md。
+agentflow:
+  worker:
+    subtask-concurrency: 4
 
 # LLM 网关:默认 mock(不烧钱、无需 key);切真模型设 llm.provider=openai + OPENAI_* 环境变量。
 llm:
