@@ -64,7 +64,7 @@ containers and volume), same shape as above: 2 workers × 4 threads. Each run an
 | Kafka | 120 / 0 | 120 | 0 | 14.0 s | 31.4 s | Producers buffer and retry. Submit calls block until the broker is back (P99 60 s) |
 | MySQL | 99 / 21 | 99 | 0 | 10.7 s | 22.2 s | The result consumer retries with backoff. Submits return 500 meanwhile |
 | Redis | 120 / 0 | 120 | 0 | 4.4 s | 20.7 s | The subtask consumer retries its idempotency lookup with backoff |
-| MongoDB | 120 / 0 | 120 | 0 | — | — | Tasks do not depend on it. Trace events wait in Kafka; trace is 100% complete afterwards |
+| MongoDB | 120 / 0 | 120 | 0 | — | — | Tasks do not depend on it. Trace events wait in Kafka and are written after the restart |
 
 Re-run at 64 partitions, 2 × 32 worker threads and 3 result threads: the same outcome for all six (accepted
 tasks all completed, none run twice, nothing dropped), and the backlog clears in 11–17 s instead of 15–31 s.
@@ -106,6 +106,10 @@ tasks all completed, none run twice, nothing dropped), and the backlog clears in
   recovers it through redispatch and re-send.
 - Redis is not persisted here. A kill loses the idempotency keys and agent checkpoints written since the last
   snapshot, so a later redelivery of those subtasks redoes the work. These runs did not trigger one.
+- MongoDB acknowledges a trace write before it is journaled (the default write concern), so a kill can lose the
+  last ~100 ms of events. On the Linux run, 1 task of 120 lost its first two trace events (`SUBMITTED`,
+  `DECOMPOSED`) in each MongoDB drill; the laptop runs lost none. Task state lives in MySQL and was not
+  affected. `?journal=true` on the Mongo URI closes the gap and makes every trace write slower.
 - Duplicates are counted from the trace, so the MongoDB row is a lower bound.
 
     C() { docker compose -p agentflow-chaos -f docker-compose.yml -f docker/chaos.yml "$@"; }
@@ -131,6 +135,25 @@ expected 30 s. Waiting calls are not served in order, and one large task can sti
 small one.
 
     python3 scripts/load_test.py --base http://127.0.0.1:18080/api/v1 --type LLM_BATCH --tasks 60 --items 5 --concurrency 60 --deadline 480
+
+### The same runs on a Linux server (2026-11-12)
+
+Sections 1 (ceiling), 2 and 3 repeated on a 24-core Linux machine (WSL2, Docker 29.1, Compose 2.40), from a
+fresh clone of the fixed build.
+
+| | Laptop (M5) | Linux server |
+|---|---|---|
+| Throughput, 8 partitions | 25.1 /s | 25.0 /s |
+| Throughput, 64 partitions | 195–201 /s | 193–203 /s |
+| Six faults, 30 s outage, both configurations | all accepted tasks completed, none run twice | same |
+| Redis down 180 s | 120 / 120 | 120 / 120 |
+| MySQL down 330 s | 21 / 21 | 21 / 21, 5 redeliveries answered from the stored result |
+| Overload, 4× the quota | 60 / 60 in 31 s | 60 / 60 in 30.5 s |
+| Messages dropped / results ignored / dead-lettered | 0 / 0 / 0 | 0 / 0 / 0 |
+| Trace complete after the MongoDB kill | 100% | 99.2% (see Limits) |
+
+Throughput is the same on both because the ceiling is set by the 300 ms simulated work per thread, not by the
+hardware.
 
 ## 4. Agent crash recovery (real model: Claude Haiku + Tavily)
 
