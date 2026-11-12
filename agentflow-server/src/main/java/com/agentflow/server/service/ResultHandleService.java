@@ -43,8 +43,13 @@ public class ResultHandleService {
         }
         SubtaskStatus target = msg.isSuccess() ? SubtaskStatus.COMPLETED : SubtaskStatus.FAILED;
         if (!stateMachine.transitionSubtask(sub.getId(), SubtaskStatus.DISPATCHED, target)) {
-            log.warn("子任务状态已变更,忽略重复结果 subtaskId={}", sub.getId());
-            return;
+            // 分发方是"先发消息、后把子任务记成 DISPATCHED",高负载下结果可能比那次状态更新先到。
+            // 这时子任务还是 PENDING:替分发方补上这一步再落定,否则这条结果会被当成重复的丢掉。
+            if (!(stateMachine.transitionSubtask(sub.getId(), SubtaskStatus.PENDING, SubtaskStatus.DISPATCHED)
+                    && stateMachine.transitionSubtask(sub.getId(), SubtaskStatus.DISPATCHED, target))) {
+                log.warn("子任务状态已变更,忽略重复结果 subtaskId={}", sub.getId());
+                return;
+            }
         }
         sub.setStatus(target.name());
         if (msg.isSuccess()) {

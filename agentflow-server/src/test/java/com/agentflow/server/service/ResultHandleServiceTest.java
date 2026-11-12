@@ -56,6 +56,18 @@ class ResultHandleServiceTest {
     }
 
     @Test
+    void resultThatOutrunsTheDispatchedMarkStillSettles() {
+        // 分发是先发消息、后改状态:压测(64 分区、3 个结果线程)里有结果在子任务还是 PENDING 时就到了,被当成重复结果丢掉
+        List<Long> ids = fixture(1);
+        subtaskMapper.casStatus(ids.get(1), "DISPATCHED", "PENDING");
+
+        service.handle(new ResultMessage(ids.get(0), ids.get(1), true, "{\"echo\":\"X\",\"length\":1}", null));
+
+        assertEquals("COMPLETED", subtaskMapper.selectById(ids.get(1)).getStatus());
+        assertEquals("COMPLETED", taskMapper.selectById(ids.get(0)).getStatus());
+    }
+
+    @Test
     void partialResultUpdatesProgressOnly() {
         List<Long> ids = fixture(2);
         service.handle(new ResultMessage(ids.get(0), ids.get(1), true,
