@@ -123,7 +123,7 @@ the scheduler, not the model — free & deterministic). Reproduce: `scripts/load
 | Throughput / latency (3 workers, earlier run) | submit P50 40ms / P99 137ms; end-to-end P50 5.3s / P99 6.9s; 103 tasks/min; 8.6 subtasks/s |
 | Horizontal scaling 1→3 workers | 3.1 → 8.6 subtasks/s = **2.77×** (single-machine resource bound, not architectural) |
 | Cost control (idempotency) | crash scenario: **27.3%** of redeliveries intercepted (no duplicate LLM calls) |
-| Fault tolerance | `docker kill` a worker 3s into a 60-task load → **60/60 COMPLETED**, 300/300 subtasks processed once; P99 47s = Kafka session timeout before the partitions move (`scripts/chaos-load.sh`) |
+| Fault tolerance | `kill -9` each of worker / server / Kafka / MySQL / Redis / MongoDB under load, 30 s outage: **every accepted task COMPLETED, 0 subtasks run twice**. Minutes-long Redis and MySQL outages: 120/120 and 21/21 (before the fixes: 24 messages dropped, 5 tasks stuck, 1 task falsely `PARTIAL_FAILED`). `scripts/fault_matrix.py`, details in [docs/benchmarks.md](docs/benchmarks.md) |
 | Agent crash recovery (real Claude) | kill the worker mid-agent, 3 runs → **3/3 COMPLETED**, all 6 in-flight agents resumed from step 2 on the other worker, finished steps not re-run (`scripts/chaos-agent.sh`) |
 | Retrieval quality (BEIR, nDCG@10) | SciFact **0.21 → 0.73**, NFCorpus **0.07 → 0.37** (hash embedding → hybrid BM25 + bge-small; see *Retrieval evaluation*) |
 | Side-effect idempotency | 85 finalized tasks → **85 notifications, 0 duplicates** |

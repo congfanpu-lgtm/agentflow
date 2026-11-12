@@ -17,14 +17,72 @@ Reading it: Kafka dispatch, MySQL state CAS, idempotency checks, Mongo trace wri
 together add ~4% over pure work time at saturation; end-to-end latency grows with queue depth, not with
 per-task overhead.
 
-## 2. Worker killed under load
+## 2. Fault matrix (2026-11-12)
 
-`TASKS=60 KILL_AFTER=3 scripts/chaos-load.sh` — `docker kill agentflow-worker-1` 3 s into the run, restart 30 s later.
+`scripts/fault_matrix.py` submits 2 tasks/s (5 subtasks each) for 60 s, `docker kill`s one component 10 s in
+(SIGKILL) and starts it again after the outage. It runs in its own compose project (`docker/chaos.yml`: separate
+containers and volume), same shape as above: 2 workers × 4 threads. Each run answers three questions:
 
-- **60/60 tasks COMPLETED**, 300/300 subtasks processed (no loss, no duplicate processing).
-- E2E P50 1.9 s, **P99 47.2 s**: the subtasks owned by the dead consumer wait for the Kafka session
-  timeout (~45 s) before their partitions are reassigned. Lowering `session.timeout.ms` trades faster
+- **Lost?** Every *accepted* task (the submit call returned a `taskUuid`) must end `COMPLETED`. Submits refused
+  during the outage are counted separately.
+- **Duplicated?** A subtask with more than one `PROCESSED/OK` event in its trace was executed twice.
+- **How long?** Seconds from the restart to the first new result, and to the backlog being cleared.
+
+**30 s outage**
+
+| Killed | Accepted / refused | Completed | Run twice | First result | Backlog cleared | What happens |
+|---|---|---|---|---|---|---|
+| 1 of 2 workers | 120 / 0 | 120 | 0 | 14.9 s | 26.6 s | Its partitions move after Kafka's 45 s session timeout, restart or not |
+| Server | 52 / 68 | 52 | 0 | 14.4 s | 14.5 s | Results wait in Kafka. One server, so submits are refused while it is down |
+| Kafka | 120 / 0 | 120 | 0 | 14.0 s | 31.4 s | Producers buffer and retry. Submit calls block until the broker is back (P99 60 s) |
+| MySQL | 99 / 21 | 99 | 0 | 10.7 s | 22.2 s | The result consumer retries with backoff. Submits return 500 meanwhile |
+| Redis | 120 / 0 | 120 | 0 | 4.4 s | 20.7 s | The subtask consumer retries its idempotency lookup with backoff |
+| MongoDB | 120 / 0 | 120 | 0 | — | — | Tasks do not depend on it. Trace events wait in Kafka; trace is 100% complete afterwards |
+
+**Minutes-long outage** (a failover, not a blip), before and after the fixes below
+
+| Outage | Build | Completed | Stuck at the deadline | Run twice | Messages dropped |
+|---|---|---|---|---|---|
+| Redis, 180 s | before | 115 / 120 | 5 | 5 | 24 subtask messages |
+| | after | **120 / 120** | 0 | 0 | 0 |
+| MySQL, 330 s | before | 20 / 21 | 1, later `PARTIAL_FAILED` | 0 | 1 result |
+| | after | **21 / 21** | 0 | 0 | 0 |
+
+### What the drills found
+
+1. **Messages dropped after 10 instant retries.** Spring Kafka's default error handler retries a failed record
+   10 times with no delay and then skips it. With Redis down the workers skipped subtask messages; with MySQL
+   down the server skipped a result. Now: exponential backoff, 1 s doubling to 30 s, 10 minutes in total.
+2. **A lost result became a false failure.** The worker had done the work and stored its idempotency key, so
+   every timeout redispatch was skipped, and nothing re-sent the result. After 3 redispatches (40 minutes at the
+   default 600 s) the subtask was marked `FAILED` and the task ended `PARTIAL_FAILED`, although all the work
+   had succeeded. Now the key stores the output and a redelivery re-sends it; the server's compare-and-swap
+   drops extras. Checked live: one redispatch settles the task and the work is not redone.
+3. **Redis failing just after a result was sent ran the work twice.** The failed idempotency write was treated
+   as a processing failure and went to the retry ladder (5 of 5 in-flight subtasks). Now it is logged: the
+   result is already out, and a missing key can only cost a duplicate on a later redelivery.
+4. **A task could be stranded forever.** If the server died between committing a task and dispatching it,
+   task and subtasks stayed `PENDING`; the sweep only looked at `RUNNING` tasks. The random drills did not hit
+   this window (a few milliseconds), so it was reproduced by planting such a row: untouched after two sweeps on
+   the old build, `COMPLETED` after one on the new build.
+
+### Limits
+
+- One server. While it is down nothing can be submitted; accepted tasks are unaffected.
+- Submit waits for the broker ack of each subtask, so it blocks while Kafka is down.
+- A dead consumer is replaced only after the 45 s session timeout. Lowering `session.timeout.ms` trades faster
   failover for more false rebalances.
+- An outage longer than the 10-minute retry budget still drops the message. The timeout sweep (600 s) then
+  recovers it through redispatch and re-send.
+- Redis is not persisted here. A kill loses the idempotency keys and agent checkpoints written since the last
+  snapshot, so a later redelivery of those subtasks redoes the work. These runs did not trigger one.
+- Duplicates are counted from the trace, so the MongoDB row is a lower bound.
+
+    C() { docker compose -p agentflow-chaos -f docker-compose.yml -f docker/chaos.yml "$@"; }
+    C up -d --wait mysql redis mongo kafka && C up -d --build --no-deps server worker-1 worker-2
+    python3 scripts/fault_matrix.py --victim all
+    python3 scripts/fault_matrix.py --victim redis --down 180 --deadline 300
+    python3 scripts/fault_matrix.py --victim mysql --down 330 --deadline 480
 
 ## 3. Agent crash recovery (real model: Claude Haiku + Tavily)
 
@@ -38,7 +96,7 @@ checks that another worker resumes from the Redis checkpoint.
 | How does Redis Cluster shard keys? | worker-2 | 2 agents on worker-1, from step 2 | COMPLETED | 59 s |
 
 3/3 recovered; completed steps (LLM decisions + tool results) were replayed from the checkpoint, not re-run.
-Most of the wall time is the same ~45 s session timeout as above.
+Most of the wall time is the same 45 s session timeout as in the fault matrix.
 
 ## 4. Research quality
 

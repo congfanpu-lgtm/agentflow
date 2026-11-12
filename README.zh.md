@@ -85,7 +85,7 @@ LLM token 记账,轮询刷新。用于 demo 演示。
 
 ## 多 Worker 水平扩展
 
-主 topic 3 分区,最多 3 个 Worker 并行(同消费组自动 rebalance):
+主 topic 8 分区,每个 Worker 4 个消费线程(同消费组自动 rebalance):
 
     # 终端各起一个,同 group 自动分走分区
     mvn -q -pl agentflow-worker -am spring-boot:run
@@ -208,7 +208,7 @@ router(意图判断是否需要检索)→ retriever(**命中才检索**,不是�
 | 吞吐/延迟(3 worker) | 提交 P50 40ms/P99 137ms;端到端 P50 5.3s/P99 6.9s;103 任务/分;8.6 子任务/秒 |
 | 水平扩展 1→3 worker | 子任务吞吐 3.1→8.6/秒 = **2.77×**(单机资源瓶颈,非架构瓶颈) |
 | 成本控制(幂等拦截) | 崩溃场景 45/165 = **27.3%** 重复投递被幂等拦住,省冗余处理(≈LLM 调用) |
-| 容错(零丢失) | kill -9 一个 worker 于压测中途 → **24/24 任务仍 COMPLETED** |
+| 容错(故障矩阵) | 压测中途 `kill -9` worker / server / Kafka / MySQL / Redis / MongoDB 各一次,挂 30 秒:**收下的任务全部 COMPLETED,0 个子任务被重复执行**;Redis 挂 3 分钟、MySQL 挂 5 分半:120/120、21/21(修复前:丢 24 条消息、5 个任务卡住、1 个任务被误判部分失败)。`scripts/fault_matrix.py`,详见 [docs/benchmarks.md](docs/benchmarks.md) |
 | 检索质量(BEIR,nDCG@10) | SciFact **0.21 → 0.73**、NFCorpus **0.07 → 0.37**(词哈希 → 混合检索,见上方 RAG 一节) |
 | 副作用幂等 | 85 任务落定 → **85 通知,0 重复** |
 | 可观测 | trace 完整率 **100%**(每任务 SUBMITTED→…→TASK_FINALIZED) |
