@@ -38,14 +38,19 @@ class LlmGatewayTest {
     }
 
     private LlmGateway gateway(String model, int capacity) {
+        return gateway(model, capacity, 0);
+    }
+
+    private LlmGateway gateway(String model, int capacity, double refillPerSec) {
         LlmModelProperties props = new LlmModelProperties();
         LlmModelProperties.Model m = new LlmModelProperties.Model();
         m.setName(model);
         m.setCapacity(capacity);
-        m.setRefillPerSec(0);
+        m.setRefillPerSec(refillPerSec);
         m.setPricePer1kTokens(1.0);
         props.setModels(List.of(m));
         props.setDefaultModel(model);
+        props.setMaxWaitMs(300);
         LlmClient mock = new LlmClient() {
             public String provider() { return "mock"; }
             public ChatResponse chat(ChatRequest r) {
@@ -62,6 +67,15 @@ class LlmGatewayTest {
         gw.chat(req(model));
         gw.chat(req(model));
         assertThrows(RateLimitedException.class, () -> gw.chat(req(model)));
+    }
+
+    @Test
+    void waitsForATokenInsteadOfFailing() {
+        // 桶里只有 1 个令牌、每秒补 20 个:第二次调用要等约 50ms,而不是直接被限流失败
+        String model = "gw-" + UUID.randomUUID();
+        LlmGateway gw = gateway(model, 1, 20);
+        gw.chat(req(model));
+        assertEquals("ok", gw.chat(req(model)).getContent());
     }
 
     @Test

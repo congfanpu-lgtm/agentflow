@@ -21,6 +21,8 @@ public class LlmModelProperties {
     private String defaultModel = "mock-small";
     /** AgentContext 组装 prompt 的 token 预算上限,超出即裁剪(防上下文膨胀)。 */
     private int maxContextTokens = 2000;
+    /** 被限流时最多排队等多久(毫秒);超过才抛 RateLimitedException 走重试阶梯。0 = 不等。 */
+    private long maxWaitMs = 60_000;
     private List<Model> models = new ArrayList<>();
 
     public Model model(String name) {
