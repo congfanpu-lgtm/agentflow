@@ -84,4 +84,25 @@ class TimeoutSweepServiceTest {
 
         assertEquals("DISPATCHED", subtaskMapper.selectById(subId).getStatus());
     }
+
+    @Test
+    void dispatchesTaskLeftPendingByCrashBetweenPersistAndDispatch() {
+        // server 在"事务提交之后、分发之前"被杀:任务和子任务都停在 PENDING,只认 RUNNING 任务的扫描永远捡不到它
+        seedStuck(0);
+        subtaskMapper.casStatus(subId, "DISPATCHED", "PENDING");
+        subtaskMapper.setUpdatedAt(subId, LocalDateTime.now().minusSeconds(30));
+        taskMapper.casStatus(taskId, "RUNNING", "PENDING");
+        var record = new org.apache.kafka.clients.producer.ProducerRecord<String, Object>(Topics.SUBTASK, "k", "v");
+        var meta = new org.apache.kafka.clients.producer.RecordMetadata(
+                new org.apache.kafka.common.TopicPartition(Topics.SUBTASK, 0), 0L, 0, 0L, 0, 0);
+        org.mockito.Mockito.when(kafkaTemplate.send(org.mockito.ArgumentMatchers.eq(Topics.SUBTASK),
+                        org.mockito.ArgumentMatchers.anyString(), org.mockito.ArgumentMatchers.any()))
+                .thenReturn(java.util.concurrent.CompletableFuture.completedFuture(
+                        new org.springframework.kafka.support.SendResult<>(record, meta)));
+
+        sweep.sweep();
+
+        assertEquals("RUNNING", taskMapper.selectById(taskId).getStatus());
+        assertEquals("DISPATCHED", subtaskMapper.selectById(subId).getStatus());
+    }
 }

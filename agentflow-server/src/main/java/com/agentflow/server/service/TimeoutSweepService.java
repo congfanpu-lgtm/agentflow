@@ -3,10 +3,12 @@ package com.agentflow.server.service;
 import com.agentflow.common.mq.SubtaskMessage;
 import com.agentflow.common.mq.Topics;
 import com.agentflow.common.state.SubtaskStatus;
+import com.agentflow.common.state.TaskStatus;
 import com.agentflow.common.trace.TraceStage;
 import com.agentflow.server.coordinator.StageAdvancer;
 import com.agentflow.server.coordinator.SubtaskDispatcher;
 import com.agentflow.server.entity.SubtaskEntity;
+import com.agentflow.server.entity.TaskEntity;
 import com.agentflow.server.mapper.SubtaskMapper;
 import com.agentflow.server.mapper.TaskMapper;
 import com.agentflow.server.trace.TraceEmitter;
@@ -60,10 +62,16 @@ public class TimeoutSweepService {
     // 漏掉并发提交的结果(见 StageAdvanceIsolationTest)。每条语句读最新已提交数据才能配合行锁得出正确的下一阶段。
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public void sweep() {
-        // 1) 补发:发送 MQ 失败而停在 PENDING 的子任务(提交、阶段推进都在 afterCommit 发送,失败只记日志)
+        // 1) 补发:停在 PENDING 的子任务。发送 MQ 失败(提交、阶段推进都在提交后发送,失败只记日志),
+        //    或者 server 在落库和分发之间死了 —— 后者任务本身也还是 PENDING,要先迁到 RUNNING,否则结果回来后落不了终态
         for (Long id : subtaskMapper.findTasksWithStalePending(LocalDateTime.now().minusSeconds(pendingSeconds))) {
             log.warn("补发停在 PENDING 的子任务 taskId={}", id);
-            dispatcher.dispatchPending(taskMapper.selectById(id));
+            TaskEntity task = taskMapper.selectById(id);
+            if (TaskStatus.PENDING.name().equals(task.getStatus())) {
+                dispatcher.dispatch(task);
+            } else {
+                dispatcher.dispatchPending(task);
+            }
         }
         // 2) 静默失败:卡在 DISPATCHED 的子任务
         LocalDateTime cutoff = LocalDateTime.now().minusSeconds(stuckSeconds);
