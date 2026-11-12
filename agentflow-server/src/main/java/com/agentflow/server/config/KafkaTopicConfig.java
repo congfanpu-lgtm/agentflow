@@ -30,6 +30,8 @@ public class KafkaTopicConfig {
     /**
      * SUBTASK 分区数 = 全集群同时在处理的子任务上限(每个分区同一时刻只处理一条)。
      * 已有的 topic 启动时会被自动扩到这个数;分区只能加不能减。
+     * 扩完之后,已经在运行的 worker 要等元数据刷新(最长 5 分钟)才会接管新分区,这期间落到新分区的子任务会等着;
+     * 想立刻生效就重启 worker。
      */
     @Bean
     public NewTopic subtaskTopic(@Value("${agentflow.subtask-partitions:8}") int partitions) {

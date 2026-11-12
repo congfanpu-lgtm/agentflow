@@ -44,6 +44,10 @@ takes listener failures away from the container's error handler. More partitions
 count and leaves the failure behaviour measured below unchanged. The cost: partitions cannot be removed, and a
 rebalance moves more of them.
 
+One operational note from upgrading a live deployment (3 → 8 partitions): a worker that is already running
+picks up the added partitions only after its next metadata refresh, up to 5 minutes. Subtasks sent to the
+new partitions waited about 4 minutes and then completed. Restart the workers to take over at once.
+
 ## 2. Fault matrix (2026-11-12)
 
 `scripts/fault_matrix.py` submits 2 tasks/s (5 subtasks each) for 60 s, `docker kill`s one component 10 s in
