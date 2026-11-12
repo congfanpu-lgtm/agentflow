@@ -7,8 +7,11 @@ services:
   mongo: {container_name: !reset null, ports: !reset []}
   kafka: {container_name: !reset null, ports: !reset []}
   server: {container_name: !reset null, ports: !override ["127.0.0.1:18080:8080"]}
-  # worker 固定用模拟模型:.env 里配的是真模型和 key,演练和压测不能花钱
-  worker-1: &mock
+  # worker 固定用模拟模型:.env 里配的是真模型和 key,演练和压测不能花钱。
+  # 两个 worker 各写一遍,不用 YAML 锚点:compose 2.40 下经锚点引用的 !reset 不生效,worker-2 会沿用原来的容器名。
+  worker-1:
     container_name: !reset null
     environment: {LLM_PROVIDER: mock, LLM_DEFAULTMODEL: mock-small, LLM_MODEL: mock-small, OPENAI_API_KEY: "", TAVILY_API_KEY: ""}
-  worker-2: *mock
+  worker-2:
+    container_name: !reset null
+    environment: {LLM_PROVIDER: mock, LLM_DEFAULTMODEL: mock-small, LLM_MODEL: mock-small, OPENAI_API_KEY: "", TAVILY_API_KEY: ""}
