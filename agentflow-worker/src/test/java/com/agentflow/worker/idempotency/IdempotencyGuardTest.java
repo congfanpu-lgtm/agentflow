@@ -20,10 +20,10 @@ class IdempotencyGuardTest {
     }
 
     @Test
-    void markThenAlreadyProcessed() {
+    void markStoresTheOutputForResend() {
         String key = guard.key("uuid-" + System.nanoTime(), "{\"text\":\"a\"}");
-        assertFalse(guard.alreadyProcessed(key));
-        guard.markProcessed(key);
-        assertTrue(guard.alreadyProcessed(key));
+        assertNull(guard.processedOutput(key));
+        guard.markProcessed(key, "{\"echo\":\"A\"}");
+        assertEquals("{\"echo\":\"A\"}", guard.processedOutput(key));
     }
 }

@@ -11,15 +11,16 @@ import java.time.Duration;
 import java.util.HexFormat;
 
 /**
- * 消费幂等:幂等键 = MD5(subtaskUuid + ":" + input),仅处理成功后置键(TTL 24h)。
- * 挡住"重复投递已成功消息"的重复干活;失败不置键,合法重试可重跑。
+ * 消费幂等:幂等键 = MD5(subtaskUuid + ":" + input),处理成功后把输出存进去(TTL 24h)。
+ * 重复投递时不再干活,而是把存下的输出再回传一次(结果可能在路上丢了,见 SubtaskListener);
+ * 失败不置键,合法重试可重跑。
  */
 @Component
 @RequiredArgsConstructor
 public class IdempotencyGuard {
 
     private static final Duration TTL = Duration.ofHours(24);
-    private static final String PREFIX = "agentflow:idem:";
+    private static final String PREFIX = "agentflow:done:";   // 旧前缀 agentflow:idem: 下存的是 "1",不是输出
 
     private final RedissonClient redisson;
 
@@ -33,12 +34,14 @@ public class IdempotencyGuard {
         }
     }
 
-    public boolean alreadyProcessed(String key) {
-        return redisson.getBucket(PREFIX + key).isExists();
+    /** 处理过 → 当时的输出;没处理过 → null。 */
+    public String processedOutput(String key) {
+        RBucket<String> bucket = redisson.getBucket(PREFIX + key);
+        return bucket.get();
     }
 
-    public void markProcessed(String key) {
+    public void markProcessed(String key, String output) {
         RBucket<String> bucket = redisson.getBucket(PREFIX + key);
-        bucket.set("1", TTL);
+        bucket.set(output, TTL);
     }
 }

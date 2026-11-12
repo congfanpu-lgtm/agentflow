@@ -51,8 +51,14 @@ public class SubtaskListener {
         traceEmitter.emit(String.valueOf(msg.getTaskId()), msg.getTaskId(), msg.getSubtaskId(),
                 TraceStage.WORKER_RECEIVED, null, "attempt=" + attempt);
         String idemKey = guard.key(msg.getSubtaskUuid(), msg.getInputJson());
-        if (guard.alreadyProcessed(idemKey)) {
-            log.info("幂等命中,跳过重复处理 subtaskId={}", msg.getSubtaskId());
+        String done = guard.processedOutput(idemKey);
+        if (done != null) {
+            // 活干过了,但结果不一定送到:发送失败、server 处理时出错被丢弃,都会让子任务停在 DISPATCHED,
+            // 等来的只有超时重投。这里只跳过不补发的话,它会一直卡到重投耗尽、被误判失败。
+            // 多发的结果由 server 端子任务 CAS 丢弃。
+            log.info("幂等命中,不重复处理,补发结果 subtaskId={}", msg.getSubtaskId());
+            kafkaTemplate.send(Topics.RESULT, String.valueOf(msg.getSubtaskId()),
+                    new ResultMessage(msg.getTaskId(), msg.getSubtaskId(), true, done, null));
             traceEmitter.emit(String.valueOf(msg.getTaskId()), msg.getTaskId(), msg.getSubtaskId(),
                     TraceStage.PROCESSED, "SKIPPED_IDEMPOTENT", null);
             return;
@@ -65,15 +71,18 @@ public class SubtaskListener {
             String output = processor.process(msg);
             traceEmitter.emit(String.valueOf(msg.getTaskId()), msg.getTaskId(), msg.getSubtaskId(),
                     TraceStage.PROCESSED, "OK", null);
-            // 先发 RESULT,再标记幂等键:发送更安全——服务端子任务 CAS 已对重复结果去重,
-            // 若崩溃发生在“发送成功之后、markProcessed 之前”,重投顶多导致一次无害的重复处理
-            // (纯回显 + 服务端幂等丢弃);反之若先 markProcessed 再崩溃在发送前,则结果永久丢失,
-            // 且重投会被幂等直接跳过,最终被超时兜底误判为失败——不可接受。
+            // 先发 RESULT,再存幂等键:崩在两者之间,重投只会多干一遍(server 端 CAS 丢弃多余结果);
+            // 反过来先存键再崩在发送前,就得等超时重投来触发上面的补发,白等一个超时周期。
             kafkaTemplate.send(Topics.RESULT, String.valueOf(msg.getSubtaskId()),
                     new ResultMessage(msg.getTaskId(), msg.getSubtaskId(), true, output, null));
             traceEmitter.emit(String.valueOf(msg.getTaskId()), msg.getTaskId(), msg.getSubtaskId(),
                     TraceStage.RESULT_SENT, "true", null);
-            guard.markProcessed(idemKey);
+            try {
+                guard.markProcessed(idemKey, output);
+            } catch (RuntimeException e) {
+                // 结果已经发出。幂等键没写上,最多是以后重复投递时再干一遍;交给重试路由则一定会再干一遍。
+                log.warn("幂等键写入失败(结果已发出) subtaskId={}", msg.getSubtaskId(), e);
+            }
         } catch (Exception e) {
             log.warn("子任务处理失败 subtaskId={} attempt={},交重试路由", msg.getSubtaskId(), attempt, e);
             traceEmitter.emit(String.valueOf(msg.getTaskId()), msg.getTaskId(), msg.getSubtaskId(),

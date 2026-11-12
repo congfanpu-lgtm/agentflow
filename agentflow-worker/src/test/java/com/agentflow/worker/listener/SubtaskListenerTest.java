@@ -28,7 +28,6 @@ class SubtaskListenerTest {
 
     {
         when(guard.key(any(), any())).thenReturn("k");
-        when(guard.alreadyProcessed("k")).thenReturn(false);
     }
 
     @Test
@@ -53,5 +52,17 @@ class SubtaskListenerTest {
 
         verify(retryRouter).route(eq(msg), eq(0), any());
         verify(template, never()).send(eq(Topics.RESULT), anyString(), any());
+    }
+
+    @Test
+    void failingToStoreTheIdempotencyKeyAfterSendingDoesNotRetry() {
+        // Redis 挂掉时:结果已发出,不能因为幂等键没写上就走重试(那等于保证重复执行一次)
+        org.mockito.Mockito.doThrow(new IllegalStateException("redis down")).when(guard).markProcessed(any(), any());
+        SubtaskMessage msg = new SubtaskMessage(1L, 12L, "uuid-3", "ECHO_BATCH", 0, "{\"text\":\"hi\"}");
+
+        listener.onMessage(msg, null);
+
+        verify(template).send(eq(Topics.RESULT), eq("12"), any());
+        verify(retryRouter, never()).route(any(), org.mockito.ArgumentMatchers.anyInt(), any());
     }
 }
