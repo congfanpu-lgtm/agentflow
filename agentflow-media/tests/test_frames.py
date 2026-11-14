@@ -3,10 +3,11 @@ import threading
 import wave
 
 import av
+import numpy as np
 import pytest
 from PIL import Image, ImageDraw
 
-from app.frames import RapidOcr, changed, frames_media, keyframes, small
+from app.frames import FRAMES_FILE, RapidOcr, changed, frames_media, keyframes, noisy_blocks, same_slide, small
 from app.stats import Stats
 from app.store import Store
 from tests.fakes import KEY, CountingOcr
@@ -59,7 +60,7 @@ def test_one_frame_per_slide_with_its_text(tmp_path, video):
     s, stats = media(tmp_path, video), Stats()
     out = frames_media(s, KEY, RapidOcr(), stats)
     assert out == {"mediaKey": KEY, "cached": False, "frames": 3}
-    fs = s.read_json(KEY, "frames.json")["frames"]
+    fs = s.read_json(KEY, FRAMES_FILE)["frames"]
     assert [f["tsMs"] for f in fs] == [0, 20000, 40000]
     assert [f["file"] for f in fs] == ["frames/000000000.jpg", "frames/000020000.jpg", "frames/000040000.jpg"]
     assert "Gradient descent" in fs[0]["text"] and "ReAct" in fs[1]["text"] and "Evaluation" in fs[2]["text"]
@@ -82,7 +83,7 @@ def test_only_changed_keyframes_are_ocred(tmp_path, video):
 def test_frames_with_too_little_text_are_dropped(tmp_path, video):
     s = media(tmp_path, video)
     assert frames_media(s, KEY, CountingOcr("  ab \n"), Stats())["frames"] == 0
-    assert s.read_json(KEY, "frames.json") == {"frames": []}
+    assert s.read_json(KEY, FRAMES_FILE)["frames"] == []
 
 
 def test_identical_text_is_kept_once(tmp_path, video):
@@ -93,7 +94,7 @@ def test_media_without_video_has_no_frames(tmp_path):
     s = Store(tmp_path)
     s.write_json(KEY, "meta.json", {"mediaKey": KEY, "audio": "audio.m4a", "video": None, "durationMs": 1})
     assert frames_media(s, KEY, CountingOcr("x" * 20), Stats()) == {"mediaKey": KEY, "cached": False, "frames": 0}
-    assert s.read_json(KEY, "frames.json") == {"frames": []}
+    assert s.read_json(KEY, FRAMES_FILE)["frames"] == []
 
 
 def test_unreadable_video_fails_without_writing_frames(tmp_path):
@@ -102,7 +103,7 @@ def test_unreadable_video_fails_without_writing_frames(tmp_path):
     (s.dir(KEY) / "video.mp4").write_bytes(b"not a video")
     with pytest.raises(Exception):
         frames_media(s, KEY, CountingOcr("x" * 20), Stats())
-    assert s.read_json(KEY, "frames.json") is None
+    assert s.read_json(KEY, FRAMES_FILE) is None
 
 
 def test_unknown_media_raises_key_error(tmp_path):
@@ -120,7 +121,7 @@ def test_file_without_a_video_stream_has_no_frames(tmp_path):
         w.setframerate(16000)
         w.writeframes(b"\0\0" * 16000)
     assert frames_media(s, KEY, CountingOcr("x" * 20), Stats())["frames"] == 0
-    assert s.read_json(KEY, "frames.json") == {"frames": []}
+    assert s.read_json(KEY, FRAMES_FILE)["frames"] == []
 
 
 def test_concurrent_calls_for_the_same_media_ocr_once(tmp_path, video):
@@ -129,3 +130,75 @@ def test_concurrent_calls_for_the_same_media_ocr_once(tmp_path, video):
     [t.start() for t in threads]
     [t.join() for t in threads]
     assert ocr.calls == 3 and stats.ocr_runs == 1
+
+
+# ---- 计划 2 任务 1:截帧去重 ----
+
+@pytest.fixture(scope="module")
+def webcam_video(tmp_path_factory):
+    """和 video 一样的三页幻灯片,右上角多一个每个关键帧都在变的"讲者摄像头"小窗(190×100)。"""
+    path = tmp_path_factory.mktemp("w") / "video.mp4"
+    out = av.open(str(path), "w")
+    st = out.add_stream("libx264", rate=2)
+    st.width, st.height, st.pix_fmt = 1280, 720, "yuv420p"
+    st.codec_context.gop_size = 4
+    for i in range(120):
+        img = slide(SLIDES[i // 40])
+        gray = 40 if (i // 4) % 2 == 0 else 200          # 每 4 帧一个关键帧,相邻关键帧的小窗一明一暗
+        img.paste((gray, gray, gray), (1090, 0, 1280, 100))
+        for p in st.encode(av.VideoFrame.from_image(img)):
+            out.mux(p)
+    for p in st.encode():
+        out.mux(p)
+    out.close()
+    return path
+
+
+def test_noisy_blocks_marks_only_the_webcam_corner(webcam_video, video):
+    mask = noisy_blocks(webcam_video)
+    assert mask.shape == (9, 16) and mask[0, 14:].all()
+    assert mask.sum() <= 8 and not mask[3:, :].any() and not mask[:, :12].any()
+    assert not noisy_blocks(video).any()
+
+
+def test_webcam_overlay_does_not_trigger_ocr(tmp_path, webcam_video):
+    s, ocr = media(tmp_path, webcam_video), CountingOcr("some slide text here")
+    frames_media(s, KEY, ocr, Stats())
+    doc = s.read_json(KEY, FRAMES_FILE)
+    assert ocr.calls == 3 and doc["keyframes"] == 30 and doc["ocred"] == 3
+
+
+def test_slides_are_still_found_next_to_a_webcam(tmp_path, webcam_video):
+    s = media(tmp_path, webcam_video)
+    assert frames_media(s, KEY, RapidOcr(), Stats())["frames"] == 3
+    fs = s.read_json(KEY, FRAMES_FILE)["frames"]
+    assert [f["tsMs"] for f in fs] == [0, 20000, 40000]
+    assert "Gradient descent" in fs[0]["text"] and "ReAct" in fs[1]["text"] and "Evaluation" in fs[2]["text"]
+
+
+def test_same_slide_ignores_ocr_spacing_jitter():
+    a = "YannDubois\nIntroduction to training\nLLMs for Al agents\nLLM AgentsMOOC series\nYannDubois|Sep.15th 2025"
+    b = "YannDub\nIntroduction to training\nLLMs for Al agents\nLLM Agents MOOC series\nYannDubois |Sep.15th 2025"
+    assert same_slide(a, b)
+    assert not same_slide(a, "ChatGPT\nLLMs\nWhat are you?\nLLMs & chatbots took over the world")
+
+
+def test_repeated_ocr_of_one_slide_is_kept_once(tmp_path, video, monkeypatch):
+    class JitterOcr:
+        calls = 0
+
+        def read(self, img):
+            self.calls += 1
+            return "LLM Agents MOOC series" if self.calls % 2 else "LLM AgentsMOOC  series"
+
+    monkeypatch.setattr("app.frames.changed", lambda *a, **k: True)     # 每个关键帧都送去识别
+    s, ocr = media(tmp_path, video), JitterOcr()
+    assert frames_media(s, KEY, ocr, Stats())["frames"] == 1 and ocr.calls == 30
+
+
+def test_a_rerun_does_not_keep_images_of_an_earlier_run(tmp_path, video):
+    s = media(tmp_path, video)
+    (s.dir(KEY) / "frames").mkdir()
+    (s.dir(KEY) / "frames" / "999999000.jpg").write_bytes(b"stale")
+    frames_media(s, KEY, CountingOcr("some slide text here"), Stats())
+    assert not (s.dir(KEY) / "frames" / "999999000.jpg").exists()

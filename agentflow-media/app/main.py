@@ -8,7 +8,7 @@ from pydantic import BaseModel, model_validator
 
 from . import config
 from .asr import Transcriber, WhisperTranscriber, transcribe_media, transcript_file
-from .frames import Ocr, RapidOcr, frames_media
+from .frames import FRAMES_FILE, Ocr, RapidOcr, frames_media
 from .importer import FetchError, Fetcher, import_path, import_url, ytdlp_fetch
 from .stats import Stats
 from .store import BadInput, NotFound, Store
@@ -144,7 +144,7 @@ def get_transcript(key: str, store: Store = Depends(get_store)):
 
 @app.get("/media/{key}/frames")
 def get_frames(key: str, store: Store = Depends(get_store)):
-    return _found(store.read_json(key, "frames.json"), f"frames of {key}")
+    return _found(store.read_json(key, FRAMES_FILE), f"frames of {key}")
 
 
 @app.get("/media/{key}/frames/{name}")
