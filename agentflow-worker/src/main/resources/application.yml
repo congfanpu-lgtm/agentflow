@@ -60,3 +60,7 @@ rag:
   base-url: http://localhost:8000
   top-k: 3
   timeout-ms: 3000
+
+# 媒体服务(agentflow-media):课程录播的下载、转写、截帧识别。只有 LEC_* 子任务会用到
+media:
+  base-url: http://localhost:8010

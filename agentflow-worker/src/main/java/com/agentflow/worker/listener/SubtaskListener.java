@@ -6,6 +6,7 @@ import com.agentflow.common.mq.Topics;
 import com.agentflow.common.trace.TraceStage;
 import com.agentflow.worker.idempotency.IdempotencyGuard;
 import com.agentflow.worker.processor.SubtaskProcessor;
+import com.agentflow.worker.retry.NonRetryableException;
 import com.agentflow.worker.retry.RetryRouter;
 import com.agentflow.worker.trace.TraceEmitter;
 import lombok.extern.slf4j.Slf4j;
@@ -84,6 +85,13 @@ public class SubtaskListener {
                 // 结果已经发出。幂等键没写上,最多是以后重复投递时再干一遍;交给重试路由则一定会再干一遍。
                 log.warn("幂等键写入失败(结果已发出) subtaskId={}", msg.getSubtaskId(), e);
             }
+        } catch (NonRetryableException e) {
+            // 输入本身不对(链接不合规、这一讲没有语音):重试也是同样的结果,直接判失败,不让用户白等一轮重试阶梯
+            log.warn("子任务失败且重试无用 subtaskId={}: {}", msg.getSubtaskId(), e.getMessage());
+            traceEmitter.emit(String.valueOf(msg.getTaskId()), msg.getTaskId(), msg.getSubtaskId(),
+                    TraceStage.PROCESSED, "FAILED_FOR_GOOD", e.getMessage());
+            kafkaTemplate.send(Topics.RESULT, String.valueOf(msg.getSubtaskId()),
+                    new ResultMessage(msg.getTaskId(), msg.getSubtaskId(), false, null, e.getMessage()));
         } catch (Exception e) {
             log.warn("子任务处理失败 subtaskId={} attempt={},交重试路由", msg.getSubtaskId(), attempt, e);
             traceEmitter.emit(String.valueOf(msg.getTaskId()), msg.getTaskId(), msg.getSubtaskId(),

@@ -1,5 +1,7 @@
 package com.agentflow.worker.listener;
 
+import com.agentflow.worker.retry.NonRetryableException;
+import com.agentflow.worker.processor.SubtaskProcessor;
 import com.agentflow.common.mq.ResultMessage;
 import com.agentflow.common.mq.SubtaskMessage;
 import com.agentflow.common.mq.Topics;
@@ -63,6 +65,29 @@ class SubtaskListenerTest {
         listener.onMessage(msg, null);
 
         verify(template).send(eq(Topics.RESULT), eq("12"), any());
+        verify(retryRouter, never()).route(any(), org.mockito.ArgumentMatchers.anyInt(), any());
+    }
+
+    @Test
+    void aFailureThatRetryingCannotFixIsReportedAtOnce() {
+        SubtaskProcessor bad = new SubtaskProcessor() {
+            @Override
+            public String type() {
+                return "BAD_INPUT";
+            }
+
+            @Override
+            public String process(String inputJson) {
+                throw new NonRetryableException("media 400: only YouTube links are accepted");
+            }
+        };
+        SubtaskListener l = new SubtaskListener(java.util.List.of(bad), template, guard, retryRouter,
+                mock(TraceEmitter.class));
+        l.onMessage(new SubtaskMessage(1L, 13L, "uuid-4", "BAD_INPUT", 0, "{}"), null);
+        ArgumentCaptor<ResultMessage> captor = ArgumentCaptor.forClass(ResultMessage.class);
+        verify(template).send(eq(Topics.RESULT), eq("13"), captor.capture());
+        assertFalse(captor.getValue().isSuccess());
+        assertEquals("media 400: only YouTube links are accepted", captor.getValue().getErrorMsg());
         verify(retryRouter, never()).route(any(), org.mockito.ArgumentMatchers.anyInt(), any());
     }
 }
