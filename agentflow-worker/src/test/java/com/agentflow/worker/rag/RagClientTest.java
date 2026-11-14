@@ -17,6 +17,7 @@ class RagClientTest {
 
     private HttpServer server;
     private int port;
+    private String lastBody;
 
     @BeforeEach
     void up() throws IOException {
@@ -29,6 +30,13 @@ class RagClientTest {
                   {"id":"redis-1","text":"redis lua","score":0.42}
                 ]}""";
             byte[] b = body.getBytes(StandardCharsets.UTF_8);
+            ex.sendResponseHeaders(200, b.length);
+            ex.getResponseBody().write(b);
+            ex.close();
+        });
+        server.createContext("/segments/index", ex -> {
+            lastBody = new String(ex.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
+            byte[] b = "{\"indexed\":2}".getBytes(StandardCharsets.UTF_8);
             ex.sendResponseHeaders(200, b.length);
             ex.getResponseBody().write(b);
             ex.close();
@@ -54,5 +62,19 @@ class RagClientTest {
         assertEquals("kafka-2", hits.get(0).id());
         assertEquals("kafka rebalance", hits.get(0).text());
         assertEquals(0.91, hits.get(0).score(), 1e-9);
+    }
+
+    @Test
+    void indexSegmentsPostsTheLectureAndReturnsTheCount() throws Exception {
+        int n = client().indexSegments(3, 7, List.of(
+                new com.agentflow.worker.lecture.Segmenter.Segment(0, 60000, "speech", "Welcome."),
+                new com.agentflow.worker.lecture.Segmenter.Segment(0, 20000, "slide", "Title")));
+        assertEquals(2, n);
+        com.fasterxml.jackson.databind.JsonNode body = new com.fasterxml.jackson.databind.ObjectMapper().readTree(lastBody);
+        assertEquals(3, body.get("courseId").asLong());
+        assertEquals(7, body.get("lectureId").asLong());
+        assertEquals("slide", body.get("segments").get(1).get("kind").asText());
+        assertEquals(20000, body.get("segments").get(1).get("endMs").asLong());
+        assertEquals("Welcome.", body.get("segments").get(0).get("text").asText());
     }
 }

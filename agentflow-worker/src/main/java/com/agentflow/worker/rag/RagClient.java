@@ -1,7 +1,9 @@
 package com.agentflow.worker.rag;
 
+import com.agentflow.worker.lecture.Segmenter;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -54,6 +56,33 @@ public class RagClient {
             return hits;
         } catch (Exception e) {
             throw new RuntimeException("RAG 检索失败 query=" + query, e);
+        }
+    }
+
+    /** 课程录播:把一讲的片段写进检索服务(整讲替换)。返回写入条数。 */
+    public int indexSegments(long courseId, long lectureId, List<Segmenter.Segment> segments) {
+        try {
+            ObjectNode body = OM.createObjectNode();
+            body.put("courseId", courseId);
+            body.put("lectureId", lectureId);
+            ArrayNode arr = body.putArray("segments");
+            for (Segmenter.Segment s : segments) {
+                arr.addObject().put("startMs", s.startMs()).put("endMs", s.endMs())
+                        .put("kind", s.kind()).put("text", s.text());
+            }
+            HttpRequest req = HttpRequest.newBuilder()
+                    .uri(URI.create(props.getBaseUrl() + "/segments/index"))
+                    .header("Content-Type", "application/json")
+                    .timeout(Duration.ofMillis(props.getIndexTimeoutMs()))
+                    .POST(HttpRequest.BodyPublishers.ofString(OM.writeValueAsString(body)))
+                    .build();
+            HttpResponse<String> resp = http.send(req, HttpResponse.BodyHandlers.ofString());
+            if (resp.statusCode() / 100 != 2) {
+                throw new IllegalStateException("RAG HTTP " + resp.statusCode() + ": " + resp.body());
+            }
+            return OM.readTree(resp.body()).path("indexed").asInt();
+        } catch (Exception e) {
+            throw new RuntimeException("RAG 片段写入失败 lectureId=" + lectureId, e);
         }
     }
 }
