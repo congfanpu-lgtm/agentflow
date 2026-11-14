@@ -6,6 +6,7 @@ import com.agentflow.server.entity.LectureEntity;
 import com.agentflow.server.entity.TaskEntity;
 import com.agentflow.server.mapper.CourseMapper;
 import com.agentflow.server.mapper.LectureMapper;
+import com.agentflow.server.mapper.TaskMapper;
 import com.agentflow.server.service.TaskSubmitService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
@@ -35,6 +36,7 @@ public class LectureService {
 
     private final CourseMapper courseMapper;
     private final LectureMapper lectureMapper;
+    private final TaskMapper taskMapper;
     private final TaskSubmitService submitService;
     private final ObjectMapper objectMapper;
 
@@ -77,22 +79,41 @@ public class LectureService {
         return l;
     }
 
-    /** 只有失败或部分完成的讲次能重试。状态用一条带条件的 UPDATE 改,连点两下只会提交一个任务。 */
+    /**
+     * 能重试的:失败的、部分完成的,以及"处理中"但背后已经没有在跑的任务的讲次
+     * (进程死在插入讲次和提交任务之间,或者任务落定了但没能把状态写回来)——否则这样的讲次永远卡着。
+     * 状态用一条带条件的 UPDATE 改:对失败和部分完成的讲次,连点两下只会提交一个任务。
+     */
     public LectureEntity retry(long lectureId) {
         LectureEntity l = lectureMapper.selectById(lectureId);
         if (l == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "讲次不存在");
         }
+        boolean orphaned = "INGESTING".equals(l.getStatus()) && !hasLiveTask(l.getTaskUuid());
+        if (!orphaned && !"FAILED".equals(l.getStatus()) && !"PARTIAL".equals(l.getStatus())) {
+            throw bad("只有失败、部分完成或处理中断的讲次可以重试");
+        }
+        // ponytail: 卡住的讲次状态本来就是 INGESTING,这条 UPDATE 拦不住同时点两下(会提交两个任务);
+        // 两次跑的结果一样(媒体有缓存、索引整讲替换),先不为这个少见情况加锁
         int changed = lectureMapper.update(null, new UpdateWrapper<LectureEntity>()
-                .eq("id", lectureId).in("status", "FAILED", "PARTIAL")
+                .eq("id", lectureId).eq("status", l.getStatus())
                 .set("status", "INGESTING").set("error", null));
         if (changed == 0) {
-            throw bad("只有失败或部分完成的讲次可以重试");
+            throw bad("这一讲的状态刚刚变了,请刷新后再试");
         }
         l.setStatus("INGESTING");
         l.setError(null);
         submit(l);
         return l;
+    }
+
+    /** 这个任务还会不会自己往下走(还没落定)。 */
+    private boolean hasLiveTask(String taskUuid) {
+        if (taskUuid == null) {
+            return false;
+        }
+        TaskEntity task = taskMapper.selectOne(new QueryWrapper<TaskEntity>().eq("task_uuid", taskUuid));
+        return task != null && ("PENDING".equals(task.getStatus()) || "RUNNING".equals(task.getStatus()));
     }
 
     private void submit(LectureEntity l) {

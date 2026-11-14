@@ -20,7 +20,9 @@ spring:
       max-poll-records: 1
       properties:
         spring.json.trusted.packages: com.agentflow.common.mq,com.agentflow.common.trace
-        max.poll.interval.ms: 600000
+        # 处理一条子任务最长能用多久;超过了 Kafka 认为这个消费者死了,把消息交给别人。
+        # 课程摄入的一步可能在媒体服务那边排很久的队,docker/course.yml 里把它调大
+        max.poll.interval.ms: ${AGENTFLOW_WORKER_MAX_POLL_INTERVAL_MS:600000}
     listener:
       immediate-stop: false
       concurrency: 4          # 重试延迟消费者的线程数;SUBTASK 消费者单独配,见下面的 agentflow.worker.subtask-concurrency

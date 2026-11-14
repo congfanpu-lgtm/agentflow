@@ -1,7 +1,9 @@
 package com.agentflow.server.course;
 
 import com.agentflow.server.entity.LectureEntity;
+import com.agentflow.server.entity.TaskEntity;
 import com.agentflow.server.mapper.LectureMapper;
+import com.agentflow.server.mapper.TaskMapper;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
@@ -35,6 +37,7 @@ class CourseApiTest {
     private static final String KEY = "0123456789abcdef0123456789abcdef";
     @Autowired private MockMvc mvc;
     @Autowired private LectureMapper lectureMapper;
+    @Autowired private TaskMapper taskMapper;
     @MockBean private KafkaTemplate<String, Object> kafkaTemplate;
     @MockBean private MediaProxy mediaProxy;
 
@@ -128,5 +131,28 @@ class CourseApiTest {
         long id = lecture(course(), "FAILED", null);
         mvc.perform(get("/api/v1/lectures/" + id + "/transcript")).andExpect(status().isNotFound());
         mvc.perform(get("/api/v1/lectures/" + id + "/frames")).andExpect(status().isNotFound());
+    }
+
+    @Test
+    void aLectureStuckInIngestingWithNoLiveTaskCanBeRetried() throws Exception {
+        long c = course();
+        long orphan = lecture(c, "INGESTING", null);       // 进程死在"插入讲次"和"提交任务"之间:讲次在,任务没有
+        JsonNode again = postJson("/api/v1/lectures/" + orphan + "/retry", "", 200);
+        assertEquals("LEC_IMPORT", again.get("stages").get(0).get("kind").asText());
+        postJson("/api/v1/lectures/" + orphan + "/retry", "", 400);                     // 现在有在跑的任务了
+
+        TaskEntity finished = new TaskEntity();            // 任务早就落定了,但收尾时没能把状态写回讲次
+        finished.setTaskUuid(java.util.UUID.randomUUID().toString());
+        finished.setType("LECTURE_INGEST");
+        finished.setStatus("FAILED");
+        finished.setSubtaskTotal(0);
+        finished.setSubtaskDone(0);
+        finished.setSubtaskFailed(0);
+        taskMapper.insert(finished);
+        long stuck = lecture(c + 1, "INGESTING", null);
+        LectureEntity l = lectureMapper.selectById(stuck);
+        l.setTaskUuid(finished.getTaskUuid());
+        lectureMapper.updateById(l);
+        assertEquals("INGESTING", postJson("/api/v1/lectures/" + stuck + "/retry", "", 200).get("status").asText());
     }
 }
