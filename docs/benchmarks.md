@@ -240,22 +240,34 @@ all cache hits.
 | Step | First pass | Result |
 |---|---|---|
 | Import (audio + 720p video, two downloads, no ffmpeg) | 38.6 s | 242 MB on disk including frames |
-| Transcribe | 96.1 s = **73.9 × realtime**, including the one-time model load | 264 utterances, 18,546 words, English |
+| Transcribe, as shipped (timestamps inside each chunk) | 151.5 s = **46.9 × realtime**, including the one-time model load | 1,298 utterances, 18,240 words, English |
+| Transcribe, first version (pipeline default: no timestamps) | 96.1 s = 73.9 × realtime, same | 264 utterances, 18,546 words |
 | Frames (key frames only, OCR on change) | 806.4 s | 1,288 key frames, 974 OCRed, 896 kept |
 | Second pass | all three steps `cached`, `/stats` unchanged (1 download, 1 ASR run, 1 OCR run) | |
+
+The lecture was transcribed twice because the first version turned out to give one utterance per ~30 s chunk
+(next section). Import and frames were not repeated for the second run; they were cache hits.
 
 The model stays loaded after the first transcription: about 4.4 GB of VRAM while idle.
 
 ### What the spot check found
 
-- **Transcript:** reads correctly at the start, middle and end; timestamps increase; the largest gap between
-  utterances is 2.3 s. An utterance is one silence-detection chunk, median 27.8 s (max 31.4 s), and it starts
-  and ends mid-sentence. Sentence-level timestamps would need word timestamps; segmentation has to deal with
-  this.
+- **Transcript:** reads correctly at the start, middle and end; start times never go backwards. "DeepSeek"
+  is heard as "EAP-seq" in both runs.
+- **Utterance length was wrong in the first version and is fixed.** The batched pipeline does not ask Whisper
+  for timestamps by default, so one silence-detection chunk came back as one utterance: median 27.8 s, starting
+  and ending mid-sentence, useless for "jump to this sentence". With `without_timestamps=False` each chunk is
+  split at Whisper's own timestamps: 1,298 utterances, median 4.9 s, 90% under 7.8 s, longest 24.4 s. It costs
+  58% more time (96 s → 152 s). These are phrases rather than sentences (497 of 1,298 end with ". ? !"), 5 of
+  them start up to 1 s before the previous one ends (chunk boundaries), and the largest gap is 11.8 s;
+  segmentation has to deal with all three.
+- The two runs agree on 90–94% of the words, in order, in three 10-minute windows; the timestamped run has
+  1.6% fewer words overall. There is no reference transcript, so neither is shown to be more accurate.
 - **Frames: the same slide is captured many times.** The recording has the speaker's webcam in a corner
   (about 2% of the picture), so the picture "changes" on almost every key frame: the median change between
   consecutive key frames is 0.48% of pixels, above the 0.3% threshold that was tuned on a synthetic video
-  without a webcam. 76% of key frames were OCRed (974 of 1,288), which is where the 13 minutes go. OCR output
+  without a webcam. (The service compares each key frame with the last one it OCRed, not with its neighbour;
+  the outcome is the same.) 76% of key frames were OCRed (974 of 1,288), which is where the 13 minutes go. OCR output
   for an unchanged slide differs in spacing ("LLM AgentsMOOC" / "LLM Agents MOOC"), so the exact-text check
   does not remove the repeats; slides that build up line by line add more. Comparing texts with whitespace
   removed, 896 frames collapse to 359 at similarity 0.9 and to 268 at 0.8.

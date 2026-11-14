@@ -209,7 +209,7 @@ router(意图判断是否需要检索)→ retriever(**命中才检索**,不是�
 
     curl -X POST localhost:8010/media/import -H 'Content-Type: application/json' \
       -d '{"url":"https://www.youtube.com/watch?v=..."}'        # 返回 mediaKey
-    curl -X POST localhost:8010/media/<mediaKey>/transcribe      # 一小时的课约 1 分钟
+    curl -X POST localhost:8010/media/<mediaKey>/transcribe      # 一小时的课约 1 到 1.5 分钟
     curl -X POST localhost:8010/media/<mediaKey>/frames          # 只在画面变化时截帧识别
 
 本地文件放进 `MEDIA_ROOT/inbox/` 后用 `{"path":"文件名"}` 导入。测试不联网、不需要显卡:
