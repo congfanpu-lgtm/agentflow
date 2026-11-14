@@ -229,3 +229,29 @@ def test_a_local_audio_recording_is_imported_by_the_real_probe(tmp_path):
         w.writeframes(b"\0\0" * 32000)
     meta = import_path(s, "rec.wav", inbox)
     assert meta["durationMs"] == 2000 and meta["audio"] == "source.wav"
+
+
+# ---- 计划 2 整体 review 之后补的 ----
+
+def test_importing_a_local_file_again_after_it_was_moved_gives_the_same_media(tmp_path):
+    """第一次导入把文件移出了 inbox。重试(或者子任务被重复投递)再用同一个文件名来导入,不能因为文件不在了就失败。"""
+    s, inbox = Store(tmp_path), tmp_path / "inbox"
+    inbox.mkdir()
+    (inbox / "lec 1.mp4").write_bytes(b"LOCAL")
+    first = import_path(s, "lec 1.mp4", inbox, probe=lambda p: 12.0)
+    again = import_path(s, "lec 1.mp4", inbox, probe=lambda p: 12.0)
+    assert again["cached"] is True and again["mediaKey"] == first["mediaKey"] and again["title"] == "lec 1"
+    assert import_path(s, str(inbox / "lec 1.mp4"), inbox, probe=lambda p: 12.0)["mediaKey"] == first["mediaKey"]
+    with pytest.raises(ValueError):
+        import_path(s, "never-imported.mp4", inbox, probe=lambda p: 12.0)
+
+
+def test_a_new_file_under_an_old_name_is_imported_as_new_media(tmp_path):
+    s, inbox = Store(tmp_path), tmp_path / "inbox"
+    inbox.mkdir()
+    (inbox / "week1.mp4").write_bytes(b"FIRST")
+    first = import_path(s, "week1.mp4", inbox, probe=lambda p: 1.0)
+    (inbox / "week1.mp4").write_bytes(b"SECOND, RE-RECORDED")
+    second = import_path(s, "week1.mp4", inbox, probe=lambda p: 2.0)
+    assert second["cached"] is False and second["mediaKey"] != first["mediaKey"]
+    assert import_path(s, "week1.mp4", inbox, probe=lambda p: 2.0)["mediaKey"] == second["mediaKey"]

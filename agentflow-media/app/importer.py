@@ -86,21 +86,32 @@ def media_duration(path: Path) -> float:
 def import_path(store: Store, path: str, inbox: Path, probe: Callable[[Path], float] = media_duration) -> dict:
     root = inbox.resolve()
     src = (root / path).resolve()   # a bare name means "in the inbox"; resolve() follows symlinks and ".."
-    if not src.is_relative_to(root) or not src.is_file():
+    if not src.is_relative_to(root):
+        raise BadInput(f"not a file inside the inbox: {path!r}")
+    # A successful import moves the file out of the inbox, so the name is remembered like a URL is:
+    # a retry, or a redelivered step, asks for the same name again and must get the same media back.
+    name = "inbox:" + src.relative_to(root).as_posix()
+    if not src.is_file():
+        key = store.url_key(name)
+        if key and (meta := store.read_json(key, "meta.json")):
+            return {**meta, "cached": True}
         raise BadInput(f"not a file inside the inbox: {path!r}")
     key = file_key(src)
     if meta := store.read_json(key, "meta.json"):
+        store.remember_url(name, key)
         return {**meta, "cached": True}   # the duplicate stays where it is: never delete the user's file
     try:
         duration_s = probe(src)
     except Exception as e:
         raise BadInput(f"not a readable media file: {path!r} ({e})") from e
-    name = "source" + src.suffix
+    stored = "source" + src.suffix
     tmp = store.new_tmp()
-    shutil.move(src, tmp / name)
-    return _adopt(store, tmp, {
+    shutil.move(src, tmp / stored)
+    meta = _adopt(store, tmp, {
         "mediaKey": key, "title": src.stem, "durationMs": round(duration_s * 1000),
-        "sourceUrl": None, "audio": name, "video": name})
+        "sourceUrl": None, "audio": stored, "video": stored})
+    store.remember_url(name, key)
+    return meta
 
 
 def ytdlp_fetch(url: str, dest: Path) -> Fetched:

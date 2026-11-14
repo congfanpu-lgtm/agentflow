@@ -223,3 +223,24 @@ def test_a_rerun_does_not_keep_images_of_an_earlier_run(tmp_path, video):
     (s.dir(KEY) / "frames" / "999999000.jpg").write_bytes(b"stale")
     frames_media(s, KEY, CountingOcr("some slide text here"), Stats())
     assert not (s.dir(KEY) / "frames" / "999999000.jpg").exists()
+
+
+# ---- 计划 2 整体 review 之后补的 ----
+
+def test_a_slide_that_builds_up_keeps_its_fullest_reading(tmp_path, video, monkeypatch):
+    """逐条出现的幻灯片:后面的读数和前面的相近但更完整。只留最早那次的话,最后几条要点永远进不了索引。"""
+    base = "Supervised finetuning (SFT)\nIdea: finetune the LLM with language modeling of the desired answers"
+
+    class GrowingOcr:
+        calls = 0
+
+        def read(self, img):
+            self.calls += 1
+            return base if self.calls <= 10 else base + "\nNext: scalable data"
+
+    monkeypatch.setattr("app.frames.changed", lambda *a, **k: True)     # 每个关键帧都送去识别
+    s = media(tmp_path, video)
+    assert frames_media(s, KEY, GrowingOcr(), Stats())["frames"] == 1
+    frame = s.read_json(KEY, FRAMES_FILE)["frames"][0]
+    assert frame["tsMs"] == 0 and frame["text"].endswith("Next: scalable data")       # 时间是第一次出现,文字是最完整的
+    assert (s.dir(KEY) / frame["file"]).is_file()

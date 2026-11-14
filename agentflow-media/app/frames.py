@@ -12,9 +12,10 @@ from .stats import Stats
 from .store import NotFound, Store
 
 MIN_TEXT = 10   # frames whose text is shorter than this carry nothing worth indexing
-# v2 = change detection that ignores always-moving regions + near-duplicate text removed.
-# A new file name makes results of the first version (frames.json) count as "not done yet".
-FRAMES_FILE = "frames.v2.json"
+# The file name carries the version of the algorithm: bumping it makes older results count as "not done yet".
+# v2 = change detection ignores always-moving regions, near-duplicate text removed.
+# v3 = of several similar readings of one slide the fullest is kept (v2 kept the first).
+FRAMES_FILE = "frames.v3.json"
 ROWS, COLS, BLOCK = 9, 16, 10   # the 160x90 thumbnail as 10x10-pixel blocks
 BLOCK_SHARE = 0.05              # a block "changed" when more than 5% of its pixels moved
 NOISY_SHARE = 0.5               # a block that changes between more than half of all key-frame pairs is always moving
@@ -116,7 +117,15 @@ def frames_media(store: Store, key: str, ocr: Ocr, stats: Stats) -> dict:
                 seen = now   # compare against the last frame we OCRed, so slow fades still add up to a change
                 n_ocr += 1
                 text = ocr.read(img).strip()
-                if len(text) < MIN_TEXT or (text_kept is not None and same_slide(text, text_kept)):
+                if len(text) < MIN_TEXT:
+                    continue
+                if text_kept is not None and same_slide(text, text_kept):
+                    # The same slide read again. If there is more on it now (bullets appearing one by one),
+                    # keep the fuller reading and picture, at the time the slide first appeared:
+                    # keeping only the first reading would leave the last bullets out of the index.
+                    if len(text) > len(text_kept):
+                        text_kept = frames[-1]["text"] = text
+                        img.save(store.dir(key) / frames[-1]["file"], quality=80)
                     continue
                 text_kept = text
                 name = f"frames/{ts_ms:09d}.jpg"
