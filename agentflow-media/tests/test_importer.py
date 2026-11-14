@@ -1,9 +1,14 @@
+import sys
 import threading
 import time
+import types
+import wave
+from pathlib import Path
 
 import pytest
+from PIL import Image
 
-from app.importer import FetchError, check_url, import_path, import_url
+from app.importer import FetchError, check_url, import_path, import_url, ytdlp_fetch
 from app.stats import Stats
 from app.store import Store
 from tests.fakes import URL, fake_fetch
@@ -134,3 +139,93 @@ def test_unreadable_local_file_is_rejected_and_left_in_the_inbox(tmp_path):
     with pytest.raises(ValueError):
         import_path(s, str(inbox / "broken.mp4"), inbox, probe=probe)
     assert (inbox / "broken.mp4").exists() and not (tmp_path / "media").exists()
+
+
+# ---- 整体 review 之后补的 ----
+
+@pytest.mark.parametrize("ok", [
+    "https://www.youtube.com/watch?v=abc123", "https://www.youtube.com/watch?v=abc&list=PLx&index=2",
+    "https://m.youtube.com/watch?v=abc", "https://youtu.be/abc123", "https://www.youtube.com/live/abc123",
+])
+def test_accepts_links_to_one_video(ok):
+    check_url(ok)
+
+
+@pytest.mark.parametrize("bad", [
+    "https://www.youtube.com/playlist?list=PLS01nW3RtgoqGkm4UeqNeZLccW", "https://www.youtube.com/@berkeley",
+    "https://www.youtube.com/channel/UCabc/videos", "https://www.youtube.com/watch?list=PLx",
+    "https://www.youtube.com/", "https://youtu.be/",
+])
+def test_rejects_playlist_and_channel_links(bad):
+    """播放列表和频道不在第一版范围内;放进去 yt-dlp 会把里面的视频全下一遍。"""
+    with pytest.raises(ValueError):
+        check_url(bad)
+
+
+def fake_ytdlp(monkeypatch, video_fails=False):
+    """顶替 yt_dlp 模块:记录被要求下载什么,不联网。"""
+    asked = []
+
+    class DownloadError(Exception):
+        pass
+
+    class YoutubeDL:
+        def __init__(self, opts):
+            self.opts = opts
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *a):
+            return False
+
+        def extract_info(self, url, download):
+            kind = "video" if self.opts["format"].startswith("bestvideo") else "audio"
+            asked.append(kind)
+            if kind == "video" and video_fails:
+                raise DownloadError("HTTP Error 403: Forbidden")
+            path = Path(self.opts["outtmpl"].replace("%(ext)s", "mp4" if kind == "video" else "m4a"))
+            path.write_bytes(kind.encode())
+            return {"id": "abc", "title": "T", "duration": 60, "webpage_url": url,
+                    "requested_downloads": [{"filepath": str(path)}]}
+
+    mod = types.SimpleNamespace(YoutubeDL=YoutubeDL, utils=types.SimpleNamespace(DownloadError=DownloadError))
+    monkeypatch.setitem(sys.modules, "yt_dlp", mod)
+    return asked, DownloadError
+
+
+def test_ytdlp_fetch_gets_audio_and_video_as_two_files(tmp_path, monkeypatch):
+    asked, _ = fake_ytdlp(monkeypatch)
+    got = ytdlp_fetch(URL, tmp_path)
+    assert got.audio.name == "audio.m4a" and got.video.name == "video.mp4"
+    assert got.title == "T" and got.duration_s == 60.0 and got.source_url == URL and asked == ["audio", "video"]
+
+
+def test_a_failed_video_download_is_an_error_not_a_lecture_without_picture(tmp_path, monkeypatch):
+    _, DownloadError = fake_ytdlp(monkeypatch, video_fails=True)
+    with pytest.raises(DownloadError):
+        ytdlp_fetch(URL, tmp_path)
+
+
+def test_files_that_are_not_lectures_are_rejected_by_the_real_probe(tmp_path):
+    s, inbox = Store(tmp_path), tmp_path / "inbox"
+    inbox.mkdir()
+    (inbox / "notes.txt").write_text("just some notes\n" * 50)
+    Image.new("RGB", (64, 64), "white").save(inbox / "slide.jpg")
+    for name in ["notes.txt", "slide.jpg"]:
+        with pytest.raises(ValueError):
+            import_path(s, name, inbox)          # 真实的探测(PyAV),不是假的
+        assert (inbox / name).exists()
+    assert not (tmp_path / "media").exists()
+
+
+def test_a_local_audio_recording_is_imported_by_the_real_probe(tmp_path):
+    s, inbox = Store(tmp_path), tmp_path / "inbox"
+    inbox.mkdir()
+    with wave.open(str(inbox / "rec.wav"), "wb") as w:
+        w.setnchannels(1)
+        w.setsampwidth(2)
+        w.setframerate(16000)
+        w.writeframes(b"\0\0" * 32000)
+    meta = import_path(s, "rec.wav", inbox)
+    assert meta["durationMs"] == 2000 and meta["audio"] == "source.wav"

@@ -104,3 +104,23 @@ def test_cache_hit_and_unknown_key_do_not_load_the_model(client, monkeypatch):
     assert client.post(f"/media/{key}/transcribe").json()["cached"] is True
     assert client.post(f"/media/{MISSING}/transcribe").status_code == 404
     assert loaded == []
+
+
+def test_a_value_error_from_inside_is_a_500_not_a_400(tmp_path):
+    """只有"调用方给的东西不对"才是 400。库或配置抛出的 ValueError 是服务自己的故障,调用方可以重试。"""
+    class Misconfigured:
+        def transcribe(self, audio):
+            raise ValueError("Requested float16 compute type, but the target device does not support it")
+
+    store = Store(tmp_path)
+    app.dependency_overrides.update({
+        get_store: lambda: store, get_stats: lambda: Stats(), get_fetcher: lambda: fake_fetch([]),
+        get_transcriber: lambda: Misconfigured(),
+    })
+    try:
+        c = TestClient(app, raise_server_exceptions=False)
+        key = c.post("/media/import", json={"url": URL}).json()["mediaKey"]
+        r = c.post(f"/media/{key}/transcribe")
+        assert r.status_code == 500 and "float16" in r.json()["detail"]
+    finally:
+        app.dependency_overrides.clear()

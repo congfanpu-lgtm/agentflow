@@ -1,10 +1,11 @@
 """Speech to text. One lecture = one call on the whole file; the result is cached per model."""
+import re
 import threading
 from pathlib import Path
 from typing import Protocol
 
 from .stats import Stats
-from .store import Store
+from .store import NotFound, Store
 
 # One GPU, one transcription at a time: measured on the RTX 5080 (design doc section 10), extra workers
 # give no speed-up and push VRAM to the limit. In-process lock, so the service must run as one process.
@@ -17,13 +18,15 @@ class Transcriber(Protocol):
 
 
 def transcript_file(model_tag: str) -> str:
-    return f"transcript.{model_tag}.json"   # the model is part of the cache key: only a new model re-runs
+    # The model is part of the cache key: only a new model re-runs. A tag like "Systran/faster-whisper-large-v3"
+    # must stay ONE file name, or the write fails after the whole lecture has been transcribed.
+    return "transcript." + re.sub(r"[^A-Za-z0-9._-]", "_", model_tag) + ".json"
 
 
 def transcribe_media(store: Store, key: str, transcriber: Transcriber, model_tag: str, stats: Stats) -> dict:
     meta = store.read_json(key, "meta.json")
     if meta is None:
-        raise KeyError(key)
+        raise NotFound(key)
     name = transcript_file(model_tag)
 
     def result(doc: dict, cached: bool) -> dict:
@@ -53,7 +56,10 @@ class WhisperTranscriber:
         self._batch = batch
 
     def transcribe(self, audio: Path) -> tuple[str, list[dict]]:
-        segments, info = self._pipe.transcribe(str(audio), batch_size=self._batch)
+        # without_timestamps=False: the batched pipeline defaults to True, and then one ~30 s silence-detection
+        # chunk comes back as ONE utterance that starts and ends mid-sentence. With timestamps, Whisper splits
+        # each chunk at its own sentence-ish boundaries, which is what "jump to this sentence" needs.
+        segments, info = self._pipe.transcribe(str(audio), batch_size=self._batch, without_timestamps=False)
         return info.language, [
             {"startMs": round(s.start * 1000), "endMs": round(s.end * 1000), "text": s.text.strip()}
             for s in segments if s.text.strip()

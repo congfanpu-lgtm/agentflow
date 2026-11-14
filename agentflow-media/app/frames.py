@@ -7,7 +7,7 @@ import numpy as np
 from PIL import Image
 
 from .stats import Stats
-from .store import Store
+from .store import NotFound, Store
 
 MIN_TEXT = 10   # frames whose text is shorter than this carry nothing worth indexing
 
@@ -52,7 +52,7 @@ def frames_media(store: Store, key: str, ocr: Ocr, stats: Stats) -> dict:
     # ponytail: 拍摄讲台的视频几乎每个关键帧都算"变了",OCR 次数接近关键帧数;真遇到再加每分钟上限
     meta = store.read_json(key, "meta.json")
     if meta is None:
-        raise KeyError(key)
+        raise NotFound(key)
     with store.lock("frames:" + key):   # a retry that arrives while the first run is still going waits
         if (doc := store.read_json(key, "frames.json")) is not None:
             return {"mediaKey": key, "cached": True, "frames": len(doc["frames"])}

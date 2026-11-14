@@ -1,8 +1,11 @@
+import sys
 import threading
+import types
+from pathlib import Path
 
 import pytest
 
-from app.asr import transcribe_media
+from app.asr import WhisperTranscriber, transcribe_media
 from app.stats import Stats
 from app.store import Store
 from tests.fakes import KEY, FakeTranscriber
@@ -75,3 +78,34 @@ def test_concurrent_calls_for_the_same_media_transcribe_once(tmp_path):
 def test_unknown_media_raises_key_error(tmp_path):
     with pytest.raises(KeyError):
         transcribe_media(Store(tmp_path), KEY, FakeTranscriber(), "large-v3", Stats())
+
+
+# ---- 整体 review 之后补的 ----
+
+def test_a_model_name_with_a_slash_still_caches(tmp_path):
+    s, t, stats = media(tmp_path), FakeTranscriber(), Stats()
+    tag = "Systran/faster-whisper-large-v3"
+    assert transcribe_media(s, KEY, t, tag, stats)["cached"] is False
+    assert transcribe_media(s, KEY, t, tag, stats)["cached"] is True and t.calls == 1
+
+
+def test_whisper_is_asked_for_timestamps_inside_each_chunk(monkeypatch):
+    """批处理管线默认不要时间戳:一个约 30 秒的静音检测块就是一条,从句子中间开始和结束。"""
+    seen = {}
+    Seg = types.SimpleNamespace
+
+    class Pipe:
+        def __init__(self, model):
+            pass
+
+        def transcribe(self, audio, **kw):
+            seen.update(kw)
+            return iter([Seg(start=0.0, end=2.5, text=" Hello. "), Seg(start=2.5, end=2.6, text="  "),
+                         Seg(start=2.6, end=7.04, text="Next sentence.")]), Seg(language="en")
+
+    monkeypatch.setitem(sys.modules, "faster_whisper",
+                        types.SimpleNamespace(BatchedInferencePipeline=Pipe, WhisperModel=lambda *a, **k: None))
+    lang, utts = WhisperTranscriber("large-v3", "cpu", "int8", 16).transcribe(Path("a.m4a"))
+    assert seen["without_timestamps"] is False and seen["batch_size"] == 16
+    assert lang == "en" and utts == [{"startMs": 0, "endMs": 2500, "text": "Hello."},
+                                     {"startMs": 2600, "endMs": 7040, "text": "Next sentence."}]

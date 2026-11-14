@@ -11,7 +11,7 @@ from .asr import Transcriber, WhisperTranscriber, transcribe_media, transcript_f
 from .frames import Ocr, RapidOcr, frames_media
 from .importer import FetchError, Fetcher, import_path, import_url, ytdlp_fetch
 from .stats import Stats
-from .store import Store
+from .store import BadInput, NotFound, Store
 
 app = FastAPI(title="agentflow-media")
 _FRAME_NAME = re.compile(r"\d{9}\.jpg")
@@ -61,15 +61,15 @@ def get_ocr() -> Ocr:
     return _LazyOcr()
 
 
-# ponytail: every ValueError is a 400 and every KeyError a 404, including one raised by a bug.
-# Switch to dedicated exception classes if a masked bug ever costs time.
-@app.exception_handler(ValueError)
-def _bad_request(_, e: ValueError):
+# Only the two classes raised on purpose map to 4xx. A plain ValueError/KeyError from a library or a bug
+# falls through to the 500 handler (and its traceback is logged), so the caller knows it may retry.
+@app.exception_handler(BadInput)
+def _bad_request(_, e: BadInput):
     return JSONResponse({"detail": str(e)}, 400)
 
 
-@app.exception_handler(KeyError)
-def _not_found(_, e: KeyError):
+@app.exception_handler(NotFound)
+def _not_found(_, e: NotFound):
     return JSONResponse({"detail": f"not found: {e.args[0] if e.args else ''}"}, 404)
 
 
@@ -96,7 +96,7 @@ class ImportRequest(BaseModel):
 
 def _found(doc: dict | None, what: str) -> dict:
     if doc is None:
-        raise KeyError(what)
+        raise NotFound(what)
     return doc
 
 
@@ -150,8 +150,8 @@ def get_frames(key: str, store: Store = Depends(get_store)):
 @app.get("/media/{key}/frames/{name}")
 def get_frame(key: str, name: str, store: Store = Depends(get_store)):
     if not _FRAME_NAME.fullmatch(name):   # the name becomes a path: only what frames_media writes is served
-        raise ValueError(f"bad frame name: {name!r}")
+        raise BadInput(f"bad frame name: {name!r}")
     path = store.dir(key) / "frames" / name
     if not path.is_file():
-        raise KeyError(f"frame {name} of {key}")
+        raise NotFound(f"frame {name} of {key}")
     return FileResponse(path, media_type="image/jpeg")

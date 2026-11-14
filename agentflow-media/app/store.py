@@ -13,6 +13,15 @@ from pathlib import Path
 _KEY = re.compile(r"[0-9a-f]{32}")
 
 
+class BadInput(ValueError):
+    """The caller sent something unusable (HTTP 400). A ValueError raised by a library or by a bug is
+    deliberately NOT this class: that is the service's own failure (500), which a caller may retry."""
+
+
+class NotFound(KeyError):
+    """No such media, or the product has not been made yet (HTTP 404)."""
+
+
 def file_key(path: Path) -> str:
     with open(path, "rb") as f:
         return hashlib.file_digest(f, "sha256").hexdigest()[:32]
@@ -38,7 +47,7 @@ class Store:
     def dir(self, key: str) -> Path:
         # the key ends up in a filesystem path and arrives from HTTP: anything but 32 hex is rejected
         if not isinstance(key, str) or not _KEY.fullmatch(key):
-            raise ValueError(f"bad media key: {key!r}")
+            raise BadInput(f"bad media key: {key!r}")
         return self.root / "media" / key
 
     def exists(self, key: str) -> bool:
