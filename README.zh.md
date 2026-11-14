@@ -212,6 +212,15 @@ router(意图判断是否需要检索)→ retriever(**命中才检索**,不是�
     curl -X POST localhost:8010/media/<mediaKey>/transcribe      # 一小时的课约 1 到 1.5 分钟
     curl -X POST localhost:8010/media/<mediaKey>/frames          # 只在画面变化时截帧识别
 
+课程录播的整套环境和测试(都是隔离的 compose 项目,固定用模拟模型,不碰日常那套):
+
+    ./scripts/course-env.sh up          # 整套服务,server 在 127.0.0.1:18090;用完 down
+    ./scripts/course-env.sh test-up     # 只有中间件;然后 test-java test、test-rag;用完 test-down
+
+server 和 worker 在容器里,要访问宿主机上的媒体服务,所以媒体服务得监听容器网关的地址:
+`MEDIA_HOST=$(docker network inspect bridge -f '{{(index .IPAM.Config 0).Gateway}}') ./run.sh`
+(不要用 `0.0.0.0`,那会把服务暴露到局域网)。
+
 本地文件放进 `MEDIA_ROOT/inbox/` 后用 `{"path":"文件名"}` 导入。测试不联网、不需要显卡:
 `cd agentflow-media && .venv/bin/python -m pytest -q`。接口表见
 `docs/superpowers/plans/2026-11-13-course-video-1-media-service.md`,设计见
