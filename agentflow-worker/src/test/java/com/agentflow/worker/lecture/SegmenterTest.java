@@ -95,4 +95,22 @@ class SegmenterTest {
         assertEquals(List.of(new Segment(0, 20_000, "speech", "before the break see you in ten minutes"),
                 new Segment(620_000, 630_000, "speech", "Welcome back.")), Segmenter.speech(arr));
     }
+
+    @Test
+    void sparseShortRemarksAreNotCopiedIntoManySegments() {
+        // 演示或等学生回答时:每 9 秒说一句 1 秒的话(间隔没到"长停顿"的 10 秒)。
+        // 重叠按说话时长算的话,10 秒能装下十句,每句话会被复制进十来个片段,还会有片段起点相同。
+        ArrayNode arr = OM.createArrayNode();
+        for (int i = 0; i < 60; i++) {
+            arr.addObject().put("startMs", i * 9_000L).put("endMs", i * 9_000L + 1_000).put("text", "r" + i + ".");
+        }
+        List<Segment> segs = Segmenter.speech(arr);
+        assertEquals(segs.size(), segs.stream().map(Segment::startMs).distinct().count(), "片段起点不能重复(起点是片段 id 的一部分)");
+        for (int i = 0; i < 60; i++) {
+            String word = " r" + i + ". ";
+            long copies = segs.stream().filter(seg -> (" " + seg.text() + " ").contains(word)).count();
+            assertTrue(copies >= 1 && copies <= 2, "r" + i + " 出现在 " + copies + " 个片段里");
+        }
+        assertTrue(segs.size() <= 15, "每个片段 46 秒、和前一个重叠 10 秒,540 秒最多 15 个,实际 " + segs.size());
+    }
 }

@@ -9,7 +9,7 @@ import java.util.List;
  * 把一讲课切成检索用的片段。纯函数,不依赖 Spring。
  *
  * <p>语音:依次把 utterance 加进当前片段,跨度到 {@link #TARGET_MS} 且这一条以句末标点结尾就收尾,
- * 到 {@link #MAX_MS} 无条件收尾。下一个片段带上前一个片段末尾不超过 {@link #OVERLAP_MS} 的内容,
+ * 到 {@link #MAX_MS} 无条件收尾。下一个片段带上前一个片段最后 {@link #OVERLAP_MS} 之内的内容,
  * 这样跨在边界上的一句话在两个片段里都能搜到。
  * 两条 utterance 之间停顿超过 {@link #OVERLAP_MS} 时片段也到此为止,不带重叠。
  * 上限 90 秒是为了不超过向量模型的 512 token 窗口(讲课约每分钟 155 个词)。
@@ -83,16 +83,14 @@ public final class Segmenter {
                 "speech", String.join(" ", texts));
     }
 
-    /** 片段末尾总时长不超过 OVERLAP_MS 的那几条;最后一条本身就超了,就不重叠。 */
+    /**
+     * 片段末尾 OVERLAP_MS 之内开始的那几条(按经过的时间算,不是按说话的时长:稀疏的短句之间隔着停顿,
+     * 按说话时长算会把很久以前的句子也带上)。最后一条本身就比 OVERLAP_MS 长,就不重叠。
+     */
     private static List<Utterance> overlapTail(List<Utterance> segment) {
+        long end = segment.get(segment.size() - 1).endMs();
         int from = segment.size();
-        long total = 0;
-        while (from > 0) {
-            Utterance u = segment.get(from - 1);
-            if (total + u.endMs() - u.startMs() > OVERLAP_MS) {
-                break;
-            }
-            total += u.endMs() - u.startMs();
+        while (from > 0 && end - segment.get(from - 1).startMs() <= OVERLAP_MS) {
             from--;
         }
         return new ArrayList<>(segment.subList(from, segment.size()));
