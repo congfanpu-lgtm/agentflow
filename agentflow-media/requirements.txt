@@ -1,0 +1,12 @@
+fastapi
+uvicorn[standard]
+numpy
+pillow
+# 以下版本在 RTX 5080 上验证过(设计文档第 10 节)。PyAV 16 起去掉了 faster-whisper 用到的参数,不能升
+faster-whisper==1.2.1
+ctranslate2==4.9.0
+av==15.1.0
+rapidocr-onnxruntime==1.4.4
+yt-dlp>=2026.10.26
+pytest
+httpx

@@ -31,3 +31,13 @@ jobs:
       - run: cd agentflow-rag && pytest -q
       - name: Eval harness self-check
         run: python3 eval/run_eval.py --self-check && python3 eval/frames_eval.py --self-check && python3 scripts/fault_matrix.py --self-check
+
+  media:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r agentflow-media/requirements.txt
+      - run: cd agentflow-media && pytest -q

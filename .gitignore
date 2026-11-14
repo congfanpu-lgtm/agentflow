@@ -21,3 +21,6 @@ __pycache__/
 
 # superpowers 执行工作区(进度记录等)
 .superpowers/
+
+# 媒体服务下载的视频、转写和截帧(不进仓库)
+agentflow-media/data/
