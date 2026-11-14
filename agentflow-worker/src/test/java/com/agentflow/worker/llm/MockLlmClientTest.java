@@ -132,5 +132,7 @@ class MockLlmClientTest {
         org.junit.jupiter.api.Assertions.assertEquals(0, c.get(0).get("segment").asInt());
         org.junit.jupiter.api.Assertions.assertEquals(5, c.get(1).get("segment").asInt());
         org.junit.jupiter.api.Assertions.assertEquals("sixth", c.get(1).get("summary").asText());
+        org.junit.jupiter.api.Assertions.assertEquals("知识点 1", c.get(0).get("name").asText());
+        org.junit.jupiter.api.Assertions.assertEquals("知识点 2", c.get(1).get("name").asText());
     }
 }

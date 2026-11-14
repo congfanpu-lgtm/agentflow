@@ -147,7 +147,8 @@ public class MockLlmClient implements LlmClient {
             int segment = Integer.parseInt(line.group(1));
             if (segment % 5 == 0) {
                 String text = line.group(2);
-                arr.addObject().put("name", "知识点 " + (arr.size() + 1)).put("segment", segment)
+                String name = "知识点 " + (arr.size() + 1);   // 先算名字:addObject 之后 size 已经加一了
+                arr.addObject().put("name", name).put("segment", segment)
                         .put("summary", text.length() > 60 ? text.substring(0, 60) : text);
             }
         }
