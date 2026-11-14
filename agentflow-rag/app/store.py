@@ -42,15 +42,7 @@ def init() -> None:
                     embedding vector({d}) NOT NULL
                 )"""
         )
-        cur.execute(
-            "SELECT atttypmod, col_description(attrelid, attnum) FROM pg_attribute"
-            " WHERE attrelid = %s::regclass AND attname = 'embedding'",
-            (TABLE,),
-        )
-        if cur.fetchone() != (d, embedding.MODEL):
-            _reembed(cur, d)
-            cur.execute(sql.SQL("COMMENT ON COLUMN {}.embedding IS {}").format(
-                sql.Identifier(TABLE), sql.Literal(embedding.MODEL)))
+        sync_embedding(cur, TABLE, d)
         cur.execute(f"SELECT id, content FROM {TABLE}")
         rows = cur.fetchall()
         conn.commit()
@@ -60,17 +52,31 @@ def init() -> None:
     _bm25 = idx
 
 
-def _reembed(cur, d: int) -> None:
-    cur.execute(f"ALTER TABLE {TABLE} DROP COLUMN embedding, ADD COLUMN embedding vector({d})")
-    cur.execute(f"SELECT id, content FROM {TABLE}")
+def sync_embedding(cur, table: str, d: int) -> None:
+    """表的 embedding 列记着它是用哪个模型编码的(列注释)。和当前模型不一致就在这个事务里整表重新编码。
+    documents 和 segments 两张表共用;表要有 id、content、embedding 三列。"""
+    cur.execute(
+        "SELECT atttypmod, col_description(attrelid, attnum) FROM pg_attribute"
+        " WHERE attrelid = %s::regclass AND attname = 'embedding'",
+        (table,),
+    )
+    if cur.fetchone() != (d, embedding.MODEL):
+        _reembed(cur, table, d)
+        cur.execute(sql.SQL("COMMENT ON COLUMN {}.embedding IS {}").format(
+            sql.Identifier(table), sql.Literal(embedding.MODEL)))
+
+
+def _reembed(cur, table: str, d: int) -> None:
+    cur.execute(f"ALTER TABLE {table} DROP COLUMN embedding, ADD COLUMN embedding vector({d})")
+    cur.execute(f"SELECT id, content FROM {table}")
     rows = cur.fetchall()
-    log.warning("embedding 模型变为 %s(%d 维),重新编码 %d 篇文档", embedding.MODEL, d, len(rows))
+    log.warning("embedding 模型变为 %s(%d 维),重新编码 %s 的 %d 行", embedding.MODEL, d, table, len(rows))
     vecs = embedding.embed_passages([c for _, c in rows])
     cur.executemany(
-        f"UPDATE {TABLE} SET embedding = %s::vector WHERE id = %s",
+        f"UPDATE {table} SET embedding = %s::vector WHERE id = %s",
         [(_vec_literal(v), doc_id) for v, (doc_id, _) in zip(vecs, rows)],
     )
-    cur.execute(f"ALTER TABLE {TABLE} ALTER COLUMN embedding SET NOT NULL")
+    cur.execute(f"ALTER TABLE {table} ALTER COLUMN embedding SET NOT NULL")
 
 
 def upsert(docs: list[dict]) -> int:

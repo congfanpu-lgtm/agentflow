@@ -9,7 +9,7 @@ from typing import Literal
 from fastapi import FastAPI
 from pydantic import BaseModel, Field
 
-from . import embedding, store
+from . import embedding, segments, store
 from .rank import CANDIDATES
 
 
@@ -28,9 +28,31 @@ class SearchRequest(BaseModel):
     mode: Literal["hybrid", "dense", "bm25"] = "hybrid"
 
 
+class Segment(BaseModel):
+    startMs: int = Field(ge=0)
+    endMs: int = Field(ge=0)
+    kind: Literal["speech", "slide"]
+    text: str = Field(min_length=1)
+
+
+class IndexSegmentsRequest(BaseModel):
+    courseId: int
+    lectureId: int
+    segments: list[Segment]
+
+
+class SearchSegmentsRequest(BaseModel):
+    courseId: int
+    query: str
+    topK: int = Field(5, ge=1, le=50)
+    lectureIds: list[int] | None = None
+    mode: Literal["hybrid", "dense", "bm25"] = "hybrid"
+
+
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     store.init()
+    segments.init()
     yield
 
 
@@ -51,3 +73,16 @@ def ingest(req: IngestRequest):
 @app.post("/rag/search")
 def search(req: SearchRequest):
     return {"hits": store.search(req.query, req.topK, req.mode)}
+
+
+@app.post("/segments/index")
+def index_segments(req: IndexSegmentsRequest):
+    """课程录播:整讲替换这一讲的片段(重复调用不会留下两份)。"""
+    n = segments.index(req.courseId, req.lectureId, [s.model_dump() for s in req.segments])
+    return {"indexed": n}
+
+
+@app.post("/segments/search")
+def search_segments(req: SearchSegmentsRequest):
+    """课程录播:只在这门课里检索,可以再限定到几讲。"""
+    return {"hits": segments.search(req.courseId, req.query, req.topK, req.lectureIds, req.mode)}
