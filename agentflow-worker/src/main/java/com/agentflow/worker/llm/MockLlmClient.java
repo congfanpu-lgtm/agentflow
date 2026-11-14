@@ -40,6 +40,7 @@ public class MockLlmClient implements LlmClient {
             "between", "about", "versus", "when", "where", "there", "their", "have");
 
     private static final Pattern FIRST_ITEM = Pattern.compile("(?m)^\\[1] (.+)$");
+    private static final Pattern SEGMENT_LINE = Pattern.compile("(?m)^\\[(\\d+)] \\S+ (.*)$");
 
     @Value("${llm.mock.delay-ms:0}")
     private long delayMs;
@@ -66,6 +67,8 @@ public class MockLlmClient implements LlmClient {
             resp = synthesize(lastUser(msgs));
         } else if (system.startsWith(Prompts.BRIEFER_TAG)) {
             resp = brief(lastUser(msgs));
+        } else if (system.startsWith(Prompts.CONCEPTS_TAG)) {
+            resp = concepts(lastUser(msgs));
         } else {
             resp = summarize(lastUser(msgs));
         }
@@ -135,6 +138,22 @@ public class MockLlmClient implements LlmClient {
     }
 
     /** 每日简报剧本:把第 1 条条目当成一个事件,引文就是它的标题(逐字,能通过 BriefProcessor 的核对)。 */
+    /** 课程知识点目录:每隔 5 个片段出一个知识点,编号都是输入里真实存在的片段。 */
+    private ChatResponse concepts(String user) {
+        ObjectNode out = OM.createObjectNode();
+        ArrayNode arr = out.putArray("concepts");
+        Matcher line = SEGMENT_LINE.matcher(user);
+        while (line.find() && arr.size() < 30) {
+            int segment = Integer.parseInt(line.group(1));
+            if (segment % 5 == 0) {
+                String text = line.group(2);
+                arr.addObject().put("name", "知识点 " + (arr.size() + 1)).put("segment", segment)
+                        .put("summary", text.length() > 60 ? text.substring(0, 60) : text);
+            }
+        }
+        return new ChatResponse(out.toString(), null, null);
+    }
+
     private ChatResponse brief(String user) {
         ObjectNode out = OM.createObjectNode();
         ArrayNode events = out.putArray("events");

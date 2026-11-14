@@ -119,4 +119,18 @@ class MockLlmClientTest {
         assertEquals("Apple beats on revenue", e.get("quote").asText());
         assertFalse(e.get("title").asText().isBlank());
     }
+
+    @Test
+    void conceptsPromptGetsConceptsThatPointAtRealSegments() throws Exception {
+        String user = "标题:Demo\n[0] 00:00 first\n[1] 00:50 second\n[2] 01:40 third\n[3] 02:30 fourth\n[4] 03:20 fifth\n[5] 04:10 sixth";
+        com.agentflow.common.llm.ChatResponse resp = new MockLlmClient().chat(new com.agentflow.common.llm.ChatRequest("mock-small",
+                java.util.List.of(new com.agentflow.common.llm.ChatMessage("system", com.agentflow.worker.agent.Prompts.CONCEPTS),
+                        new com.agentflow.common.llm.ChatMessage("user", user)), 2000));
+        com.fasterxml.jackson.databind.JsonNode c = new com.fasterxml.jackson.databind.ObjectMapper()
+                .readTree(resp.getContent()).get("concepts");
+        org.junit.jupiter.api.Assertions.assertEquals(2, c.size());
+        org.junit.jupiter.api.Assertions.assertEquals(0, c.get(0).get("segment").asInt());
+        org.junit.jupiter.api.Assertions.assertEquals(5, c.get(1).get("segment").asInt());
+        org.junit.jupiter.api.Assertions.assertEquals("sixth", c.get(1).get("summary").asText());
+    }
 }
