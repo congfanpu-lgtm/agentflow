@@ -226,6 +226,27 @@ server 和 worker 在容器里,要访问宿主机上的媒体服务,所以媒体
 `docs/superpowers/plans/2026-11-13-course-video-1-media-service.md`,设计见
 `docs/superpowers/specs/2026-11-13-course-video-qa-design.md`。
 
+### 课程录播(课程库页 / 单讲页)
+
+贴一个 YouTube 链接(或填媒体服务 inbox 里的文件名),AgentFlow 把这一讲变成可检索的片段。
+一讲是一个 `LECTURE_INGEST` 任务,五步各是一个普通子任务,重试、超时重投、幂等、trace 都是引擎现成的:
+
+    导入 → 转写 ∥ 截帧识别 → 建索引 → 知识点目录
+
+- 重活在媒体服务里做,子任务只带 `mediaKey` 和计数;逐字稿不经过 Kafka 和 MySQL。
+- 转写是一讲一个子任务,不切片并行:实测一张显卡上多个 worker 并行转写没有收益(`docs/benchmarks.md` 第 7 节)。
+- 导入或转写失败,整讲失败;截帧或知识点目录失败算"部分完成",语音片段照样能检索。
+- 链接不合规这类重试也没用的错误直接判失败,不走 5 秒 / 30 秒 / 5 分钟的重试阶梯。
+- 片段进 pgvector 的 `segments` 表,检索按课程隔离(`POST /segments/search`);写入是整讲替换,重复执行不会留下两份。
+- 知识点目录:模型看到按时间编号的片段,只输出"知识点 + 片段编号",时间由代码按编号查出来。
+
+功能默认关闭(`agentflow.course.enabled=false`):公开 demo 用的是同一份代码,不能让路人触发下载和转写。
+`./scripts/course-env.sh up` 起的环境里是打开的,页面在 `http://127.0.0.1:18090/courses.html`。
+
+当前的范围限制:只支持单个 YouTube 视频和本地文件(播放列表、B 站还没有);本地文件能摄入但不能在页面里播放;
+课程环境里知识点目录是模拟模型生成的(只说明流程通了);问答和三层核验是下一步。
+实测见 `docs/benchmarks.md` 第 8 节,设计见 `docs/superpowers/specs/2026-11-13-course-video-qa-design.md`。
+
 ## 压测与指标(W8)
 
 零依赖 Python 压测脚本 `scripts/load_test.py`(标准库并发提交+轮询,测**端到端完成延迟**而非

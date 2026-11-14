@@ -298,3 +298,70 @@ is dropped.
   is kept once per state (median gap between kept frames 24.5 s). That is left as is: each state is what was
   on screen at that time.
 - OCR costs about 0.9 s per frame on this CPU, so the step is now about 4 minutes for a 2-hour lecture.
+
+## 8. Lecture ingest on the engine (2026-11-13)
+
+A lecture is one `LECTURE_INGEST` task with five subtasks: import → transcribe ∥ frames → index → concepts
+(design: `docs/superpowers/specs/2026-11-13-course-video-qa-design.md`). Same machine as section 7; the full
+stack runs from `scripts/course-env.sh up` (2 workers, mock LLM), the media service on the host with the GPU.
+Three lectures of the evaluation course (Berkeley Agentic AI MOOC, Fall 2025) were ingested through the course
+library page's API.
+
+### Time per step
+
+Seconds from the moment the step's subtask was created until it settled, as the engine recorded them.
+
+| Lecture | Length | Import | Transcribe | Frames | Index | Concepts | Wall clock |
+|---|---|---|---|---|---|---|---|
+| 3. Post-Training Verifiable Agents (nothing cached) | 77.5 min | 28 s | 196 s | 153 s | 4 s | <1 s | 240 s |
+| 2. Evolution of System Designs (nothing cached) | 79.5 min | | | | | | 240 s for lectures 1 and 2 together |
+| 1. LLM Agents Overview (import, transcript and frames already in the media cache) | 118.3 min | | | | | | see above |
+| The link of lecture 1 added a second time | 118.3 min | <1 s | <1 s | <1 s | 11 s | <1 s | 12 s |
+
+- Lectures 1 and 2 have no per-step numbers: when they ran, the engine overwrote a settled subtask's
+  `updated_at` with the time it was dispatched, so every step read 0 s. That was fixed before lecture 3.
+- A 77-minute lecture is searchable four minutes after its link is pasted. Transcription and frames run side
+  by side, so the wall clock is import + the slower of the two + index.
+- Transcription ran at 24× realtime here against 47× when it ran alone (section 7): the OCR of the frames step
+  competes for the same CPU cores during audio decoding. The two steps still finish sooner together than one
+  after the other (196 s against 196 + 153 s).
+- Adding a link that is already in the media cache does no download, no transcription and no OCR
+  (`/stats` of the media service unchanged); only the index is rebuilt.
+- Concepts are produced by the mock model in this environment, so that column only shows the step runs; its
+  real cost is one model call per lecture.
+
+### What ended up in the index
+
+| Lecture | Utterances | Speech segments (avg length) | Key frames → OCRed → kept | Slide segments |
+|---|---|---|---|---|
+| 1 | 1,298 | 129 (62 s) | 1,288 → 263 → 191 | 191 |
+| 2 | 1,173 | 98 (56 s) | 1,008 → 77 → 47 | 47 |
+| 3 | 1,541 | 113 | 1,075 → 84 → 53 | 53 |
+
+The longest speech segment is 1,496 characters, about 250 words, inside the embedding model's 512-token window.
+
+Search inside the course (`POST /segments/search`, hybrid, top 3), checked by eye:
+
+| Query | Top hits |
+|---|---|
+| "what is pre-training" | L1 speech 53:02 "Okay, so pre-training summary. The idea is about predicting the next [word] on the internet…", L1 speech 11:57, L1 speech 12:36 |
+| "reinforcement learning from human feedback" | L1 slide 78:18 "RL from Human Feedback (RLHF) / Idea: maximize human preference rather than clone their behavior", L1 speech 2:55, L1 speech 77:33 |
+| "what hardware do you need to serve large models" | L2 speech 51:58 "It hosts eight GPUs, two CPUs, and it's a very beefy machine…", L2 speech 51:22, L2 speech 53:32 |
+
+The third query is answered from lecture 2 without naming it: retrieval is scoped to the course, not to a
+lecture. For "how are agents evaluated" one of the three hits was an unrelated slide (an SFT pipeline); this is
+plain retrieval with no agent and no verification yet.
+
+### Failure cases
+
+| Case | Result |
+|---|---|
+| A playlist link | `FAILED` at once (import settled in under 1 s) with `LEC_IMPORT: media 400: the link must point to one video…`; no retry was scheduled (0 retry log lines on both workers). Before the non-retryable path, any failure waited through the 5 s / 30 s / 5 min retry ladder first. |
+| Retry on a lecture that is `READY` | 400, "only failed or partly finished lectures can be retried" |
+| Retry on the failed playlist lecture | accepted, runs again, fails again with the same reason |
+| The same link added twice | second lecture `READY` in 12 s, all from cache |
+
+Both pages (`/courses.html`, `/lecture.html`) were checked in a browser against this data: the five steps and
+their times, the failure reason and the retry button; on the lecture page the player, 1,298 transcript lines,
+26 concepts and 191 slide thumbnails, with a click on a transcript line, a concept and a slide each moving the
+player to that second, the search box narrowing the transcript, and no console errors.
