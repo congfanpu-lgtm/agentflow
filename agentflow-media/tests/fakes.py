@@ -38,3 +38,12 @@ class FakeTranscriber:
             return "en", list(self.utterances)
         finally:
             self.active -= 1
+
+
+class CountingOcr:
+    def __init__(self, text):
+        self.text, self.calls = text, 0
+
+    def read(self, img):
+        self.calls += 1
+        return self.text
