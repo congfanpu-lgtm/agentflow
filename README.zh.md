@@ -197,6 +197,26 @@ router(意图判断是否需要检索)→ retriever(**命中才检索**,不是�
 演示脚本:`./scripts/w7-rag-demo.sh`(灌库 → RESEARCH_BATCH:需检索项 `usedRag=true` 带
 `retrieved` ids;不需项 `usedRag=false` 不检索)。
 
+### 媒体服务(agentflow-media,课程录播)
+
+课程录播问答的第一块:给一个 YouTube 链接或本地文件,下载、转写成带时间戳的文本、截出幻灯片并识别
+上面的文字。结果按音频内容的哈希缓存在磁盘上,同一讲不会重复下载、转写、识别。转写用 faster-whisper,
+需要 NVIDIA 显卡,所以它不在 `docker-compose.yml` 里,直接跑在有显卡的宿主机上:
+
+    cd agentflow-media
+    python3.12 -m venv .venv && .venv/bin/pip install -r requirements.txt -r requirements-gpu.txt
+    MEDIA_ROOT=~/agentflow-media-data ./run.sh     # 只监听 127.0.0.1:8010,必须单进程
+
+    curl -X POST localhost:8010/media/import -H 'Content-Type: application/json' \
+      -d '{"url":"https://www.youtube.com/watch?v=..."}'        # 返回 mediaKey
+    curl -X POST localhost:8010/media/<mediaKey>/transcribe      # 一小时的课约 1 分钟
+    curl -X POST localhost:8010/media/<mediaKey>/frames          # 只在画面变化时截帧识别
+
+本地文件放进 `MEDIA_ROOT/inbox/` 后用 `{"path":"文件名"}` 导入。测试不联网、不需要显卡:
+`cd agentflow-media && .venv/bin/python -m pytest -q`。接口表见
+`docs/superpowers/plans/2026-11-13-course-video-1-media-service.md`,设计见
+`docs/superpowers/specs/2026-11-13-course-video-qa-design.md`。
+
 ## 压测与指标(W8)
 
 零依赖 Python 压测脚本 `scripts/load_test.py`(标准库并发提交+轮询,测**端到端完成延迟**而非
