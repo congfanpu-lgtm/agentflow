@@ -134,18 +134,19 @@ def test_concurrent_calls_for_the_same_media_ocr_once(tmp_path, video):
 
 # ---- 计划 2 任务 1:截帧去重 ----
 
-@pytest.fixture(scope="module")
-def webcam_video(tmp_path_factory):
-    """和 video 一样的三页幻灯片,右上角多一个每个关键帧都在变的"讲者摄像头"小窗(190×100)。"""
-    path = tmp_path_factory.mktemp("w") / "video.mp4"
+def encode_with_webcam(path, lower_half_period):
+    """三页幻灯片 + 右上角 190×100 的"讲者摄像头"小窗。上半部分每个关键帧都变;
+    下半部分每 lower_half_period 个关键帧变一次(真实录像里肩膀比脸动得少)。"""
     out = av.open(str(path), "w")
     st = out.add_stream("libx264", rate=2)
     st.width, st.height, st.pix_fmt = 1280, 720, "yuv420p"
     st.codec_context.gop_size = 4
     for i in range(120):
         img = slide(SLIDES[i // 40])
-        gray = 40 if (i // 4) % 2 == 0 else 200          # 每 4 帧一个关键帧,相邻关键帧的小窗一明一暗
-        img.paste((gray, gray, gray), (1090, 0, 1280, 100))
+        k = i // 4                                         # 每 4 帧一个关键帧
+        top, bottom = (40 if k % 2 == 0 else 200), (40 if (k // lower_half_period) % 2 == 0 else 200)
+        img.paste((top, top, top), (1090, 0, 1280, 50))
+        img.paste((bottom, bottom, bottom), (1090, 50, 1280, 100))
         for p in st.encode(av.VideoFrame.from_image(img)):
             out.mux(p)
     for p in st.encode():
@@ -154,10 +155,30 @@ def webcam_video(tmp_path_factory):
     return path
 
 
+@pytest.fixture(scope="module")
+def webcam_video(tmp_path_factory):
+    return encode_with_webcam(tmp_path_factory.mktemp("w") / "video.mp4", lower_half_period=1)
+
+
+@pytest.fixture(scope="module")
+def calm_webcam_video(tmp_path_factory):
+    return encode_with_webcam(tmp_path_factory.mktemp("c") / "video.mp4", lower_half_period=3)
+
+
+def test_the_calmer_edge_of_the_webcam_is_ignored_too(tmp_path, calm_webcam_video):
+    """真实的那一讲里,小窗下半部分只在 38% 到 47% 的相邻关键帧之间有变化,没到一半,
+    却触发了 85% 的多余识别(docs/benchmarks.md 第 7 节)。"""
+    mask = noisy_blocks(calm_webcam_video)
+    assert mask[:2, 14:].all() and not mask[3:, :].any() and not mask[:, :12].any()
+    s, ocr = media(tmp_path, calm_webcam_video), CountingOcr("some slide text here")
+    frames_media(s, KEY, ocr, Stats())
+    assert ocr.calls == 3
+
+
 def test_noisy_blocks_marks_only_the_webcam_corner(webcam_video, video):
     mask = noisy_blocks(webcam_video)
     assert mask.shape == (9, 16) and mask[0, 14:].all()
-    assert mask.sum() <= 8 and not mask[3:, :].any() and not mask[:, :12].any()
+    assert mask.sum() <= 12 and not mask[3:, :].any() and not mask[:, :12].any()   # 小窗 6 块 + 一圈边
     assert not noisy_blocks(video).any()
 
 

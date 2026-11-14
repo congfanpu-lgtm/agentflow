@@ -54,7 +54,12 @@ def noisy_blocks(video: Path) -> np.ndarray:
         prev = now
     if pairs < 4:   # too short to tell movement from slide changes
         return np.zeros((ROWS, COLS), dtype=bool)
-    return counts / pairs > NOISY_SHARE
+    moving = counts / pairs > NOISY_SHARE
+    # One block of margin around the moving region is ignored as well: an overlay's edge runs through the middle
+    # of blocks, and its calmer part moves less often. Measured on the first real lecture: the lower half of the
+    # webcam changed in 38-47% of pairs (under the 50% line) and caused 85% of the wasted OCR runs.
+    padded = np.pad(moving, 1)
+    return np.logical_or.reduce([padded[r:r + ROWS, c:c + COLS] for r in range(3) for c in range(3)])
 
 
 def changed(a: np.ndarray, b: np.ndarray, ignore: np.ndarray | None = None) -> bool:
