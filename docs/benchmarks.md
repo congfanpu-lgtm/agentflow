@@ -194,3 +194,70 @@ exact cosine (what pgvector `<=>` does without an ANN index). Raw output: `eval/
 Paired bootstrap 95% CI of the nDCG@10 gain: hybrid − BM25 = [+0.028, +0.076] (SciFact), [+0.030, +0.057]
 (NFCorpus); hybrid − dense = [−0.012, +0.036] (SciFact, not significant), [+0.014, +0.041] (NFCorpus).
 Encoding time on the M5 CPU: 539 s (SciFact), 360 s (NFCorpus).
+
+## 7. Lecture video: transcription and slide frames (2026-11-13)
+
+Environment: the 24-core Linux machine (WSL2) with one RTX 5080 Laptop GPU (16 GB). faster-whisper 1.2.1
+(ctranslate2 4.9.0), `large-v3`, fp16. The service is `agentflow-media`; design in
+`docs/superpowers/specs/2026-11-13-course-video-qa-design.md`.
+
+### How to run transcription on one GPU (spike)
+
+One 47.7-minute lecture (MIT 18.06, lecture 2), same audio for every row. Model load time is excluded.
+The scripts were throwaway and are not in the repo.
+
+| Plan | ASR workers | Wall time | Speed (× realtime) | Peak VRAM |
+|---|---|---|---|---|
+| 60 s chunks, one at a time | 1 | 315 s | 9.1 | 5.8 GB |
+| same | 2 | 310 s | 9.2 | 11.2 GB |
+| same | 3 | 327 s | 8.8 | 15.8 GB |
+| same (control, rerun at the end) | 1 | 334 s | 8.6 | 5.8 GB |
+| 5 min chunks, batched inside the worker (batch 8) | 1 | 39 s | 72.6 | 7.3 GB |
+| same | 2 | 43 s | 67.0 | 13.7 GB |
+| same | 3 | 74 s | 38.9 | 15.9 GB |
+| **whole file, batched (batch 16)** | **1** | **30 s** | **95.1** | **10.0 GB** |
+
+1. **More ASR workers on one GPU buy nothing.** Throughput with 1, 2 and 3 workers is the same (one worker
+   already saturates the GPU) while VRAM grows linearly; near the 16 GB limit it gets slower (5-minute plan,
+   3 workers: almost half the speed).
+2. **The speed-up comes from batching inside one worker**: 8 to 10 times faster than chunk-by-chunk.
+3. **So a lecture is not split:** one subtask per lecture, the whole file batched, one transcription at a time
+   on the GPU. The earlier idea (60 s chunks fanned out to several workers, retried per chunk) was dropped.
+4. After half an hour of continuous load the same configuration was about 6% slower (315 s → 334 s).
+
+The two ways do not produce the same text. In the first 10 minutes the chunked run had about 10% more words
+(1400 vs 1265): partly repetitions and hallucinations at the hard 60 s cuts ("Thank you very much. Thank you."
+where nobody said it), partly short phrases that the batched pipeline's silence detection dropped. There is no
+reference transcript, so neither is shown to be more accurate; batching was chosen because invented text would
+later be quoted as evidence.
+
+### End to end on a real lecture (smoke)
+
+`agentflow-media/smoke.py` against the running service, one lecture of the evaluation course (Berkeley Agentic
+AI MOOC, "LLM Agents Overview", 1 h 58 min 21 s, 1280×720). Everything is done twice; the second pass must be
+all cache hits.
+
+| Step | First pass | Result |
+|---|---|---|
+| Import (audio + 720p video, two downloads, no ffmpeg) | 38.6 s | 242 MB on disk including frames |
+| Transcribe | 96.1 s = **73.9 × realtime**, including the one-time model load | 264 utterances, 18,546 words, English |
+| Frames (key frames only, OCR on change) | 806.4 s | 1,288 key frames, 974 OCRed, 896 kept |
+| Second pass | all three steps `cached`, `/stats` unchanged (1 download, 1 ASR run, 1 OCR run) | |
+
+The model stays loaded after the first transcription: about 4.4 GB of VRAM while idle.
+
+### What the spot check found
+
+- **Transcript:** reads correctly at the start, middle and end; timestamps increase; the largest gap between
+  utterances is 2.3 s. An utterance is one silence-detection chunk, median 27.8 s (max 31.4 s), and it starts
+  and ends mid-sentence. Sentence-level timestamps would need word timestamps; segmentation has to deal with
+  this.
+- **Frames: the same slide is captured many times.** The recording has the speaker's webcam in a corner
+  (about 2% of the picture), so the picture "changes" on almost every key frame: the median change between
+  consecutive key frames is 0.48% of pixels, above the 0.3% threshold that was tuned on a synthetic video
+  without a webcam. 76% of key frames were OCRed (974 of 1,288), which is where the 13 minutes go. OCR output
+  for an unchanged slide differs in spacing ("LLM AgentsMOOC" / "LLM Agents MOOC"), so the exact-text check
+  does not remove the repeats; slides that build up line by line add more. Comparing texts with whitespace
+  removed, 896 frames collapse to 359 at similarity 0.9 and to 268 at 0.8.
+- Not fixed here. The frame list is usable (the text is the slide text, not noise) but about three times too
+  long, and the OCR step is the slowest part of ingesting a lecture by a wide margin.
