@@ -322,9 +322,10 @@ Seconds from the moment the step's subtask was created until it settled, as the 
   `updated_at` with the time it was dispatched, so every step read 0 s. That was fixed before lecture 3.
 - A 77-minute lecture is searchable four minutes after its link is pasted. Transcription and frames run side
   by side, so the wall clock is import + the slower of the two + index.
-- Transcription ran at 24× realtime here against 47× when it ran alone (section 7): the OCR of the frames step
-  competes for the same CPU cores during audio decoding. The two steps still finish sooner together than one
-  after the other (196 s against 196 + 153 s).
+- Transcription ran at 24× realtime here against 47× when it ran alone (section 7). The likely cause, not
+  measured, is that the OCR of the frames step uses the same CPU cores that transcription needs for decoding
+  and feature extraction. The two steps still finish sooner together than one after the other (196 s against
+  196 + 153 s).
 - Adding a link that is already in the media cache does no download, no transcription and no OCR
   (`/stats` of the media service unchanged); only the index is rebuilt.
 - Concepts are produced by the mock model in this environment, so that column only shows the step runs; its
