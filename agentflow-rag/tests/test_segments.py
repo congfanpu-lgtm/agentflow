@@ -19,7 +19,9 @@ LECTURE_1 = [seg(0, "Welcome. Today we cover pre-training of large language mode
 @pytest.fixture
 def course(db):
     segments.init()
-    return random.randrange(10 ** 6, 10 ** 9)      # 每个用例一门新课,互不影响,也不用清表
+    # 每个用例一门新课,检索互不影响。讲次 id 各用例是重复的(都从 1 起):index 按讲次整讲替换,
+    # 后一个用例写入时会把前一个用例那一讲的片段删掉,所以不用清表
+    return random.randrange(10 ** 6, 10 ** 9)
 
 
 def test_search_returns_the_segment_with_its_time(course):
@@ -48,7 +50,8 @@ def test_search_can_be_limited_to_some_lectures(course):
 
 def test_reindex_replaces_the_lecture(course):
     segments.index(course, 1, [seg(0, "Kafka partitions are rebalanced across consumers.")])
-    assert segments.index(course, 1, [seg(0, "Redis runs Lua scripts atomically.")]) == 1
+    # 新的一版从另一个时间点开始,片段 id 不同:只靠"同 id 覆盖"是清不掉旧片段的,必须先删这一讲
+    assert segments.index(course, 1, [seg(30, "Redis runs Lua scripts atomically.")]) == 1
     for mode in ("bm25", "dense", "hybrid"):
         hits = segments.search(course, "kafka partitions rebalanced", 10, mode=mode)
         assert all("Kafka" not in h["text"] for h in hits), mode
