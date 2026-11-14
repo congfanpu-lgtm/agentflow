@@ -57,6 +57,9 @@ public class ResultHandleService {
         } else {
             sub.setErrorMsg(msg.getErrorMsg());
         }
+        // 实体是状态迁移之前查出来的,带着"发出时"的 updated_at;不清掉的话 updateById 会把它写回去,
+        // 盖住状态迁移那条 UPDATE 刚刷新的时间,子任务就看不出是什么时候落定的了
+        sub.setUpdatedAt(null);
         subtaskMapper.updateById(sub);
         traceEmitter.emit(String.valueOf(msg.getTaskId()), msg.getTaskId(), msg.getSubtaskId(),
                 TraceStage.SUBTASK_SETTLED, target.name(), null);

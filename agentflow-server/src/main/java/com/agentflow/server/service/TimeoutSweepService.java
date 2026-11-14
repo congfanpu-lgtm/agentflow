@@ -95,6 +95,7 @@ public class TimeoutSweepService {
                         SubtaskStatus.DISPATCHED, SubtaskStatus.FAILED)) {
                     s.setStatus(SubtaskStatus.FAILED.name());
                     s.setErrorMsg("超时未回传,重投耗尽");
+                    s.setUpdatedAt(null);   // 不把查出来时的旧时间写回去,见 ResultHandleService
                     subtaskMapper.updateById(s);
                     taskMapper.incrementFailed(s.getTaskId());
                     stageAdvancer.onSettled(s.getTaskId());

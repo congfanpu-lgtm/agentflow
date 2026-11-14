@@ -117,4 +117,16 @@ class LectureIngestFlowTest {
         assertEquals("FAILED", l.getStatus());
         assertEquals("LEC_TRANSCRIBE: CUDA out of memory", l.getError());
     }
+
+    @Test
+    void aSettledStepRecordsWhenItSettled() {
+        long importId = fixture();
+        // 用库里的时间做基准,不用 JVM 的时钟:两边时区可能不一样
+        java.time.LocalDateTime dispatchedAt = subtaskMapper.selectById(importId).getUpdatedAt().minusMinutes(5);
+        subtaskMapper.setUpdatedAt(importId, dispatchedAt);          // 这一步 5 分钟前发出去
+        ok(importId, "{\"mediaKey\":\"" + KEY + "\",\"title\":\"T\",\"durationMs\":1000,\"hasVideo\":true}");
+        java.time.LocalDateTime settledAt = subtaskMapper.selectById(importId).getUpdatedAt();
+        assertTrue(settledAt.isAfter(dispatchedAt.plusMinutes(4)),
+                "落定后 updated_at 应该是落定的时间(页面靠它算每一步的用时),实际还是发出时的 " + settledAt);
+    }
 }
