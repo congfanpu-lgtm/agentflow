@@ -271,5 +271,30 @@ The model stays loaded after the first transcription: about 4.4 GB of VRAM while
   for an unchanged slide differs in spacing ("LLM AgentsMOOC" / "LLM Agents MOOC"), so the exact-text check
   does not remove the repeats; slides that build up line by line add more. Comparing texts with whitespace
   removed, 896 frames collapse to 359 at similarity 0.9 and to 268 at 0.8.
-- Not fixed here. The frame list is usable (the text is the slide text, not noise) but about three times too
-  long, and the OCR step is the slowest part of ingesting a lecture by a wide margin.
+- Fixed afterwards, see the next section.
+
+### Frame dedup (fixed)
+
+Same lecture, same machine. Two changes: (1) a first pass over the key frames finds the blocks of the picture
+that keep moving (changed in more than half of all key-frame pairs) and the change test ignores them plus one
+block of margin; (2) a frame whose OCR text is at least 80% similar to the last kept one (whitespace removed)
+is dropped.
+
+| | Key frames OCRed | Frames kept | Frames step | Distinct slides of the first run found again |
+|---|---|---|---|---|
+| First version | 974 of 1,288 | 896 | 806 s | |
+| Moving blocks ignored, no margin | 585 | 200 | 542 s | 199 of 199 |
+| **Moving blocks + one block of margin (shipped)** | **263** | **191** | **238 s** | **192 of 199** |
+
+- The middle row is what the first attempt gave. Counting per block showed why: the upper half of the webcam
+  changed in 85-89% of key-frame pairs, the lower half (shoulders) in 38-47%, the slide area in at most 11%.
+  The lower half stayed under the 50% line, was not ignored, and caused 85% of the 385 wasted OCR runs.
+  Lowering the line would also start to swallow the slide area of a fast-paced deck, so the line stayed and a
+  margin was added instead.
+- "Distinct slides" = the 896 frames of the first run with neighbours of 80% text similarity merged (199).
+  The 7 not matched were checked by hand: all 7 are slides that are in the new list in another build-up state
+  or with a different OCR reading (for example "Questions?" without the webcam caption). No slide was lost.
+- 191 frames for a 2-hour lecture is still more than the number of slides: a slide that builds up line by line
+  is kept once per state (median gap between kept frames 24.5 s). That is left as is: each state is what was
+  on screen at that time.
+- OCR costs about 0.9 s per frame on this CPU, so the step is now about 4 minutes for a 2-hour lecture.
