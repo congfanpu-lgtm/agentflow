@@ -28,3 +28,11 @@ spring:
 mybatis-plus:
   configuration:
     map-underscore-to-camel-case: true
+
+# 课程录播(课程库页 / 单讲页的接口)。默认关闭:公开 demo 用的也是这份代码,不能让路人触发下载和转写
+agentflow:
+  course:
+    enabled: false
+# 媒体服务(agentflow-media):逐字稿、帧列表、帧图片从这里转给页面
+media:
+  base-url: ${MEDIA_BASEURL:http://localhost:8010}

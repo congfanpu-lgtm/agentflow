@@ -1,5 +1,6 @@
 package com.agentflow.server.product;
 
+import com.agentflow.server.course.CourseController;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -9,7 +10,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.Map;
 
 /** 产品接口的错误统一成 {"error": 原因},页面直接显示这句话。只作用于产品接口,不改引擎接口的行为。 */
-@RestControllerAdvice(assignableTypes = {AuthController.class, MeController.class})
+@RestControllerAdvice(assignableTypes = {AuthController.class, MeController.class, CourseController.class})
 public class ProductErrors {
 
     @ExceptionHandler(ResponseStatusException.class)

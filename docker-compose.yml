@@ -99,6 +99,8 @@ services:
       SEC_USER_AGENT: ${SEC_USER_AGENT:-}
       PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-http://localhost:8080}
       AUTH_COOKIE_SECURE: ${AUTH_COOKIE_SECURE:-false}
+      AGENTFLOW_COURSE_ENABLED: ${COURSE_ENABLED:-false}        # 课程录播接口,默认关闭(见 docker/course.yml)
+      MEDIA_BASEURL: ${MEDIA_BASEURL:-http://localhost:8010}
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/agentflow?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:19092
       SPRING_DATA_REDIS_HOST: redis
