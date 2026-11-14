@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AgentFlow 课程 · 单讲</title>
+<style>
+  :root{--ink:#16191d;--body:#2c313a;--t2:#58606c;--dim:#8a919b;--line:#e3e6ea;--wash:#f5f6f8;
+    --blue:#14467c;--hl:#edf1f6;--err:#b3261e;--ok:#14884a;--warn:#8a5a00;--warnbg:#fdf3dc}
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:#fff;color:var(--ink);
+    font:14px/1.6 -apple-system,"Helvetica Neue","PingFang SC","Microsoft YaHei",sans-serif}
+  a{color:var(--blue);text-decoration:none} a:hover{text-decoration:underline}
+  button{font:inherit;color:inherit;background:none;border:0;padding:0;margin:0;cursor:pointer;text-align:inherit}
+  h2{margin:0 0 8px;font-size:12.5px;font-weight:600;color:var(--t2);display:flex;justify-content:space-between;align-items:center;gap:12px}
+  h2 label{font-weight:400;color:var(--dim)}
+  input[type=search]{font:inherit;height:28px;width:220px;border:1px solid #c5cad2;border-radius:3px;padding:0 8px}
+  input[type=search]:focus{outline:2px solid var(--blue);outline-offset:-1px}
+  .num{font-variant-numeric:tabular-nums}
+  .dim{color:var(--dim)}
+
+  header{padding:14px 28px;border-bottom:1px solid var(--line);display:flex;gap:14px;align-items:baseline;flex-wrap:wrap}
+  header .crumb{color:var(--t2)}
+  header h1{margin:0;font-size:17px;font-weight:700}
+  .warn{margin:12px 28px 0;padding:8px 12px;border-radius:3px;background:var(--warnbg);color:var(--warn);font-size:12.5px;overflow-wrap:anywhere}
+  .cols{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:0 28px;padding:16px 28px 0;height:calc(100vh - 62px)}
+  .col{display:flex;flex-direction:column;min-height:0;padding-bottom:16px}
+  .video{position:relative;width:100%;aspect-ratio:16/9;background:#101216;flex:none;max-height:46vh}
+  .video iframe,.video #player{position:absolute;inset:0;width:100%;height:100%;border:0}
+  .video .none{position:absolute;inset:0;display:grid;place-items:center;color:#b9c0ca;padding:0 24px;text-align:center}
+  .pane{flex:1;min-height:0;display:flex;flex-direction:column;margin-top:14px}
+  .scroll{flex:1;min-height:0;overflow:auto;border:1px solid var(--line);border-radius:3px}
+
+  .u{display:grid;grid-template-columns:58px minmax(0,1fr);gap:0 8px;width:100%;padding:4px 10px;border-left:3px solid transparent}
+  .u:hover{background:var(--wash)}
+  .u.now{background:var(--hl);border-left-color:var(--blue)}
+  .u b{font-weight:400;color:var(--dim)}
+  .c{display:block;width:100%;padding:8px 12px;border-bottom:1px solid var(--line)}
+  .c:hover{background:var(--wash)}
+  .c strong{font-weight:600}
+  .c span{margin-left:8px;color:var(--dim)}
+  .c div{font-size:12.5px;color:var(--t2)}
+  .slides{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;padding:10px}
+  .s{display:block;font-size:12px;color:var(--dim)}
+  .s img{display:block;width:100%;aspect-ratio:16/9;object-fit:cover;background:var(--wash);border:1px solid var(--line)}
+  .s:hover img{border-color:var(--blue)}
+  .note{padding:14px;color:var(--dim)}
+</style>
+</head>
+<body>
+<header>
+  <a class="crumb" id="back" href="courses.html">课程库</a>
+  <h1 id="title">…</h1>
+  <span class="dim num" id="meta"></span>
+</header>
+<div class="warn" id="warn" hidden></div>
+<div class="cols">
+  <div class="col">
+    <div class="video"><div id="player"></div><div class="none" id="noPlayer" hidden></div></div>
+    <div class="pane">
+      <h2><span>逐字稿（点一行跳到那一秒）<label><input type="checkbox" id="follow" checked> 跟随播放</label></span>
+        <input type="search" id="q" placeholder="在这一讲里找…"></h2>
+      <div class="scroll" id="transcript"><div class="note">加载中…</div></div>
+    </div>
+  </div>
+  <div class="col">
+    <div class="pane" style="margin-top:0;flex:0 1 44%">
+      <h2><span>知识点目录</span></h2>
+      <div class="scroll" id="concepts"></div>
+    </div>
+    <div class="pane">
+      <h2><span>幻灯片（画面变化时截一张；悬停看识别出的文字）</span><span class="dim num" id="slideCount"></span></h2>
+      <div class="scroll"><div class="slides" id="slides"></div></div>
+    </div>
+  </div>
+</div>
+<script>
+const $ = s => document.querySelector(s);
+function el(tag, cls, text) {           // 标题、逐字稿、OCR 文字都是外来内容:只走 textContent
+  const e = document.createElement(tag);
+  if (cls) e.className = cls;
+  if (text != null) e.textContent = text;
+  return e;
+}
+const id = Number(new URLSearchParams(location.search).get("id"));
+let player = null, rows = [], starts = [], now = -1;
+
+async function api(path) {
+  const r = await fetch("/api/v1" + path);
+  if (!r.ok) {
+    const e = new Error("HTTP " + r.status);
+    e.status = r.status;
+    throw e;
+  }
+  return r.json();
+}
+
+function clock(ms) {
+  const s = Math.floor(ms / 1000), h = Math.floor(s / 3600), m = Math.floor(s / 60) % 60;
+  return (h ? h + ":" + String(m).padStart(2, "0") : String(m).padStart(2, "0")) + ":" + String(s % 60).padStart(2, "0");
+}
+
+function seek(ms) {
+  if (player && player.seekTo) {
+    player.seekTo(ms / 1000, true);
+    player.playVideo();
+  }
+}
+
+function youtubeId(url) {
+  try {
+    const u = new URL(url);
+    if (u.hostname === "youtu.be") return u.pathname.slice(1) || null;
+    if (!/(^|\.)youtube\.com$/.test(u.hostname)) return null;
+    if (u.searchParams.get("v")) return u.searchParams.get("v");
+    const m = u.pathname.match(/^\/(?:live|embed|shorts)\/([^/]+)/);
+    return m ? m[1] : null;
+  } catch (e) {
+    return null;
+  }
+}
+
+function mountPlayer(lecture) {
+  const vid = lecture.sourceUrl ? youtubeId(lecture.sourceUrl) : null;
+  if (!vid) {
+    $("#player").hidden = true;
+    $("#noPlayer").hidden = false;
+    $("#noPlayer").textContent = "本地文件暂不支持在页面里播放。时间点照常显示。";
+    return;
+  }
+  window.onYouTubeIframeAPIReady = () => {
+    player = new YT.Player("player", {videoId: vid, playerVars: {rel: 0}});
+    setInterval(tick, 1000);
+  };
+  const s = document.createElement("script");
+  s.src = "https://www.youtube.com/iframe_api";
+  document.head.append(s);
+}
+
+function tick() {                        // 播放到哪一行就高亮哪一行
+  if (!player || !player.getCurrentTime || !starts.length) return;
+  const t = player.getCurrentTime() * 1000;
+  let lo = 0, hi = starts.length - 1, i = -1;
+  while (lo <= hi) {                     // 最后一条开始时间不晚于 t 的 utterance
+    const mid = (lo + hi) >> 1;
+    if (starts[mid] <= t) { i = mid; lo = mid + 1; } else hi = mid - 1;
+  }
+  if (i === now) return;
+  if (now >= 0) rows[now].classList.remove("now");
+  now = i;
+  if (i < 0) return;
+  rows[i].classList.add("now");
+  if ($("#follow").checked && !rows[i].hidden) rows[i].scrollIntoView({block: "nearest"});
+}
+
+function showTranscript(doc) {
+  const box = $("#transcript");
+  box.replaceChildren();
+  rows = [];
+  starts = [];
+  for (const u of doc.utterances) {
+    const b = el("button", "u");
+    b.append(el("b", "num", clock(u.startMs)), el("span", null, u.text));
+    b.onclick = () => seek(u.startMs);
+    b.dataset.text = u.text.toLowerCase();
+    rows.push(b);
+    starts.push(u.startMs);
+    box.append(b);
+  }
+  if (!rows.length) box.append(el("div", "note", "这一讲没有识别出语音。"));
+}
+
+function showConcepts(list) {
+  const box = $("#concepts");
+  box.replaceChildren();
+  for (const c of list) {
+    const b = el("button", "c");
+    b.append(el("strong", null, c.name), el("span", "num", clock(c.startMs)), el("div", null, c.summary));
+    b.onclick = () => seek(c.startMs);
+    box.append(b);
+  }
+  if (!list.length) box.append(el("div", "note", "这一讲还没有知识点目录。"));
+}
+
+function showSlides(frames) {
+  const box = $("#slides");
+  box.replaceChildren();
+  $("#slideCount").textContent = frames.length ? frames.length + " 张" : "";
+  for (const f of frames) {
+    const b = el("button", "s");
+    const img = document.createElement("img");
+    img.loading = "lazy";
+    img.alt = "";
+    img.src = "/api/v1/lectures/" + id + "/frames/" + encodeURIComponent(f.file.split("/").pop());
+    b.title = f.text;
+    b.append(img, el("span", "num", clock(f.tsMs)));
+    b.onclick = () => seek(f.tsMs);
+    box.append(b);
+  }
+  if (!frames.length) box.append(el("div", "note", "这一讲没有截到幻灯片。"));
+}
+
+$("#q").oninput = e => {
+  const q = e.target.value.trim().toLowerCase();
+  for (const r of rows) r.hidden = q !== "" && !r.dataset.text.includes(q);
+};
+
+async function load() {
+  const lecture = await api("/lectures/" + id);
+  document.title = (lecture.title || "单讲") + " · AgentFlow 课程";
+  $("#title").textContent = "第 " + lecture.seq + " 讲 · " + (lecture.title || lecture.sourceUrl || lecture.sourcePath);
+  $("#meta").textContent = (lecture.durationMs ? clock(lecture.durationMs) + " · " : "")
+      + ({READY: "已完成", PARTIAL: "部分完成", FAILED: "失败", INGESTING: "处理中"}[lecture.status] || lecture.status);
+  $("#back").href = "courses.html#c=" + lecture.courseId;
+  api("/courses/" + lecture.courseId).then(c => { $("#back").textContent = c.name; }).catch(() => {});
+  if (lecture.status === "PARTIAL" && lecture.error) {
+    $("#warn").hidden = false;
+    $("#warn").textContent = "这一讲只完成了一部分：" + lecture.error;
+  }
+  mountPlayer(lecture);
+  showConcepts(lecture.concepts || []);
+  api("/lectures/" + id + "/transcript").then(showTranscript)
+      .catch(() => $("#transcript").replaceChildren(el("div", "note", "这一讲还没有逐字稿。")));
+  api("/lectures/" + id + "/frames").then(d => showSlides(d.frames)).catch(() => showSlides([]));
+}
+
+load().catch(e => {
+  $("#title").textContent = e.status === 404 ? "找不到这一讲（或者课程功能没有开启）" : "加载失败：" + e.message;
+  $("#transcript").replaceChildren();
+});
+</script>
+</body>
+</html>
