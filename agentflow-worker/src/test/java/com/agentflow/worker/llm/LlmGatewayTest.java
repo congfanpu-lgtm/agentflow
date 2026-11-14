@@ -24,7 +24,8 @@ class LlmGatewayTest {
     @BeforeAll
     static void up() {
         Config cfg = new Config();
-        cfg.useSingleServer().setAddress("redis://localhost:" + System.getenv().getOrDefault("SPRING_DATA_REDIS_PORT", "6379"));
+        cfg.useSingleServer().setAddress("redis://" + System.getenv().getOrDefault("SPRING_DATA_REDIS_HOST", "localhost")
+                + ":" + System.getenv().getOrDefault("SPRING_DATA_REDIS_PORT", "6379"));
         redisson = Redisson.create(cfg);
     }
 

@@ -22,7 +22,8 @@ class TokenAccountantTest {
     @BeforeAll
     static void connect() {
         Config c = new Config();
-        c.useSingleServer().setAddress("redis://localhost:" + System.getenv().getOrDefault("SPRING_DATA_REDIS_PORT", "6379"));
+        c.useSingleServer().setAddress("redis://" + System.getenv().getOrDefault("SPRING_DATA_REDIS_HOST", "localhost")
+                + ":" + System.getenv().getOrDefault("SPRING_DATA_REDIS_PORT", "6379"));
         redisson = Redisson.create(c);
     }
 
